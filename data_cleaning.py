@@ -1,11 +1,6 @@
 import numpy as np
 import pandas as pd
 
-# Load data
-df = pd.read_csv('Case_3_Media_Behavior.csv')
-df.head()
-df.columns.tolist()
-
 def clean_data(df):
     df = df.copy()
 
@@ -284,3 +279,17 @@ def clean_data(df):
             df[col] = df[col].replace(rating_mapping_tea_inf)
 
     return df
+
+if __name__ == '__main__':
+    try:
+        raw_df = pd.read_csv('Case_3_Media_Behavior.csv')
+        print(raw_df.shape)
+
+        cleaned_df = clean_data(raw_df)
+        print(f"Clean the data successfully!: {cleaned_df.shape}")
+        
+        print("\nExample of column name after clean: ")
+        print(cleaned_df.columns.tolist()[:10])
+        
+    except FileNotFoundError:
+        print("'Case_3_Media_Behavior.csv' file not found")
