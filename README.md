@@ -13,4 +13,3 @@
 ## 📂 โครงสร้างโปรเจกต์ (Repository Structure)
 - `Case_3_Media_Behavior.csv`: ไฟล์ข้อมูลดิบจากแบบสอบถาม (Raw Data)
 - `data_cleaning.py`: ไฟล์สคริปต์หลักที่รวม Pipeline สำหรับการทำความสะอาดและจัดเตรียมข้อมูล (Data Preprocessing)
-- `brief.txt`: รายละเอียดโจทย์และที่มาของโปรเจกต์แบบย่อ
