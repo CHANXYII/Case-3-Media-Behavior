@@ -1,15 +1,61 @@
 # Case-3-Media-Behavior
 
 ## 📌 Project Overview (โจทย์ของโปรเจกต์)
-โปรเจกต์นี้เป็นการวิเคราะห์ข้อมูลแบบสอบถามพฤติกรรมการเสพสื่อของผู้บริโภค เพื่อวางแผนกลยุทธ์การสื่อสารให้กับร้านกาแฟสด (ที่มีสาขากว่า 4,000 สาขาทั่วประเทศ) ที่กำลังเตรียมตัวขยายธุรกิจจากร้านสาขา (On-premise) ไปสู่ตลาดกาแฟพร้อมดื่ม **Ready-to-Drink (RTD)** ที่จำหน่ายในร้านสะดวกซื้อ
+This project analyzes consumer media behavior survey data to support communication strategy planning for a coffee brand with over 4,000 outlets. The business is preparing to expand from on-premise coffee shops to the Ready-to-Drink (RTD) market in convenience stores.
 
-**เป้าหมายหลักของการวิเคราะห์:**
-- หาวิธีการสื่อสารเพื่อเข้าถึงกลุ่มผู้บริโภคใหม่ในตลาด RTD
-- หาวิธีรักษาและต่อยอดฐานลูกค้าเดิม (Brand Loyalists) ให้เชื่อมโยงกันระหว่างร้านและสินค้าพร้อมดื่ม
-- เจาะลึกพฤติกรรมการเสพสื่อในช่วง **"เทศกาลสงกรานต์"** เพื่อหา Touchpoint ที่เหมาะสมที่สุดในการเปิดตัวสินค้า (Launch)
+**Primary analysis goals:**
+- Identify communication strategies to reach new RTD consumers.
+- Retain and extend brand-loyal customers by aligning in-store and RTD product experiences.
+- Analyze media behavior during **Songkran festival** to find the most effective launch touchpoints.
 
 ---
 
-## 📂 โครงสร้างโปรเจกต์ (Repository Structure)
-- `Case_3_Media_Behavior.csv`: ไฟล์ข้อมูลดิบจากแบบสอบถาม (Raw Data)
-- `data_cleaning.py`: ไฟล์สคริปต์หลักที่รวม Pipeline สำหรับการทำความสะอาดและจัดเตรียมข้อมูล (Data Preprocessing)
+## 📂 Repository structure
+- `Case_3_Media_Behavior.csv`: raw survey dataset
+- `column_mapping.json`: mapping of raw column names to cleaned feature names
+- `data_cleaning.py`: data preprocessing pipeline for cleaning and transforming the survey data
+- `feature_selection.py`: analysis and selection of the most informative features
+- `unsupervised_learning.py`: clustering and segmentation analysis on cleaned data
+- `media_behavior_cleaned.csv`: cleaned dataset after preprocessing
+- `media_behavior_with_clusters.csv`: cleaned dataset with cluster labels added
+- `analysis_outputs/`: generated visualizations and analysis charts
+
+---
+
+## 🚀 How to use
+1. Install dependencies (if needed):
+   ```bash
+   pip install pandas numpy scikit-learn matplotlib seaborn
+   ```
+
+2. Run the preprocessing script:
+   ```bash
+   python data_cleaning.py
+   ```
+
+3. Run feature selection and clustering analysis:
+   ```bash
+   python feature_selection.py
+   python unsupervised_learning.py
+   ```
+
+4. Review output files:
+   - `media_behavior_cleaned.csv`
+   - `media_behavior_with_clusters.csv`
+   - images in `analysis_outputs/`
+
+---
+
+## 📈 What this project does
+- Cleans and standardizes survey responses.
+- Maps raw questionnaire fields to usable analytical variables.
+- Selects the most relevant features for segmentation.
+- Applies unsupervised learning to identify consumer clusters.
+- Produces charts that help interpret media behavior and target groups.
+
+---
+
+## 🔧 Notes
+- The repository currently focuses on data preparation and clustering analysis.
+- If you want to push this project to GitHub, commit the new `README.md` and then use `git push origin main`.
+- Remove large generated files from version control if you prefer to keep the repo lightweight.
