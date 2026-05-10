@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -6,7 +7,6 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import seaborn as sns
 
-from matplotlib import font_manager
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans, DBSCAN
@@ -14,19 +14,22 @@ from sklearn.metrics import silhouette_score
 from sklearn.neighbors import NearestNeighbors
 from sklearn.ensemble import IsolationForest
 
-# Setup & Configuration
-clean_data_path = Path("media_behavior_cleaned.csv")
-output_dir = Path("analysis_outputs")
-output_dir.mkdir(parents=True, exist_ok=True)
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-plot_font_path = Path("DB-Adman-X.ttf")
-if plot_font_path.exists():
-    font_manager.fontManager.addfont(str(plot_font_path))
-    plot_font = font_manager.FontProperties(fname=str(plot_font_path)).get_name()
-    plt.rcParams["font.family"] = plot_font
-    sns.set_theme(style="whitegrid", rc={"font.family": plot_font})
-else:
-    sns.set_theme(style="whitegrid")
+from src.config import (
+    CLEAN_CSV,
+    CLUSTERS_CSV,
+    OUTPUTS_DIR,
+    ensure_dirs,
+    setup_thai_font,
+)
+
+clean_data_path = CLEAN_CSV
+output_dir = OUTPUTS_DIR
+ensure_dirs()
+setup_thai_font()
 
 # Load & Prepare Data
 def load_and_prepare_data():
@@ -544,7 +547,7 @@ def analyze_personas(df, numeric_df):
         print(anomaly_by_cluster.to_string())
  
     # Save final output CSV
-    output_data_path = "media_behavior_with_clusters.csv"
+    output_data_path = CLUSTERS_CSV
     df.to_csv(output_data_path, index=False, encoding="utf-8-sig")
     print(f"Saved final data with clusters to: {output_data_path}")
  
@@ -572,4 +575,4 @@ if __name__ == "__main__":
     personas = analyze_personas(clustered_df, numeric_df)
 
     print(f"\nOutput charts saved to: ./{output_dir}/")
-    print(f"Final CSV: media_behavior_with_clusters.csv")
+    print(f"Final CSV: {CLUSTERS_CSV}")

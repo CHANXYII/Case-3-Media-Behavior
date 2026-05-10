@@ -1,27 +1,33 @@
+import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from matplotlib import font_manager
 from sklearn.preprocessing import StandardScaler
 from sklearn.feature_selection import f_classif
 
-# Setup & Configuration
-from data_cleaning import clean_data
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-raw_data_path = Path("Case_3_Media_Behavior.csv")
-clean_data_path = Path("media_behavior_cleaned.csv")
-output_dir = Path("analysis_outputs")
-plot_font_path = Path("DB-Adman-X.ttf")
-target_column = "target_try_new_rtd_coffee"
+from src.config import (
+    CLEAN_CSV,
+    OUTPUTS_DIR,
+    RAW_CSV,
+    TARGET_COLUMN,
+    ensure_dirs,
+    setup_thai_font,
+)
+from src.data_cleaning.data_cleaning import clean_data
 
-font_manager.fontManager.addfont(str(plot_font_path))
-plot_font = font_manager.FontProperties(fname=str(plot_font_path)).get_name()
-plt.rcParams["font.family"] = plot_font
-plt.rcParams["font.sans-serif"] = [plot_font]
-sns.set_theme(style="whitegrid", rc={"font.family": plot_font, "font.sans-serif": [plot_font]})
+raw_data_path = RAW_CSV
+clean_data_path = CLEAN_CSV
+output_dir = OUTPUTS_DIR
+target_column = TARGET_COLUMN
+
+setup_thai_font()
 
 age_group_mapping = {
     "ต่ำกว่า 18ปี": 17.0,
@@ -87,7 +93,7 @@ def build_clean_data():
     df["age"] = df["age_group"].map(age_group_mapping)
     df[target_column] = df["will_try_new_rtd_coffee"].apply(derive_target)
 
-    output_dir.mkdir(parents=True, exist_ok=True)
+    ensure_dirs()
     df.to_csv(clean_data_path, index=False, encoding="utf-8-sig")
     return df
 

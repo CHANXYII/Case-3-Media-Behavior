@@ -1,6 +1,21 @@
+import json
+import sys
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
-import json
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.config import (
+    CLEAN_CSV,
+    COLUMN_MAPPING_JSON,
+    RAW_CSV,
+    ensure_dirs,
+)
+
 
 def clean_data(df):
     df = df.copy()
@@ -145,9 +160,10 @@ def clean_data(df):
     df.rename(columns=col_map, inplace=True)
 
     # Save to JSON (Data Dictionary)
-    with open('column_mapping.json', 'w', encoding='utf-8') as f:
+    COLUMN_MAPPING_JSON.parent.mkdir(parents=True, exist_ok=True)
+    with open(COLUMN_MAPPING_JSON, 'w', encoding='utf-8') as f:
         json.dump(col_map, f, ensure_ascii=False, indent=4)
-    print("Dictionary has been saved as a 'column_mapping.json' file.")
+    print(f"Dictionary has been saved as '{COLUMN_MAPPING_JSON}'.")
 
     # Manage Datetime features
     df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
@@ -304,15 +320,19 @@ def clean_data(df):
     return df
 
 if __name__ == '__main__':
+    ensure_dirs()
     try:
-        raw_df = pd.read_csv('Case_3_Media_Behavior.csv')
+        raw_df = pd.read_csv(RAW_CSV)
         print(raw_df.shape)
 
         cleaned_df = clean_data(raw_df)
         print(f"Clean the data successfully!: {cleaned_df.shape}")
-        
+
+        cleaned_df.to_csv(CLEAN_CSV, index=False, encoding="utf-8-sig")
+        print(f"Cleaned dataset saved to: {CLEAN_CSV}")
+
         print("\nExample of column name after clean: ")
         print(cleaned_df.columns.tolist()[:10])
-        
+
     except FileNotFoundError:
-        print("'Case_3_Media_Behavior.csv' file not found")
+        print(f"'{RAW_CSV}' file not found")
