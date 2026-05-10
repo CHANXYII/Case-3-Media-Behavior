@@ -1,0 +1,1 @@
+# keeps the empty public/ directory tracked so Docker COPY does not fail

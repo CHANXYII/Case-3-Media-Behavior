@@ -14,6 +14,8 @@ WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# guarantee public/ exists even if the build context shipped an empty dir
+RUN mkdir -p public
 RUN npm run build
 
 # ---- 3. runner --------------------------------------------------------------
