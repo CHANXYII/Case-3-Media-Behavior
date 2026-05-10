@@ -415,19 +415,19 @@ def analyze_personas(df, numeric_df):
 
     cluster_col = 'customer_persona_cluster'
     n_clusters = df[cluster_col].nunique()
-
+ 
     # Cluster size
     print("\nCluster Size Distribution: ")
     counts = df[cluster_col].value_counts().sort_index()
     pcts = (counts / len(df) * 100).round(1)
     for c, cnt in counts.items():
-        print(f"Cluster {c}: {cnt} customers ({pcts[c]}%)")
-
+        print(f"  Cluster {c}: {cnt} customers ({pcts[c]}%)")
+ 
     # Mean profile per cluster
     print("\nMean Feature Values per Cluster: ")
     profile = df.groupby(cluster_col)[numeric_df.columns.tolist()].mean().round(3)
     print(profile.T.to_string())
-
+ 
     # Radar chart per cluster
     cluster_features = numeric_df.columns.tolist()
     top_features = (
@@ -436,54 +436,58 @@ def analyze_personas(df, numeric_df):
         .head(8)
         .index.tolist()
     )
+ 
     angles = np.linspace(0, 2 * np.pi, len(top_features), endpoint=False).tolist()
     angles += angles[:1]
-
+ 
     fig, axes = plt.subplots(1, n_clusters, figsize=(6 * n_clusters, 6),
                               subplot_kw=dict(polar=True))
     if n_clusters == 1:
         axes = [axes]
     colors = ["#D85A30", "#1D9E75", "#378ADD", "#7F77DD", "#E24B4A"]
-
-    # Normalize to 0–1 for radar readability
-    feat_min = profile[top_features].min()
-    feat_max = profile[top_features].max()
-    feat_range = (feat_max - feat_min).replace(0, 1)
-
+ 
+    # Use raw Likert scale (1–5) directly from the profile means for better interpretability
     for i, ax in enumerate(axes):
-        values = ((profile.loc[i, top_features] - feat_min) / feat_range).tolist()
+        values = profile.loc[i, top_features].tolist()
         values += values[:1]
+
         ax.plot(angles, values, color=colors[i % len(colors)], linewidth=2)
         ax.fill(angles, values, color=colors[i % len(colors)], alpha=0.25)
         ax.set_xticks(angles[:-1])
         ax.set_xticklabels(top_features, size=8)
-        ax.set_ylim(0, 1)
+        ax.set_ylim(0, 5)       # Likert 1–5 scale
+        ax.set_yticks([1, 2, 3, 4, 5])
+        ax.set_yticklabels(["1", "2", "3", "4", "5"], size=7, color="gray")
         ax.set_title(f"Cluster {i}", fontsize=13, color=colors[i % len(colors)], pad=15)
-        ax.yaxis.set_visible(False)
-
-    plt.suptitle("Customer Persona Radar Charts\n(top 8 most discriminating features)", fontsize=13)
+ 
+    plt.suptitle("Customer Persona Radar Charts\n(top 8 most discriminating features, Likert scale 1-5)", fontsize=13)
     plt.tight_layout()
     plt.savefig(output_dir / "persona_radar.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("\nSaved: persona_radar.png")
-
+ 
     # Heatmap: Cluster profiles
+    # Normalize per-column (across clusters)
+    feat_min = profile[top_features].min()
+    feat_max = profile[top_features].max()
+    feat_range = (feat_max - feat_min).replace(0, 1)
+    normalized = ((profile[top_features] - feat_min) / feat_range)
+ 
     fig, ax = plt.subplots(figsize=(min(len(top_features) * 1.2, 16), 4))
-    normalized = ((profile[top_features] - feat_min[top_features]) / feat_range[top_features])
     sns.heatmap(normalized, annot=profile[top_features].round(2), fmt=".2f",
                 cmap="RdYlGn", linewidths=0.5, ax=ax,
-                annot_kws={"size": 8}, cbar_kws={"label": "Normalized score"})
+                annot_kws={"size": 8}, cbar_kws={"label": "Relative score (0=lowest cluster, 1=highest)"})
     
-    ax.set_title("Cluster Profile Heatmap (normalized 0-1, annotated with raw mean)")
+    ax.set_title("Cluster Profile Heatmap (color = relative rank per feature, number = raw Likert mean)")
     ax.set_ylabel("Cluster")
     ax.set_xticklabels(ax.get_xticklabels(), rotation=40, ha="right", fontsize=8)
     plt.tight_layout()
     plt.savefig(output_dir / "persona_heatmap.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("Saved: persona_heatmap.png")
-
+ 
     # Auto-generate Persona Names based on top/bottom features
-    print("\nPersona Descriptions: ")
+    print("\nAuto-Generated Persona Descriptions: ")
     persona_names = {}
     for cluster_id in range(n_clusters):
         row = profile.loc[cluster_id, top_features]
@@ -492,7 +496,7 @@ def analyze_personas(df, numeric_df):
         name = f"Persona {cluster_id}: High {', '.join(high)} / Low {', '.join(low)}"
         persona_names[cluster_id] = name
         print(f"{name}")
-
+ 
     # Plot: Bar chart - cluster size
     fig, ax = plt.subplots(figsize=(6, 4))
     colors_bar = [colors[i % len(colors)] for i in range(n_clusters)]
@@ -507,14 +511,15 @@ def analyze_personas(df, numeric_df):
     plt.tight_layout()
     plt.savefig(output_dir / "persona_cluster_size.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
-    print("\nSaved: persona_cluster_size.png")
-
+    print("Saved: persona_cluster_size.png")
+ 
     # PCA scatter with personas labeled
     fig, ax = plt.subplots(figsize=(10, 8))
     for i in range(n_clusters):
         mask = df[cluster_col] == i
         ax.scatter(df.loc[mask, 'pca_1'], df.loc[mask, 'pca_2'],
                    color=colors[i % len(colors)], alpha=0.7, s=80, label=f"Cluster {i}")
+        
         # Centroid label
         cx = df.loc[mask, 'pca_1'].mean()
         cy = df.loc[mask, 'pca_2'].mean()
@@ -522,7 +527,7 @@ def analyze_personas(df, numeric_df):
                 ha="center", va="center", color="white",
                 bbox=dict(boxstyle="round,pad=0.3", facecolor=colors[i % len(colors)], alpha=0.85))
         
-    ax.set_title("Customer Segmentation — PCA 2D Projection\n(K-Means Personas)")
+    ax.set_title("Customer Segmentation - PCA 2D Projection\n(K-Means Personas)")
     ax.set_xlabel("Principal Component 1")
     ax.set_ylabel("Principal Component 2")
     ax.legend(title="Persona Cluster", loc="upper right")
@@ -530,19 +535,19 @@ def analyze_personas(df, numeric_df):
     plt.savefig(output_dir / "customer_clusters_pca.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("Saved: customer_clusters_pca.png")
-
-    # Anomaly summary per cluster
+ 
+    # 6.8 Anomaly summary per cluster
     if 'is_anomaly' in df.columns:
-        print("\nAnomaly Distribution per Cluster (K-Means): ")
+        print("\nAnomaly Distribution per Cluster (K-Means):")
         anomaly_by_cluster = df.groupby(cluster_col)['is_anomaly'].agg(['sum', 'mean']).round(3)
         anomaly_by_cluster.columns = ['anomaly_count', 'anomaly_rate']
         print(anomaly_by_cluster.to_string())
-
+ 
     # Save final output CSV
     output_data_path = "media_behavior_with_clusters.csv"
     df.to_csv(output_data_path, index=False, encoding="utf-8-sig")
-    print(f"\nSaved final data with clusters to: {output_data_path}")
-
+    print(f"Saved final data with clusters to: {output_data_path}")
+ 
     return persona_names
 
 
