@@ -1,0 +1,20 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rtd-coffee-dashboard:latest
+    container_name: rtd-coffee-dashboard
+    restart: unless-stopped
+    ports:
+      - "8236:8236"
+    environment:
+      NODE_ENV: production
+      PORT: "8236"
+      HOSTNAME: "0.0.0.0"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8236/"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3

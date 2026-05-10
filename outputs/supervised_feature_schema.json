@@ -1,0 +1,61 @@
+{
+  "numeric": [
+    {
+      "name": "coffee_value",
+      "label": "Perceived value",
+      "min": 1.0,
+      "max": 5.0,
+      "median": 4.0,
+      "is_likert": true
+    },
+    {
+      "name": "coffee_aroma",
+      "label": "Aroma preference",
+      "min": 1.0,
+      "max": 5.0,
+      "median": 4.0,
+      "is_likert": true
+    },
+    {
+      "name": "coffee_convenience",
+      "label": "Convenience importance",
+      "min": 1.0,
+      "max": 5.0,
+      "median": 4.0,
+      "is_likert": true
+    },
+    {
+      "name": "coffee_nutrition",
+      "label": "Nutrition importance",
+      "min": 1.0,
+      "max": 5.0,
+      "median": 4.0,
+      "is_likert": true
+    }
+  ],
+  "categorical": [
+    {
+      "name": "most_freq_rtd_brand",
+      "label": "Primary RTD coffee brand",
+      "choices": [
+        "Arabic",
+        "Best",
+        "Binary",
+        "High Coffee",
+        "Kokiko",
+        "Newcafe",
+        "SCC",
+        "กาแฟเน้จอร์กีฟ",
+        "ไม่ดื่มกาแฟ Ready to drink เลย",
+        "ไม่มี"
+      ],
+      "default": "ไม่ดื่มกาแฟ Ready to drink เลย"
+    }
+  ],
+  "target": "target_try_new_rtd_coffee",
+  "best_model": "RandomForest",
+  "model_files": {
+    "logreg": "supervised_logreg.joblib",
+    "best": "supervised_best.joblib"
+  }
+}

@@ -16,3 +16,5 @@ __pycache__/
 # Build / dist
 build/
 dist/
+/web-next/.next
+/web-next/node_modules

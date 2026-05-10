@@ -19,6 +19,7 @@ PROCESSED_DATA_DIR: Path = DATA_DIR / "processed"
 
 OUTPUTS_DIR: Path = PROJECT_ROOT / "outputs"
 ASSETS_DIR: Path = PROJECT_ROOT / "assets"
+MODELS_DIR: Path = PROJECT_ROOT / "models"
 
 RAW_CSV: Path = RAW_DATA_DIR / "Case_3_Media_Behavior.csv"
 CLEAN_CSV: Path = PROCESSED_DATA_DIR / "media_behavior_cleaned.csv"
@@ -33,6 +34,7 @@ TARGET_COLUMN: str = "target_try_new_rtd_coffee"
 def ensure_dirs() -> None:
     PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
     OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
+    MODELS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def setup_thai_font() -> str | None:

@@ -1,0 +1,702 @@
+{
+  "target": "target_try_new_rtd_coffee",
+  "features": [
+    {
+      "name": "coffee_value",
+      "label": "Perceived value"
+    },
+    {
+      "name": "coffee_aroma",
+      "label": "Aroma"
+    },
+    {
+      "name": "coffee_convenience",
+      "label": "Convenience"
+    },
+    {
+      "name": "coffee_nutrition",
+      "label": "Nutrition"
+    },
+    {
+      "name": "coffee_smooth",
+      "label": "Smoothness"
+    },
+    {
+      "name": "coffee_brand_trust",
+      "label": "Brand trust"
+    },
+    {
+      "name": "coffee_packaging",
+      "label": "Packaging"
+    },
+    {
+      "name": "coffee_fresh_taste",
+      "label": "Fresh-brew taste"
+    },
+    {
+      "name": "coffee_intensity",
+      "label": "Intensity"
+    },
+    {
+      "name": "coffee_premium",
+      "label": "Premium feel"
+    }
+  ],
+  "global_means": {
+    "coffee_value": 3.4661016949152543,
+    "coffee_aroma": 4.0508474576271185,
+    "coffee_convenience": 3.940677966101695,
+    "coffee_nutrition": 3.3983050847457625,
+    "coffee_smooth": 3.9152542372881354,
+    "coffee_brand_trust": 3.6271186440677967,
+    "coffee_packaging": 3.7288135593220337,
+    "coffee_fresh_taste": 4.084745762711864,
+    "coffee_intensity": 3.7288135593220337,
+    "coffee_premium": 3.711864406779661
+  },
+  "global_stds": {
+    "coffee_value": 1.3696603772396199,
+    "coffee_aroma": 1.141270906408978,
+    "coffee_convenience": 1.1738129444240928,
+    "coffee_nutrition": 1.2360395371636672,
+    "coffee_smooth": 1.2043443337959672,
+    "coffee_brand_trust": 1.2541227616058255,
+    "coffee_packaging": 1.2119532976762546,
+    "coffee_fresh_taste": 1.19018778739395,
+    "coffee_intensity": 1.2049405143848286,
+    "coffee_premium": 1.2357780429530971
+  },
+  "blocks": [
+    {
+      "id": "global",
+      "cluster_id": null,
+      "size": 181,
+      "labelled_size": 118,
+      "try_rate": 0.788135593220339,
+      "non_try_count": 25,
+      "try_count": 93,
+      "feature_means": [
+        {
+          "name": "coffee_value",
+          "label": "Perceived value",
+          "cluster_mean": 3.4661016949152543,
+          "global_mean": 3.4661016949152543,
+          "z_vs_global": 0.0
+        },
+        {
+          "name": "coffee_aroma",
+          "label": "Aroma",
+          "cluster_mean": 4.0508474576271185,
+          "global_mean": 4.0508474576271185,
+          "z_vs_global": 0.0
+        },
+        {
+          "name": "coffee_convenience",
+          "label": "Convenience",
+          "cluster_mean": 3.940677966101695,
+          "global_mean": 3.940677966101695,
+          "z_vs_global": 0.0
+        },
+        {
+          "name": "coffee_nutrition",
+          "label": "Nutrition",
+          "cluster_mean": 3.3983050847457625,
+          "global_mean": 3.3983050847457625,
+          "z_vs_global": 0.0
+        },
+        {
+          "name": "coffee_smooth",
+          "label": "Smoothness",
+          "cluster_mean": 3.9152542372881354,
+          "global_mean": 3.9152542372881354,
+          "z_vs_global": 0.0
+        },
+        {
+          "name": "coffee_brand_trust",
+          "label": "Brand trust",
+          "cluster_mean": 3.6271186440677967,
+          "global_mean": 3.6271186440677967,
+          "z_vs_global": 0.0
+        },
+        {
+          "name": "coffee_packaging",
+          "label": "Packaging",
+          "cluster_mean": 3.7288135593220337,
+          "global_mean": 3.7288135593220337,
+          "z_vs_global": 0.0
+        },
+        {
+          "name": "coffee_fresh_taste",
+          "label": "Fresh-brew taste",
+          "cluster_mean": 4.084745762711864,
+          "global_mean": 4.084745762711864,
+          "z_vs_global": 0.0
+        },
+        {
+          "name": "coffee_intensity",
+          "label": "Intensity",
+          "cluster_mean": 3.7288135593220337,
+          "global_mean": 3.7288135593220337,
+          "z_vs_global": 0.0
+        },
+        {
+          "name": "coffee_premium",
+          "label": "Premium feel",
+          "cluster_mean": 3.711864406779661,
+          "global_mean": 3.711864406779661,
+          "z_vs_global": 0.0
+        }
+      ],
+      "model": {
+        "intercept": 0.3421721352631583,
+        "train_accuracy": 0.7457627118644068,
+        "scaler_mean": [
+          3.4661016949152543,
+          4.0508474576271185,
+          3.940677966101695,
+          3.3983050847457625,
+          3.9152542372881354,
+          3.6271186440677967,
+          3.7288135593220337,
+          4.084745762711864,
+          3.7288135593220337,
+          3.711864406779661
+        ],
+        "scaler_scale": [
+          1.3696603772396199,
+          1.1412709064089779,
+          1.173812944424093,
+          1.2360395371636672,
+          1.2043443337959672,
+          1.2541227616058255,
+          1.2119532976762546,
+          1.1901877873939501,
+          1.2049405143848286,
+          1.235778042953097
+        ],
+        "coefficients": [
+          {
+            "feature": "coffee_aroma",
+            "label": "Aroma",
+            "coefficient": 1.0835561348845784,
+            "odds_ratio": 2.9551698701807214,
+            "abs_coefficient": 1.0835561348845784
+          },
+          {
+            "feature": "coffee_intensity",
+            "label": "Intensity",
+            "coefficient": -0.7358049665369757,
+            "odds_ratio": 0.4791196284372919,
+            "abs_coefficient": 0.7358049665369757
+          },
+          {
+            "feature": "coffee_premium",
+            "label": "Premium feel",
+            "coefficient": -0.6994022090206162,
+            "odds_ratio": 0.4968822467525795,
+            "abs_coefficient": 0.6994022090206162
+          },
+          {
+            "feature": "coffee_packaging",
+            "label": "Packaging",
+            "coefficient": 0.6438791673841032,
+            "odds_ratio": 1.903851933609987,
+            "abs_coefficient": 0.6438791673841032
+          },
+          {
+            "feature": "coffee_value",
+            "label": "Perceived value",
+            "coefficient": 0.5489909058454182,
+            "odds_ratio": 1.7315048845425531,
+            "abs_coefficient": 0.5489909058454182
+          },
+          {
+            "feature": "coffee_convenience",
+            "label": "Convenience",
+            "coefficient": 0.34638974328304206,
+            "odds_ratio": 1.4139535873551796,
+            "abs_coefficient": 0.34638974328304206
+          },
+          {
+            "feature": "coffee_brand_trust",
+            "label": "Brand trust",
+            "coefficient": -0.20977526055953655,
+            "odds_ratio": 0.8107664366920285,
+            "abs_coefficient": 0.20977526055953655
+          },
+          {
+            "feature": "coffee_smooth",
+            "label": "Smoothness",
+            "coefficient": -0.18437690445940025,
+            "odds_ratio": 0.8316223025959919,
+            "abs_coefficient": 0.18437690445940025
+          },
+          {
+            "feature": "coffee_fresh_taste",
+            "label": "Fresh-brew taste",
+            "coefficient": 0.05555423066740541,
+            "odds_ratio": 1.057126344185142,
+            "abs_coefficient": 0.05555423066740541
+          },
+          {
+            "feature": "coffee_nutrition",
+            "label": "Nutrition",
+            "coefficient": 0.039251629425953206,
+            "odds_ratio": 1.0400321534206083,
+            "abs_coefficient": 0.039251629425953206
+          }
+        ],
+        "fitted": true
+      }
+    },
+    {
+      "id": "cluster_0",
+      "cluster_id": 0,
+      "size": 126,
+      "labelled_size": 72,
+      "try_rate": 0.8333333333333334,
+      "non_try_count": 12,
+      "try_count": 60,
+      "feature_means": [
+        {
+          "name": "coffee_value",
+          "label": "Perceived value",
+          "cluster_mean": 3.486111111111111,
+          "global_mean": 3.4661016949152543,
+          "z_vs_global": 0.014609034858833634
+        },
+        {
+          "name": "coffee_aroma",
+          "label": "Aroma",
+          "cluster_mean": 4.208333333333333,
+          "global_mean": 4.0508474576271185,
+          "z_vs_global": 0.13799166772922095
+        },
+        {
+          "name": "coffee_convenience",
+          "label": "Convenience",
+          "cluster_mean": 3.9027777777777777,
+          "global_mean": 3.940677966101695,
+          "z_vs_global": -0.03228809880139152
+        },
+        {
+          "name": "coffee_nutrition",
+          "label": "Nutrition",
+          "cluster_mean": 3.4722222222222223,
+          "global_mean": 3.3983050847457625,
+          "z_vs_global": 0.05980159635190717
+        },
+        {
+          "name": "coffee_smooth",
+          "label": "Smoothness",
+          "cluster_mean": 4.013888888888889,
+          "global_mean": 3.9152542372881354,
+          "z_vs_global": 0.08189904567397915
+        },
+        {
+          "name": "coffee_brand_trust",
+          "label": "Brand trust",
+          "cluster_mean": 3.5555555555555554,
+          "global_mean": 3.6271186440677967,
+          "z_vs_global": -0.05706226750929017
+        },
+        {
+          "name": "coffee_packaging",
+          "label": "Packaging",
+          "cluster_mean": 3.638888888888889,
+          "global_mean": 3.7288135593220337,
+          "z_vs_global": -0.07419813173128244
+        },
+        {
+          "name": "coffee_fresh_taste",
+          "label": "Fresh-brew taste",
+          "cluster_mean": 4.361111111111111,
+          "global_mean": 4.084745762711864,
+          "z_vs_global": 0.232203145861864
+        },
+        {
+          "name": "coffee_intensity",
+          "label": "Intensity",
+          "cluster_mean": 3.9305555555555554,
+          "global_mean": 3.7288135593220337,
+          "z_vs_global": 0.1674290090050787
+        },
+        {
+          "name": "coffee_premium",
+          "label": "Premium feel",
+          "cluster_mean": 3.5972222222222223,
+          "global_mean": 3.711864406779661,
+          "z_vs_global": -0.09276923571443461
+        }
+      ],
+      "model": {
+        "intercept": 0.387737964517916,
+        "train_accuracy": 0.7083333333333334,
+        "scaler_mean": [
+          3.486111111111111,
+          4.208333333333333,
+          3.9027777777777777,
+          3.4722222222222223,
+          4.013888888888889,
+          3.5555555555555554,
+          3.638888888888889,
+          4.361111111111111,
+          3.9305555555555554,
+          3.5972222222222223
+        ],
+        "scaler_scale": [
+          1.154617006673107,
+          0.7252872993970504,
+          0.988260568178901,
+          1.0537264854661477,
+          0.8578567537045699,
+          1.0122703976826999,
+          1.0315247015348412,
+          0.7871459619613752,
+          0.8551541266034525,
+          1.009121210402373
+        ],
+        "coefficients": [
+          {
+            "feature": "coffee_aroma",
+            "label": "Aroma",
+            "coefficient": 0.9023326019685907,
+            "odds_ratio": 2.465347082811353,
+            "abs_coefficient": 0.9023326019685907
+          },
+          {
+            "feature": "coffee_convenience",
+            "label": "Convenience",
+            "coefficient": 0.45352546135595256,
+            "odds_ratio": 1.5738509671377772,
+            "abs_coefficient": 0.45352546135595256
+          },
+          {
+            "feature": "coffee_value",
+            "label": "Perceived value",
+            "coefficient": 0.41302925798432455,
+            "odds_ratio": 1.5113892454899558,
+            "abs_coefficient": 0.41302925798432455
+          },
+          {
+            "feature": "coffee_premium",
+            "label": "Premium feel",
+            "coefficient": -0.30141741033852654,
+            "odds_ratio": 0.7397689210964697,
+            "abs_coefficient": 0.30141741033852654
+          },
+          {
+            "feature": "coffee_intensity",
+            "label": "Intensity",
+            "coefficient": -0.25997686257943914,
+            "odds_ratio": 0.7710694261547701,
+            "abs_coefficient": 0.25997686257943914
+          },
+          {
+            "feature": "coffee_fresh_taste",
+            "label": "Fresh-brew taste",
+            "coefficient": -0.2141874401342337,
+            "odds_ratio": 0.8071970697147434,
+            "abs_coefficient": 0.2141874401342337
+          },
+          {
+            "feature": "coffee_packaging",
+            "label": "Packaging",
+            "coefficient": 0.1648043361894132,
+            "odds_ratio": 1.1791623767342672,
+            "abs_coefficient": 0.1648043361894132
+          },
+          {
+            "feature": "coffee_brand_trust",
+            "label": "Brand trust",
+            "coefficient": -0.09991594232084478,
+            "odds_ratio": 0.904913479766074,
+            "abs_coefficient": 0.09991594232084478
+          },
+          {
+            "feature": "coffee_smooth",
+            "label": "Smoothness",
+            "coefficient": 0.09718664812557952,
+            "odds_ratio": 1.1020660529886344,
+            "abs_coefficient": 0.09718664812557952
+          },
+          {
+            "feature": "coffee_nutrition",
+            "label": "Nutrition",
+            "coefficient": -0.077866594812736,
+            "odds_ratio": 0.9250878298272109,
+            "abs_coefficient": 0.077866594812736
+          }
+        ],
+        "fitted": true
+      }
+    },
+    {
+      "id": "cluster_1",
+      "cluster_id": 1,
+      "size": 10,
+      "labelled_size": 10,
+      "try_rate": 0.4,
+      "non_try_count": 6,
+      "try_count": 4,
+      "feature_means": [
+        {
+          "name": "coffee_value",
+          "label": "Perceived value",
+          "cluster_mean": 1.4,
+          "global_mean": 3.4661016949152543,
+          "z_vs_global": -1.5084773782236627
+        },
+        {
+          "name": "coffee_aroma",
+          "label": "Aroma",
+          "cluster_mean": 1.2,
+          "global_mean": 4.0508474576271185,
+          "z_vs_global": -2.497958584257039
+        },
+        {
+          "name": "coffee_convenience",
+          "label": "Convenience",
+          "cluster_mean": 1.8,
+          "global_mean": 3.940677966101695,
+          "z_vs_global": -1.823695995405788
+        },
+        {
+          "name": "coffee_nutrition",
+          "label": "Nutrition",
+          "cluster_mean": 1.1,
+          "global_mean": 3.3983050847457625,
+          "z_vs_global": -1.859410654467955
+        },
+        {
+          "name": "coffee_smooth",
+          "label": "Smoothness",
+          "cluster_mean": 1.5,
+          "global_mean": 3.9152542372881354,
+          "z_vs_global": -2.005451571873558
+        },
+        {
+          "name": "coffee_brand_trust",
+          "label": "Brand trust",
+          "cluster_mean": 1.1,
+          "global_mean": 3.6271186440677967,
+          "z_vs_global": -2.015048862387267
+        },
+        {
+          "name": "coffee_packaging",
+          "label": "Packaging",
+          "cluster_mean": 1.5,
+          "global_mean": 3.7288135593220337,
+          "z_vs_global": -1.8390259456329396
+        },
+        {
+          "name": "coffee_fresh_taste",
+          "label": "Fresh-brew taste",
+          "cluster_mean": 1.5,
+          "global_mean": 4.084745762711864,
+          "z_vs_global": -2.1717125566978432
+        },
+        {
+          "name": "coffee_intensity",
+          "label": "Intensity",
+          "cluster_mean": 1.1,
+          "global_mean": 3.7288135593220337,
+          "z_vs_global": -2.1816957168745796
+        },
+        {
+          "name": "coffee_premium",
+          "label": "Premium feel",
+          "cluster_mean": 1.3,
+          "global_mean": 3.711864406779661,
+          "z_vs_global": -1.9516970871371933
+        }
+      ],
+      "model": {
+        "fitted": false,
+        "reason": "insufficient or single-class data"
+      }
+    },
+    {
+      "id": "cluster_2",
+      "cluster_id": 2,
+      "size": 45,
+      "labelled_size": 36,
+      "try_rate": 0.8055555555555556,
+      "non_try_count": 7,
+      "try_count": 29,
+      "feature_means": [
+        {
+          "name": "coffee_value",
+          "label": "Perceived value",
+          "cluster_mean": 4.0,
+          "global_mean": 3.4661016949152543,
+          "z_vs_global": 0.38980342423334996
+        },
+        {
+          "name": "coffee_aroma",
+          "label": "Aroma",
+          "cluster_mean": 4.527777777777778,
+          "global_mean": 4.0508474576271185,
+          "z_vs_global": 0.417894049057402
+        },
+        {
+          "name": "coffee_convenience",
+          "label": "Convenience",
+          "cluster_mean": 4.611111111111111,
+          "global_mean": 3.940677966101695,
+          "z_vs_global": 0.5711584185488344
+        },
+        {
+          "name": "coffee_nutrition",
+          "label": "Nutrition",
+          "cluster_mean": 3.888888888888889,
+          "global_mean": 3.3983050847457625,
+          "z_vs_global": 0.3968997668706182
+        },
+        {
+          "name": "coffee_smooth",
+          "label": "Smoothness",
+          "cluster_mean": 4.388888888888889,
+          "global_mean": 3.9152542372881354,
+          "z_vs_global": 0.3932717897280316
+        },
+        {
+          "name": "coffee_brand_trust",
+          "label": "Brand trust",
+          "cluster_mean": 4.472222222222222,
+          "global_mean": 3.6271186440677967,
+          "z_vs_global": 0.6738603301261541
+        },
+        {
+          "name": "coffee_packaging",
+          "label": "Packaging",
+          "cluster_mean": 4.527777777777778,
+          "global_mean": 3.7288135593220337,
+          "z_vs_global": 0.6592368039161595
+        },
+        {
+          "name": "coffee_fresh_taste",
+          "label": "Fresh-brew taste",
+          "cluster_mean": 4.25,
+          "global_mean": 4.084745762711864,
+          "z_vs_global": 0.1388471962478951
+        },
+        {
+          "name": "coffee_intensity",
+          "label": "Intensity",
+          "cluster_mean": 4.055555555555555,
+          "global_mean": 3.7288135593220337,
+          "z_vs_global": 0.2711685700105592
+        },
+        {
+          "name": "coffee_premium",
+          "label": "Premium feel",
+          "cluster_mean": 4.611111111111111,
+          "global_mean": 3.711864406779661,
+          "z_vs_global": 0.7276765511892008
+        }
+      ],
+      "model": {
+        "intercept": 0.46102589109097475,
+        "train_accuracy": 0.7777777777777778,
+        "scaler_mean": [
+          4.0,
+          4.527777777777778,
+          4.611111111111111,
+          3.888888888888889,
+          4.388888888888889,
+          4.472222222222222,
+          4.527777777777778,
+          4.25,
+          4.055555555555555,
+          4.611111111111111
+        ],
+        "scaler_scale": [
+          1.3333333333333333,
+          0.7988224358082449,
+          0.6358623967921998,
+          1.021376461713902,
+          1.0076865081787252,
+          0.7632573146685605,
+          0.6002828551381753,
+          0.982485510212633,
+          1.0786937688304221,
+          0.541488574711609
+        ],
+        "coefficients": [
+          {
+            "feature": "coffee_value",
+            "label": "Perceived value",
+            "coefficient": 1.0459976501754007,
+            "odds_ratio": 2.8462366561839327,
+            "abs_coefficient": 1.0459976501754007
+          },
+          {
+            "feature": "coffee_intensity",
+            "label": "Intensity",
+            "coefficient": -0.7636294733489785,
+            "odds_ratio": 0.4659721207564958,
+            "abs_coefficient": 0.7636294733489785
+          },
+          {
+            "feature": "coffee_packaging",
+            "label": "Packaging",
+            "coefficient": 0.7232105673800582,
+            "odds_ratio": 2.0610397065197295,
+            "abs_coefficient": 0.7232105673800582
+          },
+          {
+            "feature": "coffee_fresh_taste",
+            "label": "Fresh-brew taste",
+            "coefficient": -0.5330862056888759,
+            "odds_ratio": 0.5867912139237151,
+            "abs_coefficient": 0.5330862056888759
+          },
+          {
+            "feature": "coffee_smooth",
+            "label": "Smoothness",
+            "coefficient": -0.3021893622560704,
+            "odds_ratio": 0.7391980754203448,
+            "abs_coefficient": 0.3021893622560704
+          },
+          {
+            "feature": "coffee_aroma",
+            "label": "Aroma",
+            "coefficient": 0.22097928775794382,
+            "odds_ratio": 1.2472975959667958,
+            "abs_coefficient": 0.22097928775794382
+          },
+          {
+            "feature": "coffee_nutrition",
+            "label": "Nutrition",
+            "coefficient": -0.21153507434620014,
+            "odds_ratio": 0.8093408934521996,
+            "abs_coefficient": 0.21153507434620014
+          },
+          {
+            "feature": "coffee_brand_trust",
+            "label": "Brand trust",
+            "coefficient": -0.19925081655697438,
+            "odds_ratio": 0.8193443624267658,
+            "abs_coefficient": 0.19925081655697438
+          },
+          {
+            "feature": "coffee_premium",
+            "label": "Premium feel",
+            "coefficient": 0.16347705473282148,
+            "odds_ratio": 1.17759833456901,
+            "abs_coefficient": 0.16347705473282148
+          },
+          {
+            "feature": "coffee_convenience",
+            "label": "Convenience",
+            "coefficient": -0.0851155770855053,
+            "odds_ratio": 0.9184061315631614,
+            "abs_coefficient": 0.0851155770855053
+          }
+        ],
+        "fitted": true
+      }
+    }
+  ]
+}

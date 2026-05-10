@@ -1,0 +1,1356 @@
+{
+  "demographics": {
+    "gender": {
+      "หญิง": 125,
+      "ชาย": 54,
+      "ไม่ระบุ": 2
+    },
+    "age_group": {
+      "30-39ปี": 71,
+      "23-29ปี": 47,
+      "40-49ปี": 33,
+      "18-22ปี": 12,
+      "ต่ำกว่า 18ปี": 10,
+      "50ปี ขึ้นไป": 8
+    },
+    "occupation": {
+      "พนักงานบริษัทเอกชน": 120,
+      "ธุรกิจส่วนตัว": 15,
+      "นักเรียน": 14,
+      "ฟรีแลนซ์/อาชีพอิสระ": 10,
+      "นักศึกษา": 9,
+      "ข้าราชการ": 5,
+      "พนักงานมหาวิทยาลัย": 2,
+      "พนักงานรัฐวิสาหกิจ": 2,
+      "ว่างงาน": 1,
+      "แพทย์": 1,
+      "ไลฟ์สด": 1,
+      "แม่ค้า": 1
+    },
+    "total": 181
+  },
+  "raw_feature_stats": {
+    "coffee_fresh_taste": {
+      "mean": 4.08,
+      "std": 1.2,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 5.0,
+      "count": 118
+    },
+    "coffee_intensity": {
+      "mean": 3.73,
+      "std": 1.21,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 4.0,
+      "count": 118
+    },
+    "coffee_smooth": {
+      "mean": 3.92,
+      "std": 1.21,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 4.0,
+      "count": 118
+    },
+    "coffee_acidity": {
+      "mean": 2.42,
+      "std": 1.3,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 2.0,
+      "count": 118
+    },
+    "coffee_aroma": {
+      "mean": 4.05,
+      "std": 1.15,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 4.0,
+      "count": 118
+    },
+    "coffee_caffeine": {
+      "mean": 3.66,
+      "std": 1.25,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 4.0,
+      "count": 118
+    },
+    "coffee_origin": {
+      "mean": 3.03,
+      "std": 1.29,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 3.0,
+      "count": 118
+    },
+    "coffee_convenience": {
+      "mean": 3.94,
+      "std": 1.18,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 4.0,
+      "count": 118
+    },
+    "coffee_value": {
+      "mean": 3.47,
+      "std": 1.38,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 4.0,
+      "count": 118
+    },
+    "coffee_nutrition": {
+      "mean": 3.4,
+      "std": 1.24,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 4.0,
+      "count": 118
+    },
+    "coffee_brand_trust": {
+      "mean": 3.63,
+      "std": 1.26,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 4.0,
+      "count": 118
+    },
+    "coffee_premium": {
+      "mean": 3.71,
+      "std": 1.24,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 4.0,
+      "count": 118
+    },
+    "coffee_packaging": {
+      "mean": 3.73,
+      "std": 1.22,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 4.0,
+      "count": 118
+    },
+    "coffee_celebrity": {
+      "mean": 1.79,
+      "std": 1.24,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 1.0,
+      "count": 118
+    },
+    "coffee_food_blogger": {
+      "mean": 2.91,
+      "std": 1.05,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 3.0,
+      "count": 118
+    },
+    "coffee_coffee_blogger": {
+      "mean": 3.72,
+      "std": 1.0,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 4.0,
+      "count": 118
+    },
+    "coffee_lifestyle_blogger": {
+      "mean": 2.48,
+      "std": 1.08,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 2.0,
+      "count": 118
+    },
+    "coffee_friends_family": {
+      "mean": 4.1,
+      "std": 1.33,
+      "min": 1.0,
+      "max": 5.0,
+      "median": 5.0,
+      "count": 118
+    }
+  },
+  "cleaning": {
+    "total_raw_rows": 181,
+    "columns_original": 120,
+    "columns_after_cleaning": 120
+  },
+  "cluster_demographics": {
+    "0": {
+      "size": 126,
+      "gender": {
+        "หญิง": 82,
+        "ชาย": 42,
+        "ไม่ระบุ": 2
+      },
+      "age_group": {
+        "30-39ปี": 51,
+        "23-29ปี": 32,
+        "40-49ปี": 21,
+        "18-22ปี": 10,
+        "50ปี ขึ้นไป": 6,
+        "ต่ำกว่า 18ปี": 6
+      },
+      "occupation": {
+        "พนักงานบริษัทเอกชน": 79,
+        "ธุรกิจส่วนตัว": 13,
+        "ฟรีแลนซ์/อาชีพอิสระ": 9,
+        "นักเรียน": 9,
+        "นักศึกษา": 7
+      },
+      "top_brand": {
+        "ไม่ระบุ": 54,
+        "ไม่ดื่มกาแฟ Ready to drink เลย": 34,
+        "Arabic": 9,
+        "Newcafe": 9,
+        "Best": 8
+      }
+    },
+    "1": {
+      "size": 10,
+      "gender": {
+        "หญิง": 6,
+        "ชาย": 4
+      },
+      "age_group": {
+        "30-39ปี": 4,
+        "40-49ปี": 3,
+        "23-29ปี": 2,
+        "50ปี ขึ้นไป": 1
+      },
+      "occupation": {
+        "พนักงานบริษัทเอกชน": 7,
+        "พนักงานมหาวิทยาลัย": 1,
+        "ฟรีแลนซ์/อาชีพอิสระ": 1,
+        "ข้าราชการ": 1
+      },
+      "top_brand": {
+        "ไม่ดื่มกาแฟ Ready to drink เลย": 8,
+        "Arabic": 1,
+        "ไม่มี": 1
+      }
+    },
+    "2": {
+      "size": 45,
+      "gender": {
+        "หญิง": 37,
+        "ชาย": 8
+      },
+      "age_group": {
+        "30-39ปี": 16,
+        "23-29ปี": 13,
+        "40-49ปี": 9,
+        "ต่ำกว่า 18ปี": 4,
+        "18-22ปี": 2,
+        "50ปี ขึ้นไป": 1
+      },
+      "occupation": {
+        "พนักงานบริษัทเอกชน": 34,
+        "นักเรียน": 5,
+        "ธุรกิจส่วนตัว": 2,
+        "นักศึกษา": 2,
+        "แม่ค้า": 1
+      },
+      "top_brand": {
+        "ไม่ดื่มกาแฟ Ready to drink เลย": 16,
+        "ไม่ระบุ": 9,
+        "Newcafe": 7,
+        "Best": 5,
+        "Arabic": 4
+      }
+    }
+  },
+  "pca_scatter": [
+    {
+      "x": -3.363,
+      "y": -0.047,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -0.274,
+      "y": 1.825,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -7.894,
+      "y": -2.784,
+      "cluster": 1,
+      "anomaly": 1
+    },
+    {
+      "x": 0.417,
+      "y": -0.713,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -0.816,
+      "y": -1.021,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 3.214,
+      "y": 0.42,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -9.3,
+      "y": 3.678,
+      "cluster": 1,
+      "anomaly": 1
+    },
+    {
+      "x": -1.698,
+      "y": -4.332,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -1.811,
+      "y": -4.207,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 1.233,
+      "y": 0.268,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -2.325,
+      "y": -0.398,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.55,
+      "y": -0.479,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -2.648,
+      "y": 0.983,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.012,
+      "y": -0.888,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -1.182,
+      "y": 0.547,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 2.901,
+      "y": 1.339,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 1.653,
+      "y": 1.943,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 3.658,
+      "y": 1.734,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -10.239,
+      "y": 2.808,
+      "cluster": 1,
+      "anomaly": 0
+    },
+    {
+      "x": -4.878,
+      "y": 2.301,
+      "cluster": 1,
+      "anomaly": 0
+    },
+    {
+      "x": -0.512,
+      "y": -2.127,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.383,
+      "y": -0.625,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -0.764,
+      "y": 0.233,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -5.096,
+      "y": -1.917,
+      "cluster": 0,
+      "anomaly": 1
+    },
+    {
+      "x": 0.562,
+      "y": -1.266,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.962,
+      "y": -1.404,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.372,
+      "y": -1.047,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.45,
+      "y": -0.529,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -1.333,
+      "y": -0.012,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.099,
+      "y": -0.945,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.085,
+      "y": 2.231,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.249,
+      "y": -1.043,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.773,
+      "y": -0.059,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 1.641,
+      "y": 0.852,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 1.067,
+      "y": 0.417,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 3.753,
+      "y": 2.811,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 0.57,
+      "y": -0.292,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -1.153,
+      "y": -4.216,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.365,
+      "y": -0.696,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.417,
+      "y": -0.713,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -0.475,
+      "y": -0.445,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 3.247,
+      "y": -1.652,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.103,
+      "y": -1.289,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -2.23,
+      "y": -0.092,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -2.688,
+      "y": -0.895,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -4.701,
+      "y": -1.628,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -8.723,
+      "y": 4.836,
+      "cluster": 1,
+      "anomaly": 0
+    },
+    {
+      "x": -3.195,
+      "y": -1.783,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -11.327,
+      "y": 1.22,
+      "cluster": 1,
+      "anomaly": 1
+    },
+    {
+      "x": -0.038,
+      "y": -1.018,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -0.106,
+      "y": 0.043,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 1.484,
+      "y": -2.431,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -0.681,
+      "y": 1.92,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 4.717,
+      "y": -1.094,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 0.417,
+      "y": -0.713,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 1.909,
+      "y": 0.523,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 0.417,
+      "y": -0.713,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 3.797,
+      "y": 2.731,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 0.417,
+      "y": -0.713,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.034,
+      "y": 0.682,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.725,
+      "y": 2.035,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -1.424,
+      "y": -1.491,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -10.107,
+      "y": 2.433,
+      "cluster": 1,
+      "anomaly": 0
+    },
+    {
+      "x": 1.049,
+      "y": 0.12,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 3.2,
+      "y": 1.628,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 0.956,
+      "y": -0.766,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.1,
+      "y": -0.418,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -1.069,
+      "y": 0.417,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 3.611,
+      "y": -1.468,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 0.211,
+      "y": -1.401,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.689,
+      "y": -0.234,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 2.371,
+      "y": -1.944,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 1.216,
+      "y": 0.947,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 0.069,
+      "y": 0.362,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 2.639,
+      "y": 0.742,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 5.208,
+      "y": 1.501,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -0.683,
+      "y": 4.514,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 3.113,
+      "y": 0.144,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 1.679,
+      "y": -0.038,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 1.56,
+      "y": 0.7,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -0.36,
+      "y": -2.158,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 2.612,
+      "y": 2.66,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 4.073,
+      "y": 2.245,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -0.447,
+      "y": -2.051,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -1.366,
+      "y": -1.884,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 1.003,
+      "y": -0.094,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -1.176,
+      "y": -0.668,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -3.253,
+      "y": -0.948,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -1.63,
+      "y": 0.714,
+      "cluster": 0,
+      "anomaly": 1
+    },
+    {
+      "x": 1.469,
+      "y": 1.202,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 0.417,
+      "y": -0.713,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 3.965,
+      "y": 0.524,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -2.888,
+      "y": -3.765,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 2.384,
+      "y": -0.72,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -2.06,
+      "y": -0.384,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -1.157,
+      "y": 0.05,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.657,
+      "y": -0.43,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -2.111,
+      "y": -0.52,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.658,
+      "y": -1.524,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.549,
+      "y": 1.433,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 1.411,
+      "y": -0.897,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -3.984,
+      "y": -0.78,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 3.595,
+      "y": 3.138,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 0.417,
+      "y": -0.713,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.376,
+      "y": 3.388,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -1.021,
+      "y": -0.968,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 1.61,
+      "y": -0.469,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.417,
+      "y": -0.713,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.417,
+      "y": -0.713,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.417,
+      "y": -0.713,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 1.761,
+      "y": -0.873,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 2.242,
+      "y": 0.894,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 0.889,
+      "y": -0.182,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 1.127,
+      "y": -0.751,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 3.415,
+      "y": 1.759,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -2.449,
+      "y": 0.008,
+      "cluster": 0,
+      "anomaly": 1
+    },
+    {
+      "x": 5.797,
+      "y": 3.482,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -5.63,
+      "y": 2.43,
+      "cluster": 1,
+      "anomaly": 0
+    },
+    {
+      "x": -0.587,
+      "y": -2.29,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 2.303,
+      "y": 0.145,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.223,
+      "y": -0.99,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -3.541,
+      "y": 0.981,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 1.488,
+      "y": 0.54,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 0.605,
+      "y": -0.345,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.417,
+      "y": -0.713,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 2.517,
+      "y": 0.817,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -0.295,
+      "y": 1.598,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -1.745,
+      "y": 0.301,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -0.662,
+      "y": 0.118,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.547,
+      "y": -1.189,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 2.898,
+      "y": 2.548,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 0.009,
+      "y": -1.247,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 1.142,
+      "y": 0.762,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -2.507,
+      "y": -0.127,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.417,
+      "y": -0.713,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.417,
+      "y": -0.713,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 2.655,
+      "y": 2.351,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -1.945,
+      "y": -2.608,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -0.709,
+      "y": -2.291,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 1.771,
+      "y": 1.819,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 0.616,
+      "y": -0.252,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 3.044,
+      "y": -2.389,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.278,
+      "y": -0.334,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.261,
+      "y": -0.563,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.757,
+      "y": 0.062,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 3.075,
+      "y": -1.89,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -0.48,
+      "y": 0.322,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -1.015,
+      "y": -2.375,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 4.495,
+      "y": -0.915,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -1.219,
+      "y": -3.192,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 1.099,
+      "y": 0.906,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 1.377,
+      "y": 0.721,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 0.774,
+      "y": 0.346,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -8.962,
+      "y": 0.739,
+      "cluster": 1,
+      "anomaly": 1
+    },
+    {
+      "x": 0.762,
+      "y": -0.324,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.417,
+      "y": -0.713,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 2.596,
+      "y": 2.177,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -0.308,
+      "y": 0.319,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.594,
+      "y": -0.536,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -8.088,
+      "y": 4.244,
+      "cluster": 1,
+      "anomaly": 0
+    },
+    {
+      "x": -0.224,
+      "y": -1.055,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.122,
+      "y": -0.733,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -4.555,
+      "y": -2.129,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.627,
+      "y": -0.24,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 1.985,
+      "y": -1.356,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.864,
+      "y": -0.492,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -1.326,
+      "y": 8.443,
+      "cluster": 2,
+      "anomaly": 1
+    },
+    {
+      "x": 0.653,
+      "y": -0.532,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.128,
+      "y": -0.327,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 0.212,
+      "y": -0.481,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 2.0,
+      "y": 2.228,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 2.645,
+      "y": -0.749,
+      "cluster": 2,
+      "anomaly": 1
+    },
+    {
+      "x": 5.291,
+      "y": 1.503,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": -0.526,
+      "y": -1.196,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -2.814,
+      "y": 1.121,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -1.128,
+      "y": -2.247,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 2.692,
+      "y": 2.664,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 1.931,
+      "y": -1.785,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": -0.008,
+      "y": -0.991,
+      "cluster": 0,
+      "anomaly": 0
+    },
+    {
+      "x": 6.196,
+      "y": 2.322,
+      "cluster": 2,
+      "anomaly": 0
+    },
+    {
+      "x": 0.006,
+      "y": 2.721,
+      "cluster": 0,
+      "anomaly": 0
+    }
+  ]
+}
