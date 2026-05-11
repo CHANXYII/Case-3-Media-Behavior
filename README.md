@@ -29,16 +29,15 @@ Case_3_Final_Project/
 │   ├── data_cleaning/
 │   │   └── data_cleaning.py                    # raw → cleaned CSV + column dictionary
 │   ├── feature_engineering/
-│   │   ├── feature_selection.py                # general EDA + feature scoring
 │   │   └── feature_selection_visualization.py  # target-aware diagnostics (prep for supervised)
 │   ├── unsupervised/
 │   │   └── unsupervised_learning.py            # K-Means / DBSCAN / personas
-│   ├── supervised/                             # next stage — training stub + README
-│   │   ├── README.md
-│   │   └── train.py
-│   └── web/                                    # next stage — streamlit stub + README
+│   └── supervised/
 │       ├── README.md
-│       └── app.py
+│       ├── train.py
+│       └── per_cluster.py
+├── src/web/                                    # Next.js dashboard (live UI)
+├── run_pipeline.py                             # one-shot end-to-end runner
 ├── README.md
 ├── requirements.txt
 └── .gitignore
@@ -57,25 +56,26 @@ pip install -r requirements.txt
 Run the pipeline (each step writes its outputs into `data/processed/` and `outputs/`):
 
 ```bash
-# 1. Clean the raw survey data → data/processed/media_behavior_cleaned.csv
-python -m src.data_cleaning.data_cleaning
-
-# 2. Feature engineering / selection (also re-derives the cleaned CSV)
-python -m src.feature_engineering.feature_selection
-python -m src.feature_engineering.feature_selection_visualization
-
-# 3. Unsupervised clustering → data/processed/media_behavior_with_clusters.csv
-python -m src.unsupervised.unsupervised_learning
+# Run everything end-to-end
+python run_pipeline.py
 ```
 
-Stages prepared for the next dev:
+Or stage-by-stage:
 
 ```bash
-# 4. Supervised training (stub)
+python -m src.data_cleaning.data_cleaning
+python -m src.feature_engineering.feature_selection_visualization
+python -m src.unsupervised.unsupervised_learning
 python -m src.supervised.train
+python -m src.supervised.per_cluster
+```
 
-# 5. Web app (stub, requires `pip install streamlit`)
-streamlit run src/web/app.py
+Launch the web dashboard:
+
+```bash
+cd src/web
+npm install
+npm run dev
 ```
 
 ---
@@ -87,8 +87,8 @@ streamlit run src/web/app.py
 | Cleaning | `src/data_cleaning/` | Standardizes column names, derives `customer_segment`, writes the cleaned CSV and a Thai→English column dictionary. |
 | Feature engineering | `src/feature_engineering/` | EDA charts, ANOVA F-scores, target-aware imbalance / Cohen's d / high-value-segment diagnostics. |
 | Unsupervised | `src/unsupervised/` | Scaling + PCA, K-Means and DBSCAN clustering, anomaly detection, persona radar/heatmap/PCA plots. |
-| Supervised | `src/supervised/` | **Placeholder** — train a classifier for `target_try_new_rtd_coffee`. See folder README. |
-| Web | `src/web/` | **Placeholder** — Streamlit/FastAPI app to surface personas + predictions. See folder README. |
+| Supervised | `src/supervised/` | Multinomial logistic regression / RandomForest / GradientBoosting on the top-5 ANOVA-selected features; per-cluster drivers exported as JSON. |
+| Web | `src/web/` | Next.js dashboard — surfaces personas, drivers, and a live predictor backed by the supervised JSON. |
 
 ---
 

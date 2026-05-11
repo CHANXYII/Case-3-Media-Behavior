@@ -27,8 +27,8 @@ def run_stage(label: str, module: str) -> None:
 def main() -> None:
     for label, module in STAGES:
         run_stage(label, module)
-    print("\nAll stages completed. Launch the dashboard with:")
-    print("    streamlit run src/web/app.py")
+    print("\nAll stages completed. Launch the dashboard from `web-next/`:")
+    print("    cd src/web && npm run dev")
 
 
 if __name__ == "__main__":

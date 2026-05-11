@@ -5,14 +5,14 @@
 ## รันคำสั่งเดียว
 
 ```bash
-cd web-next
+cd src/web
 docker compose up -d --build
 ```
 
 หรือใช้ npm script ที่ตั้งไว้ให้แล้ว:
 
 ```bash
-cd web-next
+cd src/web
 npm run deploy
 ```
 

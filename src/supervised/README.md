@@ -96,5 +96,5 @@ Artefacts written by `train.py`:
 ```bash
 python -m src.feature_engineering.feature_selection_visualization   # build CLEAN_CSV + select features
 python -m src.supervised.train                                      # train + evaluate
-streamlit run src/web/app.py                                        # interactive predictor
+cd src/web && npm run dev                                          # interactive predictor
 ```

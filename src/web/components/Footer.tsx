@@ -34,7 +34,7 @@ python -m src.feature_engineering.feature_selection_visualization
 python -m src.unsupervised.unsupervised_learning
 python -m src.supervised.train
 python -m src.supervised.per_cluster
-cd web-next && npm run dev`}
+cd src/web && npm run dev`}
             </pre>
           </div>
         </div>

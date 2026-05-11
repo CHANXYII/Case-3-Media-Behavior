@@ -18,3 +18,5 @@ build/
 dist/
 /web-next/.next
 /web-next/node_modules
+/src/web/.next
+/src/web/node_modules
