@@ -15,6 +15,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.config import (
     CLEAN_CSV,
+    LEGACY_BINARY_TARGET_COLUMN,
     OUTPUTS_DIR,
     RAW_CSV,
     TARGET_COLUMN,
@@ -104,11 +105,24 @@ def merge_province(series):
     return ",".join(values) if values else np.nan
 
 
-def derive_target(value):
+def derive_binary_target(value):
     answers = split_answers(value)
     if any("ลอง" in answer and answer != "ไม่ลอง" for answer in answers):
         return 1.0
     if answers and all(answer == "ไม่ลอง" for answer in answers):
+        return 0.0
+    return np.nan
+
+
+def derive_target(value):
+    answers = split_answers(value)
+    if not answers:
+        return np.nan
+    if any(answer == "ลองเลย ชอบลองของออกใหม่อยู่แล้ว" for answer in answers):
+        return 2.0
+    if any("ลอง" in answer and answer != "ไม่ลอง" for answer in answers):
+        return 1.0
+    if all(answer == "ไม่ลอง" for answer in answers):
         return 0.0
     return np.nan
 
@@ -161,26 +175,34 @@ def get_feature_display_label(source_var, feature_type, level=None):
 
 
 def summarize_feature_effect(source_var, feature_type, analysis_df, target, level=None):
+    try_mask = target == 2
+    maybe_mask = target == 1
+    no_mask = target == 0
+
     if feature_type == "numeric":
         values = pd.to_numeric(analysis_df[source_var], errors="coerce")
-        mean_try = values[target == 1].mean()
-        mean_not_try = values[target == 0].mean()
+        mean_try = values[try_mask].mean()
+        mean_maybe = values[maybe_mask].mean()
+        mean_not_try = values[no_mask].mean()
         delta = mean_try - mean_not_try
         return {
             "effect_value": delta,
             "direction": "positive" if delta >= 0 else "negative",
-            "effect_label": f"{delta:+.2f} avg score",
+            "effect_label": f"try vs no {delta:+.2f} avg; maybe {mean_maybe:.2f}",
         }
 
     if feature_type == "categorical":
         mask = analysis_df[source_var].fillna("ไม่ระบุ").astype(str).eq(level)
-        rate_in = target[mask].mean()
-        rate_out = target[~mask].mean()
-        lift = (rate_in - rate_out) * 100
+        rate_try_in = try_mask[mask].mean()
+        rate_try_out = try_mask[~mask].mean()
+        rate_maybe_in = maybe_mask[mask].mean()
+        rate_maybe_out = maybe_mask[~mask].mean()
+        lift = (rate_try_in - rate_try_out) * 100
+        maybe_lift = (rate_maybe_in - rate_maybe_out) * 100
         return {
             "effect_value": lift,
             "direction": "positive" if lift >= 0 else "negative",
-            "effect_label": f"{lift:+.1f} pts try rate",
+            "effect_label": f"{lift:+.1f} pts definite try; {maybe_lift:+.1f} pts maybe",
         }
 
     return {
@@ -244,6 +266,7 @@ def build_clean_data():
 
     df["age_group"] = df["age_group_raw"].astype(str).replace("nan", np.nan)
     df["age"] = df["age_group"].map(age_group_mapping)
+    df[LEGACY_BINARY_TARGET_COLUMN] = df["will_try_new_rtd_coffee"].apply(derive_binary_target)
     df[target_column] = df["will_try_new_rtd_coffee"].apply(derive_target)
 
     ensure_dirs()
@@ -257,7 +280,8 @@ def prepare_feature_data(df):
 
     numeric_cols = [
         col for col in analysis_df.columns
-        if pd.api.types.is_numeric_dtype(analysis_df[col]) and col not in ["respondent_id", target_column]
+        if pd.api.types.is_numeric_dtype(analysis_df[col])
+        and col not in ["respondent_id", target_column, LEGACY_BINARY_TARGET_COLUMN]
     ]
     numeric_df = analysis_df[numeric_cols].fillna(analysis_df[numeric_cols].median(numeric_only=True))
     scaled_numeric = pd.DataFrame(
@@ -315,9 +339,9 @@ def make_correlation_table(df):
 
 def make_target_distribution(df):
     valid = df.dropna(subset=[target_column]).copy()
-    counts = valid[target_column].value_counts().sort_index()
-    labels = ["ไม่ลอง (0)", "ลอง (1)"]
-    colors = [negative_driver_color, positive_driver_color]
+    counts = valid[target_column].astype(int).value_counts().reindex([0, 1, 2], fill_value=0)
+    labels = ["ไม่ลอง (0)", "อาจจะลอง (1)", "ลองแน่นอน (2)"]
+    colors = ["#D85A5A", "#E0A458", "#5BB89A"]
     total = len(valid)
     pcts = counts.values / total * 100
 
@@ -362,7 +386,7 @@ def make_target_distribution(df):
     axes[1].grid(axis="x", linestyle="--", alpha=0.25)
 
     fig.suptitle(
-        f"Target: Willingness to Try New RTD Coffee  |  n={total} valid  |  excluded NaN={len(df)-total}",
+        f"Target: Three-choice willingness to try new RTD coffee  |  n={total} valid  |  excluded NaN={len(df)-total}",
         fontsize=13,
         color="#555555",
         y=1.01,
@@ -375,6 +399,7 @@ def make_target_distribution(df):
 def make_tryrate_by_segment(df, seg_cols, title, filename):
     valid = df.dropna(subset=[target_column]).copy()
     valid[target_column] = valid[target_column].astype(int)
+    valid["definite_try"] = valid[target_column].eq(2).astype(int)
 
     n_cols = len(seg_cols)
     fig, axes = plt.subplots(1, n_cols, figsize=(6 * n_cols, 7))
@@ -387,13 +412,13 @@ def make_tryrate_by_segment(df, seg_cols, title, filename):
             continue
 
         grp = (
-            valid.groupby(col, observed=True)[target_column]
+            valid.groupby(col, observed=True)["definite_try"]
             .agg(try_rate="mean", n="count")
             .reset_index()
             .sort_values("try_rate", ascending=True)
         )
         grp["try_pct"] = grp["try_rate"] * 100
-        overall = valid[target_column].mean() * 100
+        overall = valid["definite_try"].mean() * 100
 
         colors = [
             positive_driver_color if v >= overall else negative_driver_color
@@ -412,7 +437,7 @@ def make_tryrate_by_segment(df, seg_cols, title, filename):
 
         ax.axvline(overall, color="#555555", linestyle="--", linewidth=1.2, label=f"Overall {overall:.1f}%")
         ax.set_xlim(0, 110)
-        ax.set_xlabel("Trial intent rate (%)")
+        ax.set_xlabel("Definite trial-intent rate (%)")
         ax.set_title(col.replace("_", " ").title(), fontsize=12, fontweight="bold")
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
@@ -440,8 +465,8 @@ def make_likert_by_target(df):
     fig, axes = plt.subplots(nrows, ncols, figsize=(5 * ncols, 4.5 * nrows))
     axes_flat = axes.flatten() if n > 1 else [axes]
 
-    palette = {0: negative_driver_color, 1: positive_driver_color}
-    group_labels = {0: "ไม่ลอง (0)", 1: "ลอง (1)"}
+    palette = {0: "#D85A5A", 1: "#E0A458", 2: "#5BB89A"}
+    group_labels = {0: "ไม่ลอง (0)", 1: "อาจจะลอง (1)", 2: "ลองแน่นอน (2)"}
 
     for ax, col in zip(axes_flat, top_likert):
         plot_df = valid[[col, target_column]].copy()
@@ -456,7 +481,7 @@ def make_likert_by_target(df):
             width=0.45,
             flierprops={"marker": "o", "markersize": 3, "alpha": 0.4},
         )
-        mean_try = valid.loc[valid[target_column] == 1, col].mean()
+        mean_try = valid.loc[valid[target_column] == 2, col].mean()
         mean_not = valid.loc[valid[target_column] == 0, col].mean()
         delta = mean_try - mean_not
         ax.set_title(
@@ -473,7 +498,7 @@ def make_likert_by_target(df):
         ax.set_visible(False)
 
     fig.suptitle(
-        "Likert Attribute Scores by Trial Intent Group",
+        "Likert Attribute Scores by Three-Choice Trial Intent Group",
         fontsize=15,
         fontweight="bold",
         y=1.01,
@@ -486,19 +511,23 @@ def make_likert_by_target(df):
 def make_imbalance_summary(df):
     valid = df.dropna(subset=[target_column]).copy()
     valid[target_column] = valid[target_column].astype(int)
-    counts = valid[target_column].value_counts().sort_index()
-    n0, n1 = counts.get(0, 0), counts.get(1, 0)
-    total = n0 + n1
-    imbalance_ratio = n0 / n1 if n1 > 0 else float("inf")
-    w0 = total / (2 * n0) if n0 > 0 else 0
-    w1 = total / (2 * n1) if n1 > 0 else 0
-    baseline_acc = n0 / total * 100
+    counts = valid[target_column].value_counts().reindex([0, 1, 2], fill_value=0)
+    total = int(counts.sum())
+    majority = int(counts.max())
+    minority = int(counts[counts > 0].min()) if (counts > 0).any() else 0
+    imbalance_ratio = majority / minority if minority > 0 else float("inf")
+    weights = {
+        cls: (total / (len(counts) * count) if count > 0 else 0)
+        for cls, count in counts.items()
+    }
+    baseline_acc = majority / total * 100 if total else 0
 
     fig, axes = plt.subplots(1, 2, figsize=(13, 6))
-    labels = ["ไม่ลอง (0)", "ลอง (1)"]
-    colors = [negative_driver_color, positive_driver_color]
-    bars = axes[0].bar(labels, [n0, n1], color=colors, alpha=0.88, width=0.45)
-    for bar, n_val, pct in zip(bars, [n0, n1], [n0 / total * 100, n1 / total * 100]):
+    labels = ["ไม่ลอง (0)", "อาจจะลอง (1)", "ลองแน่นอน (2)"]
+    colors = ["#D85A5A", "#E0A458", "#5BB89A"]
+    bars = axes[0].bar(labels, counts.values, color=colors, alpha=0.88, width=0.45)
+    for bar, n_val in zip(bars, counts.values):
+        pct = n_val / total * 100 if total else 0
         axes[0].text(
             bar.get_x() + bar.get_width() / 2,
             bar.get_height() + 2,
@@ -513,15 +542,16 @@ def make_imbalance_summary(df):
 
     info_lines = [
         f"Imbalance ratio:  {imbalance_ratio:.2f} : 1  (majority : minority)",
-        f"Class weight[0]:  {w0:.3f}",
-        f"Class weight[1]:  {w1:.3f}",
-        f"Baseline accuracy (predict all 0):  {baseline_acc:.1f}%",
+        f"Class weight[0]:  {weights[0]:.3f}",
+        f"Class weight[1]:  {weights[1]:.3f}",
+        f"Class weight[2]:  {weights[2]:.3f}",
+        f"Baseline accuracy (predict majority):  {baseline_acc:.1f}%",
         "",
         "Implication:",
         "  - Accuracy is misleading under imbalance.",
-        "  - Use Precision-Recall / F1 for model eval.",
+        "  - Use macro Precision-Recall / F1 for model eval.",
         "  - Apply class_weight='balanced' in models.",
-        "  - Focus on minority class (try=1) profiling.",
+        "  - Focus on definite-trial class (choice=2) profiling.",
     ]
     axes[1].axis("off")
     axes[1].text(
@@ -544,7 +574,7 @@ def make_imbalance_summary(df):
 def make_minority_profile(df):
     valid = df.dropna(subset=[target_column]).copy()
     valid[target_column] = valid[target_column].astype(int)
-    minority = valid[valid[target_column] == 1]
+    minority = valid[valid[target_column] == 2]
     n_minority = len(minority)
 
     seg_cols = ["gender", "age_group", "occupation", "income", "most_freq_coffee", "presenter_effect"]
@@ -566,7 +596,7 @@ def make_minority_profile(df):
             ax.text(row["pct"] + 0.8, i, f"{row['pct']:.1f}%  (n={n_val})", va="center", fontsize=9)
         ax.set_xlim(0, 115)
         ax.set_title(col.replace("_", " ").title(), fontsize=11, fontweight="bold")
-        ax.set_xlabel("% within try=1 group")
+        ax.set_xlabel("% within definite-try group")
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
         ax.grid(axis="x", linestyle="--", alpha=0.2)
@@ -575,7 +605,7 @@ def make_minority_profile(df):
         ax.set_visible(False)
 
     fig.suptitle(
-        f"Who Are the Potential Triers?  |  Minority class (try=1) profile  |  n={n_minority}",
+        f"Who Are the Definite Triers?  |  Minority class (choice=2) profile  |  n={n_minority}",
         fontsize=14, fontweight="bold", y=1.02,
     )
     plt.tight_layout()
@@ -586,7 +616,7 @@ def make_minority_profile(df):
 def make_cohens_d_chart(df):
     valid = df.dropna(subset=[target_column]).copy()
     valid[target_column] = valid[target_column].astype(int)
-    group1 = valid[valid[target_column] == 1]
+    group1 = valid[valid[target_column] == 2]
     group0 = valid[valid[target_column] == 0]
 
     results = []
@@ -622,7 +652,7 @@ def make_cohens_d_chart(df):
     ax.axvline(-0.5, color="#AAAAAA", linewidth=0.8, linestyle="--")
     ax.axvline(0.8, color="#888888", linewidth=0.8, linestyle=":", label="Large effect (d=0.8)")
     ax.axvline(-0.8, color="#888888", linewidth=0.8, linestyle=":")
-    ax.set_xlabel("Cohen's d  (positive = triers rate this attribute higher)")
+    ax.set_xlabel("Cohen's d  (positive = definite triers rate this attribute higher than non-triers)")
     ax.set_title(
         "Imbalance-Robust Effect Size per Likert Attribute\n(Cohen's d, pooled SD)",
         fontsize=13, fontweight="bold",
@@ -639,7 +669,8 @@ def make_cohens_d_chart(df):
 def make_high_value_segments(df, min_n=10, top_n=12):
     valid = df.dropna(subset=[target_column]).copy()
     valid[target_column] = valid[target_column].astype(int)
-    overall_rate = valid[target_column].mean() * 100
+    valid["definite_try"] = valid[target_column].eq(2).astype(int)
+    overall_rate = valid["definite_try"].mean() * 100
 
     seg_cols = [
         "gender", "age_group", "occupation", "income",
@@ -649,7 +680,7 @@ def make_high_value_segments(df, min_n=10, top_n=12):
 
     rows = []
     for col in seg_cols:
-        grp = valid.groupby(col, observed=True)[target_column].agg(try_rate="mean", n="count")
+        grp = valid.groupby(col, observed=True)["definite_try"].agg(try_rate="mean", n="count")
         for segment, row in grp.iterrows():
             if row["n"] >= min_n:
                 rows.append({
@@ -674,9 +705,9 @@ def make_high_value_segments(df, min_n=10, top_n=12):
     ax.axvline(overall_rate, color="#555555", linestyle="--", linewidth=1.2,
         label=f"Overall {overall_rate:.1f}%")
     ax.set_xlim(0, 115)
-    ax.set_xlabel("Trial intent rate (%)")
+    ax.set_xlabel("Definite trial-intent rate (%)")
     ax.set_title(
-        f"Top {top_n} High-Value Audience Segments by Trial Intent\n(min n={min_n} per segment)",
+        f"Top {top_n} High-Value Audience Segments by Definite Trial Intent\n(min n={min_n} per segment)",
         fontsize=13, fontweight="bold",
     )
     ax.spines["top"].set_visible(False)
@@ -685,7 +716,7 @@ def make_high_value_segments(df, min_n=10, top_n=12):
     ax.legend(fontsize=9, frameon=False)
     fig.text(
         0.01, 0.01,
-        "Segments above dashed line are above-average trial intent. Prioritize for RTD coffee launch targeting.",
+        "Segments above dashed line are above-average definite trial intent. Prioritize for RTD coffee launch targeting.",
         ha="left", fontsize=9, color="#666666",
     )
     plt.tight_layout(rect=[0, 0.04, 1, 1])
@@ -698,13 +729,13 @@ def make_images(df):
     make_tryrate_by_segment(
         df,
         ["gender", "age_group", "occupation", "income"],
-        "Try Rate by Demographic Segment",
+        "Definite Try Rate by Demographic Segment",
         "tryrate_by_demographic.png",
     )
     make_tryrate_by_segment(
         df,
         ["presenter_effect", "dur_online", "most_freq_coffee", "most_freq_rtd_brand"],
-        "Try Rate by Behavior / Media Segment",
+        "Definite Try Rate by Behavior / Media Segment",
         "tryrate_by_behavior.png",
     )
     make_likert_by_target(df)
@@ -789,7 +820,8 @@ def make_images(df):
         1.02,
         (
             f"ANOVA feature screening | n = {len(analysis_df)} valid respondents | "
-            f"base trial intent = {analysis_df[target_column].mean():.1%}"
+            f"definite try = {(analysis_df[target_column].eq(2)).mean():.1%} | "
+            f"maybe = {(analysis_df[target_column].eq(1)).mean():.1%}"
         ),
         transform=ax.transAxes,
         ha="left",
@@ -797,7 +829,7 @@ def make_images(df):
         fontsize=11,
         color="#555555",
     )
-    ax.set_xlabel("ANOVA F-score (higher = stronger separation between triers and non-triers)")
+    ax.set_xlabel("ANOVA F-score (higher = stronger separation across the three target choices)")
     ax.set_ylabel("")
     ax.grid(axis="x", linestyle="--", alpha=0.25)
     ax.grid(axis="y", visible=False)
@@ -817,7 +849,7 @@ def make_images(df):
         0.01,
         (
             "Note: F-score highlights statistical association, not causality. "
-            "Numeric effects show mean score gap; categorical effects show trial-rate gap."
+            "Numeric effects compare definite triers vs non-triers; categorical effects show definite-try and maybe-rate gaps."
         ),
         ha="left",
         fontsize=9,

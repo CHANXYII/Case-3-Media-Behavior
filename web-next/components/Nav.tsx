@@ -4,14 +4,14 @@ import { motion } from "framer-motion";
 import clsx from "clsx";
 
 const SECTIONS = [
-  { id: "hero", label: "00 — โจทย์" },
-  { id: "raw", label: "01 — ข้อมูลดิบ" },
-  { id: "clean", label: "02 — เคลียร์ข้อมูล" },
-  { id: "select", label: "03 — ฟีเจอร์" },
-  { id: "personas", label: "04 — กลุ่มลูกค้า" },
-  { id: "drivers", label: "05 — ตัวขับ" },
-  { id: "predict", label: "06 — ลองทำนาย" },
-  { id: "plan", label: "07 — แผนยิง" }
+  { id: "hero", label: "โจทย์" },
+  { id: "raw", label: "ข้อมูลดิบ" },
+  { id: "clean", label: "เคลียร์ข้อมูล" },
+  { id: "select", label: "ฟีเจอร์" },
+  { id: "personas", label: "กลุ่มลูกค้า" },
+  { id: "drivers", label: "ตัวขับ" },
+  { id: "predict", label: "ลองทำนาย" },
+  { id: "plan", label: "แผนยิง" }
 ];
 
 export default function Nav() {
@@ -42,44 +42,50 @@ export default function Nav() {
 
   return (
     <motion.nav
-      initial={{ y: -30, opacity: 0 }}
+      initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.35 }}
       className={clsx(
-        "fixed top-0 inset-x-0 z-50 transition-all duration-300",
-        scrolled ? "backdrop-blur-xl bg-bg-0/70 border-b border-white/5" : "bg-transparent"
+        "fixed top-0 inset-x-0 z-50 transition-all duration-200",
+        scrolled
+          ? "bg-white/80 backdrop-blur-md border-b border-ink-3/40 shadow-soft"
+          : "bg-transparent"
       )}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-md bg-gradient-to-br from-accent-gold to-accent-copper flex items-center justify-center font-display font-bold text-bg-0">
+      <div className="max-w-6xl mx-auto flex items-center justify-between px-6 h-14">
+        <a href="#hero" className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-md bg-accent-gold flex items-center justify-center text-white font-semibold text-sm">
             R
           </div>
-          <div className="leading-tight">
-            <div className="font-display text-base">RTD Coffee</div>
-            <div className="text-[10px] text-ink-2 font-mono tracking-widest uppercase">
-              เข้าใจลูกค้า · เจาะลึก
-            </div>
-          </div>
-        </div>
-        <div className="hidden lg:flex items-center gap-1 text-xs font-mono">
+          <span className="font-semibold text-sm text-ink-0">RTD Coffee Research</span>
+        </a>
+
+        <div className="hidden lg:flex items-center gap-0.5 text-[13px]">
           {SECTIONS.map((s) => (
             <a
               key={s.id}
               href={`#${s.id}`}
               className={clsx(
-                "px-3 py-1.5 rounded-full transition-colors",
+                "relative px-3 py-1.5 rounded-md transition-colors",
                 active === s.id
-                  ? "text-accent-gold bg-accent-gold/10"
-                  : "text-ink-2 hover:text-ink-1"
+                  ? "text-accent-gold font-medium"
+                  : "text-ink-2 hover:text-ink-0"
               )}
             >
               {s.label}
+              {active === s.id && (
+                <motion.span
+                  layoutId="nav-indicator"
+                  className="absolute bottom-0 left-3 right-3 h-[2px] bg-accent-gold rounded-full"
+                  transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                />
+              )}
             </a>
           ))}
         </div>
-        <a href="#predict" className="btn-primary rounded-full px-4 py-2 text-sm">
-          ลองโมเดลเลย →
+
+        <a href="#predict" className="btn-primary px-4 py-1.5 text-sm">
+          ลองโมเดล
         </a>
       </div>
     </motion.nav>

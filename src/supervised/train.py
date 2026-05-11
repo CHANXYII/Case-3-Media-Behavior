@@ -1,9 +1,9 @@
-"""Supervised learning pipeline for the RTD coffee trial-intent classifier.
+"""Supervised learning pipeline for the RTD coffee choice classifier.
 
 Problem
 -------
-Binary classification: predict ``target_try_new_rtd_coffee`` (1 = respondent
-will try a new RTD coffee product, 0 = will not) using ONLY the features that
+Multiclass classification: predict ``target_try_new_rtd_coffee_choice``
+(0 = will not try, 1 = might try, 2 = will definitely try) using ONLY the features that
 the feature-selection step (``src/feature_engineering/feature_selection_visualization.py``)
 flagged as statistically significant (ANOVA p ≤ 0.05, deduplicated by source
 variable). This keeps the model parsimonious and makes the coefficients
@@ -16,13 +16,12 @@ Pipeline
    ``outputs/feature_selection_summary.csv`` and use those source variables
    only. If the file is missing, fall back to a curated default list.
 3. Stratified train/test split (80/20).
-4. Train three models with ``class_weight='balanced'`` to handle the ~79/21
-   imbalance:
+4. Train three models with balanced classes where supported:
      * Logistic Regression  → exposes interpretable coefficients
      * Random Forest        → non-linear baseline + impurity importance
      * Gradient Boosting    → strong non-linear comparator
-5. Evaluate via 5-fold stratified CV (Accuracy / Precision / Recall / F1 /
-   ROC-AUC) AND on the held-out test set.
+5. Evaluate via 5-fold stratified CV (Accuracy / macro Precision / macro Recall /
+   macro F1 / OVR ROC-AUC) AND on the held-out test set.
 6. Persist artefacts:
      * ``models/supervised_logreg.joblib`` (full pipeline)
      * ``models/supervised_best.joblib``   (highest-CV-F1 model)
@@ -78,6 +77,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.config import (
     CLEAN_CSV,
+    LEGACY_BINARY_TARGET_COLUMN,
     MODELS_DIR,
     OUTPUTS_DIR,
     TARGET_COLUMN,
@@ -89,6 +89,16 @@ RANDOM_STATE = 42
 TEST_SIZE = 0.2
 CV_SPLITS = 5
 TOP_N_FEATURES = 5  # data-driven rule: top N source variables by ANOVA F-score
+CLASS_LABELS = {
+    0: "ไม่ลอง",
+    1: "อาจจะลอง",
+    2: "ลองแน่นอน",
+}
+TARGET_OPTIONS = [
+    {"value": 0, "key": "no", "label": CLASS_LABELS[0], "short_label": "ไม่ลอง", "color": "#D85A5A"},
+    {"value": 1, "key": "maybe", "label": CLASS_LABELS[1], "short_label": "อาจจะ", "color": "#E0A458"},
+    {"value": 2, "key": "try", "label": CLASS_LABELS[2], "short_label": "ลอง", "color": "#5BB89A"},
+]
 
 FEATURE_SUMMARY_CSV = OUTPUTS_DIR / "feature_selection_summary.csv"
 
@@ -198,10 +208,10 @@ def cross_validate_model(model: Pipeline, X: pd.DataFrame, y: pd.Series) -> dict
     cv = StratifiedKFold(n_splits=CV_SPLITS, shuffle=True, random_state=RANDOM_STATE)
     scoring = {
         "accuracy": "accuracy",
-        "precision": "precision",
-        "recall": "recall",
-        "f1": "f1",
-        "roc_auc": "roc_auc",
+        "precision_macro": "precision_macro",
+        "recall_macro": "recall_macro",
+        "f1_macro": "f1_macro",
+        "roc_auc_ovr_macro": "roc_auc_ovr",
     }
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", ConvergenceWarning)
@@ -217,24 +227,32 @@ def cross_validate_model(model: Pipeline, X: pd.DataFrame, y: pd.Series) -> dict
 
 def evaluate_holdout(model: Pipeline, X_test: pd.DataFrame, y_test: pd.Series) -> dict:
     y_pred = model.predict(X_test)
-    proba = model.predict_proba(X_test)[:, 1] if hasattr(model, "predict_proba") else None
+    proba = model.predict_proba(X_test) if hasattr(model, "predict_proba") else None
     metrics = {
         "test_accuracy": float(accuracy_score(y_test, y_pred)),
-        "test_precision": float(precision_score(y_test, y_pred, zero_division=0)),
-        "test_recall": float(recall_score(y_test, y_pred, zero_division=0)),
-        "test_f1": float(f1_score(y_test, y_pred, zero_division=0)),
+        "test_precision_macro": float(precision_score(y_test, y_pred, average="macro", zero_division=0)),
+        "test_recall_macro": float(recall_score(y_test, y_pred, average="macro", zero_division=0)),
+        "test_f1_macro": float(f1_score(y_test, y_pred, average="macro", zero_division=0)),
     }
     if proba is not None:
-        metrics["test_roc_auc"] = float(roc_auc_score(y_test, proba))
-    metrics["confusion_matrix"] = confusion_matrix(y_test, y_pred).tolist()
+        metrics["test_roc_auc_ovr_macro"] = float(
+            roc_auc_score(y_test, proba, multi_class="ovr", average="macro")
+        )
+    labels = sorted(CLASS_LABELS)
+    metrics["confusion_matrix"] = confusion_matrix(y_test, y_pred, labels=labels).tolist()
     metrics["classification_report"] = classification_report(
-        y_test, y_pred, zero_division=0, output_dict=True
+        y_test,
+        y_pred,
+        labels=labels,
+        target_names=[CLASS_LABELS[i] for i in labels],
+        zero_division=0,
+        output_dict=True,
     )
     return metrics
 
 
 def plot_model_comparison(results: dict[str, dict], path: Path) -> None:
-    metrics = ["accuracy", "precision", "recall", "f1", "roc_auc"]
+    metrics = ["accuracy", "precision_macro", "recall_macro", "f1_macro", "roc_auc_ovr_macro"]
     rows = []
     for model_name, info in results.items():
         for metric in metrics:
@@ -248,6 +266,7 @@ def plot_model_comparison(results: dict[str, dict], path: Path) -> None:
 
     fig, ax = plt.subplots(figsize=(11, 5.5))
     sns.barplot(data=cmp_df, x="metric", y="score", hue="model", ax=ax, palette="Set2")
+    ax.set_xticklabels(["Accuracy", "Precision\nmacro", "Recall\nmacro", "F1\nmacro", "ROC-AUC\nOVR"])
     ax.set_ylim(0, 1)
     ax.set_title("Model Comparison — 5-fold Stratified CV (mean)")
     ax.set_ylabel("Score")
@@ -267,12 +286,13 @@ def plot_confusion_matrices(results: dict[str, dict], path: Path) -> None:
         axes = [axes]
     for ax, (name, info) in zip(axes, results.items()):
         cm = np.array(info["holdout"]["confusion_matrix"])
+        labels = [CLASS_LABELS[i] for i in sorted(CLASS_LABELS)]
         sns.heatmap(
             cm, annot=True, fmt="d", cmap="Blues", cbar=False, ax=ax,
-            xticklabels=["No (0)", "Yes (1)"],
-            yticklabels=["No (0)", "Yes (1)"],
+            xticklabels=labels,
+            yticklabels=labels,
         )
-        ax.set_title(f"{name}\nF1 = {info['holdout']['test_f1']:.3f}")
+        ax.set_title(f"{name}\nMacro F1 = {info['holdout']['test_f1_macro']:.3f}")
         ax.set_xlabel("Predicted")
         ax.set_ylabel("Actual")
     plt.suptitle("Hold-out Confusion Matrices", fontsize=13)
@@ -287,13 +307,18 @@ def plot_roc_curves(results: dict[str, dict], X_test: pd.DataFrame, y_test: pd.S
         model = info["model"]
         if not hasattr(model, "predict_proba"):
             continue
-        proba = model.predict_proba(X_test)[:, 1]
-        fpr, tpr, _ = roc_curve(y_test, proba)
-        ax.plot(fpr, tpr, lw=2, label=f"{name} (AUC = {auc(fpr, tpr):.3f})")
+        proba = model.predict_proba(X_test)
+        classes = list(model.named_steps["clf"].classes_)
+        if 2 not in classes:
+            continue
+        class_index = classes.index(2)
+        y_one_vs_rest = (y_test == 2).astype(int)
+        fpr, tpr, _ = roc_curve(y_one_vs_rest, proba[:, class_index])
+        ax.plot(fpr, tpr, lw=2, label=f"{name} · definite try (AUC = {auc(fpr, tpr):.3f})")
     ax.plot([0, 1], [0, 1], color="gray", linestyle="--", lw=1)
     ax.set_xlabel("False Positive Rate")
     ax.set_ylabel("True Positive Rate")
-    ax.set_title("ROC Curves — Hold-out Test Set")
+    ax.set_title("ROC Curves — Definite Try vs Rest (Hold-out Test Set)")
     ax.legend(loc="lower right")
     plt.tight_layout()
     plt.savefig(path, dpi=300, bbox_inches="tight")
@@ -302,25 +327,31 @@ def plot_roc_curves(results: dict[str, dict], X_test: pd.DataFrame, y_test: pd.S
 
 def export_logreg_coefficients(model: Pipeline, feature_names: list[str]) -> pd.DataFrame:
     clf: LogisticRegression = model.named_steps["clf"]
-    coefs = clf.coef_.ravel()
-    coef_df = pd.DataFrame({
-        "feature": feature_names,
-        "coefficient": coefs,
-        "odds_ratio": np.exp(coefs),
-        "abs_coefficient": np.abs(coefs),
-    }).sort_values("abs_coefficient", ascending=False).reset_index(drop=True)
+    rows = []
+    for class_value, class_coefs in zip(clf.classes_, clf.coef_):
+        class_value = int(class_value)
+        for feature, coef in zip(feature_names, class_coefs):
+            rows.append({
+                "class": class_value,
+                "class_label": CLASS_LABELS.get(class_value, str(class_value)),
+                "feature": feature,
+                "coefficient": coef,
+                "odds_ratio": np.exp(coef),
+                "abs_coefficient": abs(coef),
+            })
+    coef_df = pd.DataFrame(rows).sort_values("abs_coefficient", ascending=False).reset_index(drop=True)
 
     csv_path = OUTPUTS_DIR / "supervised_coefficients.csv"
     coef_df.drop(columns="abs_coefficient").to_csv(csv_path, index=False, encoding="utf-8-sig")
 
-    plot_df = coef_df.iloc[::-1]
+    plot_df = coef_df[coef_df["class"] == 2].head(15).iloc[::-1]
     fig, ax = plt.subplots(figsize=(10, max(5, 0.4 * len(plot_df))))
     colors = ["#1D9E75" if c > 0 else "#D85A30" for c in plot_df["coefficient"]]
     ax.barh(plot_df["feature"], plot_df["coefficient"], color=colors, alpha=0.85)
     ax.axvline(0, color="black", linewidth=0.6)
     ax.set_title(
-        "Logistic Regression Coefficients\n"
-        "(green = pushes toward 'will try', orange = pushes against)"
+        "Logistic Regression Coefficients — Definite Try Class\n"
+        "(green = pushes toward 'ลองแน่นอน', orange = pushes against)"
     )
     ax.set_xlabel("Coefficient (log-odds, on standardised numeric / one-hot categorical)")
     plt.tight_layout()
@@ -423,7 +454,8 @@ def main() -> None:
         "LogisticRegression": LogisticRegression(
             max_iter=2000,
             class_weight="balanced",
-            solver="liblinear",
+            solver="lbfgs",
+            multi_class="auto",
             random_state=RANDOM_STATE,
         ),
         "RandomForest": RandomForestClassifier(
@@ -447,7 +479,7 @@ def main() -> None:
         print(f"\n--- {name} ---")
         pipe = Pipeline([("preprocess", preprocessor), ("clf", estimator)])
         cv_metrics = cross_validate_model(pipe, X_train, y_train)
-        for metric in ("accuracy", "precision", "recall", "f1", "roc_auc"):
+        for metric in ("accuracy", "precision_macro", "recall_macro", "f1_macro", "roc_auc_ovr_macro"):
             mean = cv_metrics[f"cv_{metric}_mean"]
             std = cv_metrics[f"cv_{metric}_std"]
             print(f"  CV {metric:>9}: {mean:.4f} (+/- {std:.4f})")
@@ -458,10 +490,10 @@ def main() -> None:
                 print(f"  {k:>17}: {v:.4f}")
         results[name] = {"model": pipe, "cv": cv_metrics, "holdout": holdout}
 
-    # Choose the best model by CV F1 (handles class imbalance better than accuracy).
-    best_name = max(results, key=lambda n: results[n]["cv"]["cv_f1_mean"])
-    print(f"\nBest model by CV F1: {best_name} "
-          f"(F1 = {results[best_name]['cv']['cv_f1_mean']:.4f})")
+    # Choose the best model by macro F1 (handles class imbalance better than accuracy).
+    best_name = max(results, key=lambda n: results[n]["cv"]["cv_f1_macro_mean"])
+    print(f"\nBest model by CV macro F1: {best_name} "
+          f"(F1 = {results[best_name]['cv']['cv_f1_macro_mean']:.4f})")
 
     plot_model_comparison(results, OUTPUTS_DIR / "supervised_model_comparison.png")
     plot_confusion_matrices(results, OUTPUTS_DIR / "supervised_confusion_matrix.png")
@@ -482,6 +514,8 @@ def main() -> None:
 
     schema = build_feature_schema(labelled, numeric_cols, categorical_cols)
     schema["target"] = TARGET_COLUMN
+    schema["legacy_binary_target"] = LEGACY_BINARY_TARGET_COLUMN
+    schema["target_options"] = TARGET_OPTIONS
     schema["best_model"] = best_name
     schema["model_files"] = {
         "logreg": "supervised_logreg.joblib",
@@ -492,6 +526,8 @@ def main() -> None:
 
     metrics_payload = {
         "target": TARGET_COLUMN,
+        "legacy_binary_target": LEGACY_BINARY_TARGET_COLUMN,
+        "target_options": TARGET_OPTIONS,
         "n_labelled": int(len(labelled)),
         "class_distribution": labelled[TARGET_COLUMN].value_counts().sort_index().to_dict(),
         "feature_counts": {"numeric": len(numeric_cols), "categorical": len(categorical_cols)},
@@ -503,7 +539,7 @@ def main() -> None:
             name: {"cv": info["cv"], "holdout": info["holdout"]}
             for name, info in results.items()
         },
-        "best_model_by_cv_f1": best_name,
+        "best_model_by_cv_f1_macro": best_name,
     }
     metrics_path = OUTPUTS_DIR / "supervised_metrics.json"
     metrics_path.write_text(json.dumps(metrics_payload, indent=2, ensure_ascii=False), encoding="utf-8")

@@ -11,7 +11,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body className="font-sans antialiased">
-        <div className="grain-bg fixed inset-0 pointer-events-none opacity-60" />
         {children}
       </body>
     </html>

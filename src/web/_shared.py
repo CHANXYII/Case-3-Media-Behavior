@@ -75,9 +75,20 @@ def dataset_overview() -> dict:
     df = load_clean_df()
     clusters = load_clusters_df()
     if df.empty:
-        return {"n_total": 0, "n_labelled": 0, "trial_rate": 0.0, "n_clusters": 0}
+        return {
+            "n_total": 0,
+            "n_labelled": 0,
+            "no_rate": 0.0,
+            "maybe_rate": 0.0,
+            "try_rate": 0.0,
+            "interest_rate": 0.0,
+            "n_clusters": 0,
+        }
     labelled = df[TARGET_COLUMN].dropna()
-    rate = float(labelled.mean()) if len(labelled) else 0.0
+    labelled_int = labelled.astype(int) if len(labelled) else labelled
+    no_rate = float((labelled_int == 0).mean()) if len(labelled_int) else 0.0
+    maybe_rate = float((labelled_int == 1).mean()) if len(labelled_int) else 0.0
+    try_rate = float((labelled_int == 2).mean()) if len(labelled_int) else 0.0
     n_clusters = (
         int(clusters["customer_persona_cluster"].nunique())
         if "customer_persona_cluster" in clusters.columns
@@ -86,7 +97,10 @@ def dataset_overview() -> dict:
     return {
         "n_total": int(len(df)),
         "n_labelled": int(len(labelled)),
-        "trial_rate": rate,
+        "no_rate": no_rate,
+        "maybe_rate": maybe_rate,
+        "try_rate": try_rate,
+        "interest_rate": maybe_rate + try_rate,
         "n_clusters": n_clusters,
     }
 

@@ -5,6 +5,7 @@ artefacts stay in sync:
 
     raw csv ─► clean + feature selection ─► unsupervised personas
                                        ─► supervised model + coefficients
+                                       ─► per-cluster supervised drivers
                                        ─► web dashboard artefacts
 
 Usage::
@@ -29,6 +30,8 @@ STAGES: list[tuple[str, str]] = [
      "src.unsupervised.unsupervised_learning"),
     ("Supervised training",
      "src.supervised.train"),
+    ("Per-cluster supervised drivers",
+     "src.supervised.per_cluster"),
 ]
 
 

@@ -1,5 +1,29 @@
 {
-  "target": "target_try_new_rtd_coffee",
+  "target": "target_try_new_rtd_coffee_choice",
+  "legacy_binary_target": "target_try_new_rtd_coffee",
+  "target_options": [
+    {
+      "value": 0,
+      "key": "no",
+      "label": "ไม่ลอง",
+      "short_label": "ไม่ลอง",
+      "color": "#D85A5A"
+    },
+    {
+      "value": 1,
+      "key": "maybe",
+      "label": "อาจจะลอง",
+      "short_label": "อาจจะ",
+      "color": "#E0A458"
+    },
+    {
+      "value": 2,
+      "key": "try",
+      "label": "ลองแน่นอน",
+      "short_label": "ลอง",
+      "color": "#5BB89A"
+    }
+  ],
   "features": [
     {
       "name": "coffee_value",
@@ -72,9 +96,24 @@
       "cluster_id": null,
       "size": 181,
       "labelled_size": 118,
-      "try_rate": 0.788135593220339,
-      "non_try_count": 25,
-      "try_count": 93,
+      "choice_counts": {
+        "0": 25,
+        "1": 76,
+        "2": 17
+      },
+      "choice_rates": {
+        "0": 0.211864406779661,
+        "1": 0.6440677966101694,
+        "2": 0.1440677966101695
+      },
+      "no_count": 25,
+      "maybe_count": 76,
+      "try_count": 17,
+      "no_rate": 0.211864406779661,
+      "maybe_rate": 0.6440677966101694,
+      "try_rate": 0.1440677966101695,
+      "interest_count": 93,
+      "interest_rate": 0.7881355932203389,
       "feature_means": [
         {
           "name": "coffee_value",
@@ -148,8 +187,23 @@
         }
       ],
       "model": {
-        "intercept": 0.3421721352631583,
-        "train_accuracy": 0.7457627118644068,
+        "type": "multinomial_logistic_regression",
+        "classes": [
+          0,
+          1,
+          2
+        ],
+        "class_labels": {
+          "0": "ไม่ลอง",
+          "1": "อาจจะลอง",
+          "2": "ลองแน่นอน"
+        },
+        "intercepts": {
+          "0": -0.12393321367231548,
+          "1": 0.24426268094480305,
+          "2": -0.12032946727248701
+        },
+        "train_accuracy": 0.5254237288135594,
         "scaler_mean": [
           3.4661016949152543,
           4.0508474576271185,
@@ -174,78 +228,297 @@
           1.2049405143848286,
           1.235778042953097
         ],
+        "coefficients_by_class": {
+          "0": [
+            {
+              "feature": "coffee_aroma",
+              "label": "Aroma",
+              "coefficient": -0.9793922926777494,
+              "odds_ratio": 0.3755392474710654,
+              "abs_coefficient": 0.9793922926777494
+            },
+            {
+              "feature": "coffee_premium",
+              "label": "Premium feel",
+              "coefficient": 0.609875688312861,
+              "odds_ratio": 1.8402026258692592,
+              "abs_coefficient": 0.609875688312861
+            },
+            {
+              "feature": "coffee_packaging",
+              "label": "Packaging",
+              "coefficient": -0.5404804110221584,
+              "odds_ratio": 0.5824683609272568,
+              "abs_coefficient": 0.5404804110221584
+            },
+            {
+              "feature": "coffee_value",
+              "label": "Perceived value",
+              "coefficient": -0.42070878301303294,
+              "odds_ratio": 0.6565812811928278,
+              "abs_coefficient": 0.42070878301303294
+            },
+            {
+              "feature": "coffee_intensity",
+              "label": "Intensity",
+              "coefficient": 0.39132403375888286,
+              "odds_ratio": 1.4789376615084875,
+              "abs_coefficient": 0.39132403375888286
+            },
+            {
+              "feature": "coffee_fresh_taste",
+              "label": "Fresh-brew taste",
+              "coefficient": 0.22164636304812396,
+              "odds_ratio": 1.248129914951416,
+              "abs_coefficient": 0.22164636304812396
+            },
+            {
+              "feature": "coffee_nutrition",
+              "label": "Nutrition",
+              "coefficient": -0.20978222113047476,
+              "odds_ratio": 0.8107607933143722,
+              "abs_coefficient": 0.20978222113047476
+            },
+            {
+              "feature": "coffee_brand_trust",
+              "label": "Brand trust",
+              "coefficient": 0.12300485519699174,
+              "odds_ratio": 1.1308899116274571,
+              "abs_coefficient": 0.12300485519699174
+            },
+            {
+              "feature": "coffee_convenience",
+              "label": "Convenience",
+              "coefficient": -0.10256342885434827,
+              "odds_ratio": 0.9025209020705236,
+              "abs_coefficient": 0.10256342885434827
+            },
+            {
+              "feature": "coffee_smooth",
+              "label": "Smoothness",
+              "coefficient": 0.10079444234621575,
+              "odds_ratio": 1.1060492615031834,
+              "abs_coefficient": 0.10079444234621575
+            }
+          ],
+          "1": [
+            {
+              "feature": "coffee_intensity",
+              "label": "Intensity",
+              "coefficient": -0.5469593465466727,
+              "odds_ratio": 0.578706784635048,
+              "abs_coefficient": 0.5469593465466727
+            },
+            {
+              "feature": "coffee_fresh_taste",
+              "label": "Fresh-brew taste",
+              "coefficient": 0.49584765086058485,
+              "odds_ratio": 1.6418893983265477,
+              "abs_coefficient": 0.49584765086058485
+            },
+            {
+              "feature": "coffee_convenience",
+              "label": "Convenience",
+              "coefficient": 0.23945351440241505,
+              "odds_ratio": 1.2705546207622975,
+              "abs_coefficient": 0.23945351440241505
+            },
+            {
+              "feature": "coffee_value",
+              "label": "Perceived value",
+              "coefficient": 0.13812556797744427,
+              "odds_ratio": 1.148119708292808,
+              "abs_coefficient": 0.13812556797744427
+            },
+            {
+              "feature": "coffee_brand_trust",
+              "label": "Brand trust",
+              "coefficient": -0.11289260140644083,
+              "odds_ratio": 0.8932465883919372,
+              "abs_coefficient": 0.11289260140644083
+            },
+            {
+              "feature": "coffee_nutrition",
+              "label": "Nutrition",
+              "coefficient": -0.10033108846106323,
+              "odds_ratio": 0.9045378863961807,
+              "abs_coefficient": 0.10033108846106323
+            },
+            {
+              "feature": "coffee_premium",
+              "label": "Premium feel",
+              "coefficient": 0.07718240594229893,
+              "odds_ratio": 1.0802391004539007,
+              "abs_coefficient": 0.07718240594229893
+            },
+            {
+              "feature": "coffee_smooth",
+              "label": "Smoothness",
+              "coefficient": -0.05578639402566416,
+              "odds_ratio": 0.9457411302716261,
+              "abs_coefficient": 0.05578639402566416
+            },
+            {
+              "feature": "coffee_packaging",
+              "label": "Packaging",
+              "coefficient": -0.03558967710196519,
+              "odds_ratio": 0.9650361887007881,
+              "abs_coefficient": 0.03558967710196519
+            },
+            {
+              "feature": "coffee_aroma",
+              "label": "Aroma",
+              "coefficient": -0.007240781158163104,
+              "odds_ratio": 0.9927853701410483,
+              "abs_coefficient": 0.007240781158163104
+            }
+          ],
+          "2": [
+            {
+              "feature": "coffee_aroma",
+              "label": "Aroma",
+              "coefficient": 0.9866330738359125,
+              "odds_ratio": 2.6821885216601933,
+              "abs_coefficient": 0.9866330738359125
+            },
+            {
+              "feature": "coffee_fresh_taste",
+              "label": "Fresh-brew taste",
+              "coefficient": -0.7174940139087103,
+              "odds_ratio": 0.4879735800147022,
+              "abs_coefficient": 0.7174940139087103
+            },
+            {
+              "feature": "coffee_premium",
+              "label": "Premium feel",
+              "coefficient": -0.6870580942551596,
+              "odds_ratio": 0.5030538312378143,
+              "abs_coefficient": 0.6870580942551596
+            },
+            {
+              "feature": "coffee_packaging",
+              "label": "Packaging",
+              "coefficient": 0.5760700881241231,
+              "odds_ratio": 1.7790332310348838,
+              "abs_coefficient": 0.5760700881241231
+            },
+            {
+              "feature": "coffee_nutrition",
+              "label": "Nutrition",
+              "coefficient": 0.3101133095915375,
+              "odds_ratio": 1.3635796120278334,
+              "abs_coefficient": 0.3101133095915375
+            },
+            {
+              "feature": "coffee_value",
+              "label": "Perceived value",
+              "coefficient": 0.28258321503558764,
+              "odds_ratio": 1.32655215958903,
+              "abs_coefficient": 0.28258321503558764
+            },
+            {
+              "feature": "coffee_intensity",
+              "label": "Intensity",
+              "coefficient": 0.155635312787789,
+              "odds_ratio": 1.168400024835908,
+              "abs_coefficient": 0.155635312787789
+            },
+            {
+              "feature": "coffee_convenience",
+              "label": "Convenience",
+              "coefficient": -0.13689008554806809,
+              "odds_ratio": 0.8720660735290262,
+              "abs_coefficient": 0.13689008554806809
+            },
+            {
+              "feature": "coffee_smooth",
+              "label": "Smoothness",
+              "coefficient": -0.045008048320552184,
+              "odds_ratio": 0.9559897876898815,
+              "abs_coefficient": 0.045008048320552184
+            },
+            {
+              "feature": "coffee_brand_trust",
+              "label": "Brand trust",
+              "coefficient": -0.010112253790551425,
+              "odds_ratio": 0.9899387031400276,
+              "abs_coefficient": 0.010112253790551425
+            }
+          ]
+        },
         "coefficients": [
           {
             "feature": "coffee_aroma",
             "label": "Aroma",
-            "coefficient": 1.0835561348845784,
-            "odds_ratio": 2.9551698701807214,
-            "abs_coefficient": 1.0835561348845784
-          },
-          {
-            "feature": "coffee_intensity",
-            "label": "Intensity",
-            "coefficient": -0.7358049665369757,
-            "odds_ratio": 0.4791196284372919,
-            "abs_coefficient": 0.7358049665369757
-          },
-          {
-            "feature": "coffee_premium",
-            "label": "Premium feel",
-            "coefficient": -0.6994022090206162,
-            "odds_ratio": 0.4968822467525795,
-            "abs_coefficient": 0.6994022090206162
-          },
-          {
-            "feature": "coffee_packaging",
-            "label": "Packaging",
-            "coefficient": 0.6438791673841032,
-            "odds_ratio": 1.903851933609987,
-            "abs_coefficient": 0.6438791673841032
-          },
-          {
-            "feature": "coffee_value",
-            "label": "Perceived value",
-            "coefficient": 0.5489909058454182,
-            "odds_ratio": 1.7315048845425531,
-            "abs_coefficient": 0.5489909058454182
-          },
-          {
-            "feature": "coffee_convenience",
-            "label": "Convenience",
-            "coefficient": 0.34638974328304206,
-            "odds_ratio": 1.4139535873551796,
-            "abs_coefficient": 0.34638974328304206
-          },
-          {
-            "feature": "coffee_brand_trust",
-            "label": "Brand trust",
-            "coefficient": -0.20977526055953655,
-            "odds_ratio": 0.8107664366920285,
-            "abs_coefficient": 0.20977526055953655
-          },
-          {
-            "feature": "coffee_smooth",
-            "label": "Smoothness",
-            "coefficient": -0.18437690445940025,
-            "odds_ratio": 0.8316223025959919,
-            "abs_coefficient": 0.18437690445940025
+            "coefficient": 0.9866330738359125,
+            "odds_ratio": 2.6821885216601933,
+            "abs_coefficient": 0.9866330738359125
           },
           {
             "feature": "coffee_fresh_taste",
             "label": "Fresh-brew taste",
-            "coefficient": 0.05555423066740541,
-            "odds_ratio": 1.057126344185142,
-            "abs_coefficient": 0.05555423066740541
+            "coefficient": -0.7174940139087103,
+            "odds_ratio": 0.4879735800147022,
+            "abs_coefficient": 0.7174940139087103
+          },
+          {
+            "feature": "coffee_premium",
+            "label": "Premium feel",
+            "coefficient": -0.6870580942551596,
+            "odds_ratio": 0.5030538312378143,
+            "abs_coefficient": 0.6870580942551596
+          },
+          {
+            "feature": "coffee_packaging",
+            "label": "Packaging",
+            "coefficient": 0.5760700881241231,
+            "odds_ratio": 1.7790332310348838,
+            "abs_coefficient": 0.5760700881241231
           },
           {
             "feature": "coffee_nutrition",
             "label": "Nutrition",
-            "coefficient": 0.039251629425953206,
-            "odds_ratio": 1.0400321534206083,
-            "abs_coefficient": 0.039251629425953206
+            "coefficient": 0.3101133095915375,
+            "odds_ratio": 1.3635796120278334,
+            "abs_coefficient": 0.3101133095915375
+          },
+          {
+            "feature": "coffee_value",
+            "label": "Perceived value",
+            "coefficient": 0.28258321503558764,
+            "odds_ratio": 1.32655215958903,
+            "abs_coefficient": 0.28258321503558764
+          },
+          {
+            "feature": "coffee_intensity",
+            "label": "Intensity",
+            "coefficient": 0.155635312787789,
+            "odds_ratio": 1.168400024835908,
+            "abs_coefficient": 0.155635312787789
+          },
+          {
+            "feature": "coffee_convenience",
+            "label": "Convenience",
+            "coefficient": -0.13689008554806809,
+            "odds_ratio": 0.8720660735290262,
+            "abs_coefficient": 0.13689008554806809
+          },
+          {
+            "feature": "coffee_smooth",
+            "label": "Smoothness",
+            "coefficient": -0.045008048320552184,
+            "odds_ratio": 0.9559897876898815,
+            "abs_coefficient": 0.045008048320552184
+          },
+          {
+            "feature": "coffee_brand_trust",
+            "label": "Brand trust",
+            "coefficient": -0.010112253790551425,
+            "odds_ratio": 0.9899387031400276,
+            "abs_coefficient": 0.010112253790551425
           }
         ],
+        "intercept": -0.12032946727248701,
         "fitted": true
       }
     },
@@ -254,9 +527,24 @@
       "cluster_id": 0,
       "size": 126,
       "labelled_size": 72,
-      "try_rate": 0.8333333333333334,
-      "non_try_count": 12,
-      "try_count": 60,
+      "choice_counts": {
+        "0": 12,
+        "1": 49,
+        "2": 11
+      },
+      "choice_rates": {
+        "0": 0.16666666666666666,
+        "1": 0.6805555555555556,
+        "2": 0.1527777777777778
+      },
+      "no_count": 12,
+      "maybe_count": 49,
+      "try_count": 11,
+      "no_rate": 0.16666666666666666,
+      "maybe_rate": 0.6805555555555556,
+      "try_rate": 0.1527777777777778,
+      "interest_count": 60,
+      "interest_rate": 0.8333333333333334,
       "feature_means": [
         {
           "name": "coffee_value",
@@ -330,8 +618,23 @@
         }
       ],
       "model": {
-        "intercept": 0.387737964517916,
-        "train_accuracy": 0.7083333333333334,
+        "type": "multinomial_logistic_regression",
+        "classes": [
+          0,
+          1,
+          2
+        ],
+        "class_labels": {
+          "0": "ไม่ลอง",
+          "1": "อาจจะลอง",
+          "2": "ลองแน่นอน"
+        },
+        "intercepts": {
+          "0": -0.1490473419943256,
+          "1": 0.2942727267108711,
+          "2": -0.14522538471654522
+        },
+        "train_accuracy": 0.5138888888888888,
         "scaler_mean": [
           3.486111111111111,
           4.208333333333333,
@@ -356,78 +659,297 @@
           0.8551541266034525,
           1.009121210402373
         ],
+        "coefficients_by_class": {
+          "0": [
+            {
+              "feature": "coffee_aroma",
+              "label": "Aroma",
+              "coefficient": -0.6925902254330469,
+              "odds_ratio": 0.5002785551276018,
+              "abs_coefficient": 0.6925902254330469
+            },
+            {
+              "feature": "coffee_fresh_taste",
+              "label": "Fresh-brew taste",
+              "coefficient": 0.2868133908292257,
+              "odds_ratio": 1.332175594096129,
+              "abs_coefficient": 0.2868133908292257
+            },
+            {
+              "feature": "coffee_value",
+              "label": "Perceived value",
+              "coefficient": -0.2830542001683969,
+              "odds_ratio": 0.7534789480670967,
+              "abs_coefficient": 0.2830542001683969
+            },
+            {
+              "feature": "coffee_premium",
+              "label": "Premium feel",
+              "coefficient": 0.2385115128881333,
+              "odds_ratio": 1.2693583199326213,
+              "abs_coefficient": 0.2385115128881333
+            },
+            {
+              "feature": "coffee_nutrition",
+              "label": "Nutrition",
+              "coefficient": -0.2350851708130132,
+              "odds_ratio": 0.7905035189340739,
+              "abs_coefficient": 0.2350851708130132
+            },
+            {
+              "feature": "coffee_convenience",
+              "label": "Convenience",
+              "coefficient": -0.21964183666679318,
+              "odds_ratio": 0.80280628225021,
+              "abs_coefficient": 0.21964183666679318
+            },
+            {
+              "feature": "coffee_packaging",
+              "label": "Packaging",
+              "coefficient": -0.15103256720848782,
+              "odds_ratio": 0.8598196962759177,
+              "abs_coefficient": 0.15103256720848782
+            },
+            {
+              "feature": "coffee_smooth",
+              "label": "Smoothness",
+              "coefficient": -0.14991461890225075,
+              "odds_ratio": 0.860781467754267,
+              "abs_coefficient": 0.14991461890225075
+            },
+            {
+              "feature": "coffee_intensity",
+              "label": "Intensity",
+              "coefficient": 0.04153425530589693,
+              "odds_ratio": 1.0424088692745723,
+              "abs_coefficient": 0.04153425530589693
+            },
+            {
+              "feature": "coffee_brand_trust",
+              "label": "Brand trust",
+              "coefficient": -0.020274809697695687,
+              "odds_ratio": 0.9799293422147551,
+              "abs_coefficient": 0.020274809697695687
+            }
+          ],
+          "1": [
+            {
+              "feature": "coffee_nutrition",
+              "label": "Nutrition",
+              "coefficient": -0.31759241414027484,
+              "odds_ratio": 0.727899409467817,
+              "abs_coefficient": 0.31759241414027484
+            },
+            {
+              "feature": "coffee_intensity",
+              "label": "Intensity",
+              "coefficient": -0.2978064701982354,
+              "odds_ratio": 0.7424450110807992,
+              "abs_coefficient": 0.2978064701982354
+            },
+            {
+              "feature": "coffee_value",
+              "label": "Perceived value",
+              "coefficient": 0.273986586049053,
+              "odds_ratio": 1.315197160130208,
+              "abs_coefficient": 0.273986586049053
+            },
+            {
+              "feature": "coffee_convenience",
+              "label": "Convenience",
+              "coefficient": 0.18758483485093505,
+              "odds_ratio": 1.206332584125097,
+              "abs_coefficient": 0.18758483485093505
+            },
+            {
+              "feature": "coffee_brand_trust",
+              "label": "Brand trust",
+              "coefficient": -0.17665422366602984,
+              "odds_ratio": 0.8380695190343423,
+              "abs_coefficient": 0.17665422366602984
+            },
+            {
+              "feature": "coffee_aroma",
+              "label": "Aroma",
+              "coefficient": 0.15362680911005708,
+              "odds_ratio": 1.1660556442256216,
+              "abs_coefficient": 0.15362680911005708
+            },
+            {
+              "feature": "coffee_premium",
+              "label": "Premium feel",
+              "coefficient": 0.11723460710901143,
+              "odds_ratio": 1.1243831870385848,
+              "abs_coefficient": 0.11723460710901143
+            },
+            {
+              "feature": "coffee_fresh_taste",
+              "label": "Fresh-brew taste",
+              "coefficient": 0.10390186559243916,
+              "odds_ratio": 1.1094915702750623,
+              "abs_coefficient": 0.10390186559243916
+            },
+            {
+              "feature": "coffee_packaging",
+              "label": "Packaging",
+              "coefficient": -0.08598562464315583,
+              "odds_ratio": 0.9176074220594742,
+              "abs_coefficient": 0.08598562464315583
+            },
+            {
+              "feature": "coffee_smooth",
+              "label": "Smoothness",
+              "coefficient": -0.012111464560020364,
+              "odds_ratio": 0.9879615840210333,
+              "abs_coefficient": 0.012111464560020364
+            }
+          ],
+          "2": [
+            {
+              "feature": "coffee_nutrition",
+              "label": "Nutrition",
+              "coefficient": 0.5526775849532879,
+              "odds_ratio": 1.7379001688626043,
+              "abs_coefficient": 0.5526775849532879
+            },
+            {
+              "feature": "coffee_aroma",
+              "label": "Aroma",
+              "coefficient": 0.5389634163229886,
+              "odds_ratio": 1.7142289990930022,
+              "abs_coefficient": 0.5389634163229886
+            },
+            {
+              "feature": "coffee_fresh_taste",
+              "label": "Fresh-brew taste",
+              "coefficient": -0.3907152564216647,
+              "odds_ratio": 0.6765727783679188,
+              "abs_coefficient": 0.3907152564216647
+            },
+            {
+              "feature": "coffee_premium",
+              "label": "Premium feel",
+              "coefficient": -0.355746119997145,
+              "odds_ratio": 0.700650478802489,
+              "abs_coefficient": 0.355746119997145
+            },
+            {
+              "feature": "coffee_intensity",
+              "label": "Intensity",
+              "coefficient": 0.25627221489233853,
+              "odds_ratio": 1.2921044101338617,
+              "abs_coefficient": 0.25627221489233853
+            },
+            {
+              "feature": "coffee_packaging",
+              "label": "Packaging",
+              "coefficient": 0.23701819185164363,
+              "odds_ratio": 1.2674641750857922,
+              "abs_coefficient": 0.23701819185164363
+            },
+            {
+              "feature": "coffee_brand_trust",
+              "label": "Brand trust",
+              "coefficient": 0.19692903336372625,
+              "odds_ratio": 1.2176576245738644,
+              "abs_coefficient": 0.19692903336372625
+            },
+            {
+              "feature": "coffee_smooth",
+              "label": "Smoothness",
+              "coefficient": 0.16202608346227043,
+              "odds_ratio": 1.1758909122272394,
+              "abs_coefficient": 0.16202608346227043
+            },
+            {
+              "feature": "coffee_convenience",
+              "label": "Convenience",
+              "coefficient": 0.03205700181585789,
+              "odds_ratio": 1.0325763623552893,
+              "abs_coefficient": 0.03205700181585789
+            },
+            {
+              "feature": "coffee_value",
+              "label": "Perceived value",
+              "coefficient": 0.009067614119343688,
+              "odds_ratio": 1.009108849473443,
+              "abs_coefficient": 0.009067614119343688
+            }
+          ]
+        },
         "coefficients": [
+          {
+            "feature": "coffee_nutrition",
+            "label": "Nutrition",
+            "coefficient": 0.5526775849532879,
+            "odds_ratio": 1.7379001688626043,
+            "abs_coefficient": 0.5526775849532879
+          },
           {
             "feature": "coffee_aroma",
             "label": "Aroma",
-            "coefficient": 0.9023326019685907,
-            "odds_ratio": 2.465347082811353,
-            "abs_coefficient": 0.9023326019685907
-          },
-          {
-            "feature": "coffee_convenience",
-            "label": "Convenience",
-            "coefficient": 0.45352546135595256,
-            "odds_ratio": 1.5738509671377772,
-            "abs_coefficient": 0.45352546135595256
-          },
-          {
-            "feature": "coffee_value",
-            "label": "Perceived value",
-            "coefficient": 0.41302925798432455,
-            "odds_ratio": 1.5113892454899558,
-            "abs_coefficient": 0.41302925798432455
-          },
-          {
-            "feature": "coffee_premium",
-            "label": "Premium feel",
-            "coefficient": -0.30141741033852654,
-            "odds_ratio": 0.7397689210964697,
-            "abs_coefficient": 0.30141741033852654
-          },
-          {
-            "feature": "coffee_intensity",
-            "label": "Intensity",
-            "coefficient": -0.25997686257943914,
-            "odds_ratio": 0.7710694261547701,
-            "abs_coefficient": 0.25997686257943914
+            "coefficient": 0.5389634163229886,
+            "odds_ratio": 1.7142289990930022,
+            "abs_coefficient": 0.5389634163229886
           },
           {
             "feature": "coffee_fresh_taste",
             "label": "Fresh-brew taste",
-            "coefficient": -0.2141874401342337,
-            "odds_ratio": 0.8071970697147434,
-            "abs_coefficient": 0.2141874401342337
+            "coefficient": -0.3907152564216647,
+            "odds_ratio": 0.6765727783679188,
+            "abs_coefficient": 0.3907152564216647
+          },
+          {
+            "feature": "coffee_premium",
+            "label": "Premium feel",
+            "coefficient": -0.355746119997145,
+            "odds_ratio": 0.700650478802489,
+            "abs_coefficient": 0.355746119997145
+          },
+          {
+            "feature": "coffee_intensity",
+            "label": "Intensity",
+            "coefficient": 0.25627221489233853,
+            "odds_ratio": 1.2921044101338617,
+            "abs_coefficient": 0.25627221489233853
           },
           {
             "feature": "coffee_packaging",
             "label": "Packaging",
-            "coefficient": 0.1648043361894132,
-            "odds_ratio": 1.1791623767342672,
-            "abs_coefficient": 0.1648043361894132
+            "coefficient": 0.23701819185164363,
+            "odds_ratio": 1.2674641750857922,
+            "abs_coefficient": 0.23701819185164363
           },
           {
             "feature": "coffee_brand_trust",
             "label": "Brand trust",
-            "coefficient": -0.09991594232084478,
-            "odds_ratio": 0.904913479766074,
-            "abs_coefficient": 0.09991594232084478
+            "coefficient": 0.19692903336372625,
+            "odds_ratio": 1.2176576245738644,
+            "abs_coefficient": 0.19692903336372625
           },
           {
             "feature": "coffee_smooth",
             "label": "Smoothness",
-            "coefficient": 0.09718664812557952,
-            "odds_ratio": 1.1020660529886344,
-            "abs_coefficient": 0.09718664812557952
+            "coefficient": 0.16202608346227043,
+            "odds_ratio": 1.1758909122272394,
+            "abs_coefficient": 0.16202608346227043
           },
           {
-            "feature": "coffee_nutrition",
-            "label": "Nutrition",
-            "coefficient": -0.077866594812736,
-            "odds_ratio": 0.9250878298272109,
-            "abs_coefficient": 0.077866594812736
+            "feature": "coffee_convenience",
+            "label": "Convenience",
+            "coefficient": 0.03205700181585789,
+            "odds_ratio": 1.0325763623552893,
+            "abs_coefficient": 0.03205700181585789
+          },
+          {
+            "feature": "coffee_value",
+            "label": "Perceived value",
+            "coefficient": 0.009067614119343688,
+            "odds_ratio": 1.009108849473443,
+            "abs_coefficient": 0.009067614119343688
           }
         ],
+        "intercept": -0.14522538471654522,
         "fitted": true
       }
     },
@@ -436,9 +958,24 @@
       "cluster_id": 1,
       "size": 10,
       "labelled_size": 10,
-      "try_rate": 0.4,
-      "non_try_count": 6,
-      "try_count": 4,
+      "choice_counts": {
+        "0": 6,
+        "1": 3,
+        "2": 1
+      },
+      "choice_rates": {
+        "0": 0.6,
+        "1": 0.3,
+        "2": 0.1
+      },
+      "no_count": 6,
+      "maybe_count": 3,
+      "try_count": 1,
+      "no_rate": 0.6,
+      "maybe_rate": 0.3,
+      "try_rate": 0.1,
+      "interest_count": 4,
+      "interest_rate": 0.4,
       "feature_means": [
         {
           "name": "coffee_value",
@@ -512,8 +1049,10 @@
         }
       ],
       "model": {
+        "type": "multinomial_logistic_regression",
         "fitted": false,
-        "reason": "insufficient or single-class data"
+        "reason": "insufficient rows or class count for 3-class model",
+        "min_class_count": 1
       }
     },
     {
@@ -521,9 +1060,24 @@
       "cluster_id": 2,
       "size": 45,
       "labelled_size": 36,
-      "try_rate": 0.8055555555555556,
-      "non_try_count": 7,
-      "try_count": 29,
+      "choice_counts": {
+        "0": 7,
+        "1": 24,
+        "2": 5
+      },
+      "choice_rates": {
+        "0": 0.19444444444444445,
+        "1": 0.6666666666666666,
+        "2": 0.1388888888888889
+      },
+      "no_count": 7,
+      "maybe_count": 24,
+      "try_count": 5,
+      "no_rate": 0.19444444444444445,
+      "maybe_rate": 0.6666666666666666,
+      "try_rate": 0.1388888888888889,
+      "interest_count": 29,
+      "interest_rate": 0.8055555555555556,
       "feature_means": [
         {
           "name": "coffee_value",
@@ -597,8 +1151,23 @@
         }
       ],
       "model": {
-        "intercept": 0.46102589109097475,
-        "train_accuracy": 0.7777777777777778,
+        "type": "multinomial_logistic_regression",
+        "classes": [
+          0,
+          1,
+          2
+        ],
+        "class_labels": {
+          "0": "ไม่ลอง",
+          "1": "อาจจะลอง",
+          "2": "ลองแน่นอน"
+        },
+        "intercepts": {
+          "0": -0.21304158980070936,
+          "1": 0.3406026622122545,
+          "2": -0.12756107241154396
+        },
+        "train_accuracy": 0.6666666666666666,
         "scaler_mean": [
           4.0,
           4.527777777777778,
@@ -623,78 +1192,297 @@
           1.0786937688304221,
           0.541488574711609
         ],
+        "coefficients_by_class": {
+          "0": [
+            {
+              "feature": "coffee_value",
+              "label": "Perceived value",
+              "coefficient": -0.8693636528897566,
+              "odds_ratio": 0.419218232697957,
+              "abs_coefficient": 0.8693636528897566
+            },
+            {
+              "feature": "coffee_packaging",
+              "label": "Packaging",
+              "coefficient": -0.5788901217949398,
+              "odds_ratio": 0.5605201305368165,
+              "abs_coefficient": 0.5788901217949398
+            },
+            {
+              "feature": "coffee_intensity",
+              "label": "Intensity",
+              "coefficient": 0.5079214223836074,
+              "odds_ratio": 1.6618333528848135,
+              "abs_coefficient": 0.5079214223836074
+            },
+            {
+              "feature": "coffee_smooth",
+              "label": "Smoothness",
+              "coefficient": 0.4981347403248354,
+              "odds_ratio": 1.645648843726172,
+              "abs_coefficient": 0.4981347403248354
+            },
+            {
+              "feature": "coffee_fresh_taste",
+              "label": "Fresh-brew taste",
+              "coefficient": 0.3806452407903501,
+              "odds_ratio": 1.4632284195645315,
+              "abs_coefficient": 0.3806452407903501
+            },
+            {
+              "feature": "coffee_aroma",
+              "label": "Aroma",
+              "coefficient": -0.31947287412227965,
+              "odds_ratio": 0.7265319099244425,
+              "abs_coefficient": 0.31947287412227965
+            },
+            {
+              "feature": "coffee_brand_trust",
+              "label": "Brand trust",
+              "coefficient": 0.16231358224126038,
+              "odds_ratio": 1.1762290280303416,
+              "abs_coefficient": 0.16231358224126038
+            },
+            {
+              "feature": "coffee_nutrition",
+              "label": "Nutrition",
+              "coefficient": 0.14488170943028814,
+              "odds_ratio": 1.1559028297763598,
+              "abs_coefficient": 0.14488170943028814
+            },
+            {
+              "feature": "coffee_premium",
+              "label": "Premium feel",
+              "coefficient": -0.056032761920645664,
+              "odds_ratio": 0.9455081587196974,
+              "abs_coefficient": 0.056032761920645664
+            },
+            {
+              "feature": "coffee_convenience",
+              "label": "Convenience",
+              "coefficient": 0.007793106619501651,
+              "odds_ratio": 1.0078235519113066,
+              "abs_coefficient": 0.007793106619501651
+            }
+          ],
+          "1": [
+            {
+              "feature": "coffee_intensity",
+              "label": "Intensity",
+              "coefficient": -0.6984619831975916,
+              "odds_ratio": 0.49734964796889264,
+              "abs_coefficient": 0.6984619831975916
+            },
+            {
+              "feature": "coffee_aroma",
+              "label": "Aroma",
+              "coefficient": -0.4306084316051301,
+              "odds_ratio": 0.650113424811908,
+              "abs_coefficient": 0.4306084316051301
+            },
+            {
+              "feature": "coffee_fresh_taste",
+              "label": "Fresh-brew taste",
+              "coefficient": 0.3230937339324596,
+              "odds_ratio": 1.3813948284068636,
+              "abs_coefficient": 0.3230937339324596
+            },
+            {
+              "feature": "coffee_premium",
+              "label": "Premium feel",
+              "coefficient": 0.2821796276694427,
+              "odds_ratio": 1.3260168879185947,
+              "abs_coefficient": 0.2821796276694427
+            },
+            {
+              "feature": "coffee_value",
+              "label": "Perceived value",
+              "coefficient": 0.23650586621027894,
+              "odds_ratio": 1.2668149870014351,
+              "abs_coefficient": 0.23650586621027894
+            },
+            {
+              "feature": "coffee_smooth",
+              "label": "Smoothness",
+              "coefficient": 0.22624546803182466,
+              "odds_ratio": 1.253883415799398,
+              "abs_coefficient": 0.22624546803182466
+            },
+            {
+              "feature": "coffee_packaging",
+              "label": "Packaging",
+              "coefficient": 0.21446247248955105,
+              "odds_ratio": 1.2391956161754552,
+              "abs_coefficient": 0.21446247248955105
+            },
+            {
+              "feature": "coffee_convenience",
+              "label": "Convenience",
+              "coefficient": -0.1899898135704633,
+              "odds_ratio": 0.8269675577472141,
+              "abs_coefficient": 0.1899898135704633
+            },
+            {
+              "feature": "coffee_brand_trust",
+              "label": "Brand trust",
+              "coefficient": -0.028458961622543938,
+              "odds_ratio": 0.9719421802577592,
+              "abs_coefficient": 0.028458961622543938
+            },
+            {
+              "feature": "coffee_nutrition",
+              "label": "Nutrition",
+              "coefficient": -0.013264083813204446,
+              "odds_ratio": 0.9868234964946804,
+              "abs_coefficient": 0.013264083813204446
+            }
+          ],
+          "2": [
+            {
+              "feature": "coffee_aroma",
+              "label": "Aroma",
+              "coefficient": 0.7500813057274098,
+              "odds_ratio": 2.1171721478364844,
+              "abs_coefficient": 0.7500813057274098
+            },
+            {
+              "feature": "coffee_smooth",
+              "label": "Smoothness",
+              "coefficient": -0.7243802083566603,
+              "odds_ratio": 0.4846248423197138,
+              "abs_coefficient": 0.7243802083566603
+            },
+            {
+              "feature": "coffee_fresh_taste",
+              "label": "Fresh-brew taste",
+              "coefficient": -0.7037389747228097,
+              "odds_ratio": 0.4947320506851033,
+              "abs_coefficient": 0.7037389747228097
+            },
+            {
+              "feature": "coffee_value",
+              "label": "Perceived value",
+              "coefficient": 0.6328577866794775,
+              "odds_ratio": 1.8829840642468343,
+              "abs_coefficient": 0.6328577866794775
+            },
+            {
+              "feature": "coffee_packaging",
+              "label": "Packaging",
+              "coefficient": 0.36442764930538957,
+              "odds_ratio": 1.4396897648566682,
+              "abs_coefficient": 0.36442764930538957
+            },
+            {
+              "feature": "coffee_premium",
+              "label": "Premium feel",
+              "coefficient": -0.22614686574879733,
+              "odds_ratio": 0.7976009528021323,
+              "abs_coefficient": 0.22614686574879733
+            },
+            {
+              "feature": "coffee_intensity",
+              "label": "Intensity",
+              "coefficient": 0.19054056081398446,
+              "odds_ratio": 1.2099034473109003,
+              "abs_coefficient": 0.19054056081398446
+            },
+            {
+              "feature": "coffee_convenience",
+              "label": "Convenience",
+              "coefficient": 0.18219670695096157,
+              "odds_ratio": 1.1998501895405091,
+              "abs_coefficient": 0.18219670695096157
+            },
+            {
+              "feature": "coffee_brand_trust",
+              "label": "Brand trust",
+              "coefficient": -0.13385462061871692,
+              "odds_ratio": 0.8747172212085528,
+              "abs_coefficient": 0.13385462061871692
+            },
+            {
+              "feature": "coffee_nutrition",
+              "label": "Nutrition",
+              "coefficient": -0.13161762561708396,
+              "odds_ratio": 0.8766761494997396,
+              "abs_coefficient": 0.13161762561708396
+            }
+          ]
+        },
         "coefficients": [
           {
-            "feature": "coffee_value",
-            "label": "Perceived value",
-            "coefficient": 1.0459976501754007,
-            "odds_ratio": 2.8462366561839327,
-            "abs_coefficient": 1.0459976501754007
-          },
-          {
-            "feature": "coffee_intensity",
-            "label": "Intensity",
-            "coefficient": -0.7636294733489785,
-            "odds_ratio": 0.4659721207564958,
-            "abs_coefficient": 0.7636294733489785
-          },
-          {
-            "feature": "coffee_packaging",
-            "label": "Packaging",
-            "coefficient": 0.7232105673800582,
-            "odds_ratio": 2.0610397065197295,
-            "abs_coefficient": 0.7232105673800582
-          },
-          {
-            "feature": "coffee_fresh_taste",
-            "label": "Fresh-brew taste",
-            "coefficient": -0.5330862056888759,
-            "odds_ratio": 0.5867912139237151,
-            "abs_coefficient": 0.5330862056888759
+            "feature": "coffee_aroma",
+            "label": "Aroma",
+            "coefficient": 0.7500813057274098,
+            "odds_ratio": 2.1171721478364844,
+            "abs_coefficient": 0.7500813057274098
           },
           {
             "feature": "coffee_smooth",
             "label": "Smoothness",
-            "coefficient": -0.3021893622560704,
-            "odds_ratio": 0.7391980754203448,
-            "abs_coefficient": 0.3021893622560704
+            "coefficient": -0.7243802083566603,
+            "odds_ratio": 0.4846248423197138,
+            "abs_coefficient": 0.7243802083566603
           },
           {
-            "feature": "coffee_aroma",
-            "label": "Aroma",
-            "coefficient": 0.22097928775794382,
-            "odds_ratio": 1.2472975959667958,
-            "abs_coefficient": 0.22097928775794382
+            "feature": "coffee_fresh_taste",
+            "label": "Fresh-brew taste",
+            "coefficient": -0.7037389747228097,
+            "odds_ratio": 0.4947320506851033,
+            "abs_coefficient": 0.7037389747228097
           },
           {
-            "feature": "coffee_nutrition",
-            "label": "Nutrition",
-            "coefficient": -0.21153507434620014,
-            "odds_ratio": 0.8093408934521996,
-            "abs_coefficient": 0.21153507434620014
+            "feature": "coffee_value",
+            "label": "Perceived value",
+            "coefficient": 0.6328577866794775,
+            "odds_ratio": 1.8829840642468343,
+            "abs_coefficient": 0.6328577866794775
           },
           {
-            "feature": "coffee_brand_trust",
-            "label": "Brand trust",
-            "coefficient": -0.19925081655697438,
-            "odds_ratio": 0.8193443624267658,
-            "abs_coefficient": 0.19925081655697438
+            "feature": "coffee_packaging",
+            "label": "Packaging",
+            "coefficient": 0.36442764930538957,
+            "odds_ratio": 1.4396897648566682,
+            "abs_coefficient": 0.36442764930538957
           },
           {
             "feature": "coffee_premium",
             "label": "Premium feel",
-            "coefficient": 0.16347705473282148,
-            "odds_ratio": 1.17759833456901,
-            "abs_coefficient": 0.16347705473282148
+            "coefficient": -0.22614686574879733,
+            "odds_ratio": 0.7976009528021323,
+            "abs_coefficient": 0.22614686574879733
+          },
+          {
+            "feature": "coffee_intensity",
+            "label": "Intensity",
+            "coefficient": 0.19054056081398446,
+            "odds_ratio": 1.2099034473109003,
+            "abs_coefficient": 0.19054056081398446
           },
           {
             "feature": "coffee_convenience",
             "label": "Convenience",
-            "coefficient": -0.0851155770855053,
-            "odds_ratio": 0.9184061315631614,
-            "abs_coefficient": 0.0851155770855053
+            "coefficient": 0.18219670695096157,
+            "odds_ratio": 1.1998501895405091,
+            "abs_coefficient": 0.18219670695096157
+          },
+          {
+            "feature": "coffee_brand_trust",
+            "label": "Brand trust",
+            "coefficient": -0.13385462061871692,
+            "odds_ratio": 0.8747172212085528,
+            "abs_coefficient": 0.13385462061871692
+          },
+          {
+            "feature": "coffee_nutrition",
+            "label": "Nutrition",
+            "coefficient": -0.13161762561708396,
+            "odds_ratio": 0.8766761494997396,
+            "abs_coefficient": 0.13161762561708396
           }
         ],
+        "intercept": -0.12756107241154396,
         "fitted": true
       }
     }

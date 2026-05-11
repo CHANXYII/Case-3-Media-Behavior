@@ -1,11 +1,11 @@
-﻿feature,source_var,feature_type,display_label,f_score,p_value,effect_value,direction,effect_label
-most_freq_rtd_brand_ไม่ดื่มกาแฟ Ready to drink เลย,most_freq_rtd_brand,categorical,No regular RTD coffee brand,22.477391392103858,6.093837462469241e-06,-32.93103448275861,negative,-32.9 pts try rate
-coffee_value,coffee_value,numeric,Perceived value,15.466831618980317,0.000143374916161588,1.1496774193548385,positive,+1.15 avg score
-coffee_aroma,coffee_aroma,numeric,Aroma preference,12.674679625965549,0.0005384438659381227,0.8765591397849462,positive,+0.88 avg score
-coffee_convenience,coffee_convenience,numeric,Convenience importance,10.798217363478456,0.0013442814566338116,0.8382795698924732,positive,+0.84 avg score
-coffee_nutrition,coffee_nutrition,numeric,Nutrition importance,10.217945621105931,0.0017923568923108987,0.8606451612903223,positive,+0.86 avg score
-dur_online_มากกว่า 6 ชม./วัน,dur_online,categorical,Online use > 6 hrs/day,9.017645084548336,0.0032756670025526034,22.27151730257321,positive,+22.3 pts try rate
-coffee_smooth,coffee_smooth,numeric,Smooth taste preference,8.153009639551863,0.005094588021375513,0.7552688172043012,positive,+0.76 avg score
-coffee_brand_trust,coffee_brand_trust,numeric,Brand trust importance,7.262029652690169,0.008089124248349044,0.7449462365591399,positive,+0.74 avg score
-presenter_effect_มีผล,presenter_effect,categorical,Presenter influences purchase,6.682577268195435,0.010974978103594064,19.634703196347036,positive,+19.6 pts try rate
-coffee_packaging,coffee_packaging,numeric,Packaging importance,6.25697016443804,0.013765595963077156,0.6709677419354838,positive,+0.67 avg score
+feature,source_var,feature_type,display_label,f_score,p_value,effect_value,direction,effect_label
+most_freq_rtd_brand_ไม่ดื่มกาแฟ Ready to drink เลย,most_freq_rtd_brand,categorical,No regular RTD coffee brand,15.611562622762639,1.003927292811605e-06,-21.551724137931032,negative,-21.6 pts definite try; -11.4 pts maybe
+coffee_value,coffee_value,numeric,Perceived value,7.874353357449927,0.0006236992437630669,1.3223529411764705,positive,try vs no +1.32 avg; maybe 3.67
+coffee_aroma,coffee_aroma,numeric,Aroma,6.811545432409927,0.001600614238132578,1.1105882352941179,positive,try vs no +1.11 avg; maybe 4.18
+most_freq_rtd_tea_brand_Orishi Gold,most_freq_rtd_tea_brand,categorical,Primary RTD tea brand = Orishi Gold,6.768363479072523,0.0016636413207511038,62.71929824561404,positive,+62.7 pts definite try; -40.8 pts maybe
+dur_online_1-2 ชม./วัน,dur_online,categorical,Online use 1-2 hrs/day,6.63924697310773,0.0018675803868727586,38.18181818181819,positive,+38.2 pts definite try; -55.7 pts maybe
+coffee_nutrition,coffee_nutrition,numeric,Nutrition,5.788250436819439,0.004025533006740979,1.1623529411764704,positive,try vs no +1.16 avg; maybe 3.51
+holiday_streaming_ดูน้อยกว่าปกติ,holiday_streaming,categorical,Holiday streaming lower than usual,5.57337716244768,0.00489498279645269,32.280219780219774,positive,+32.3 pts definite try; -24.5 pts maybe
+coffee_convenience,coffee_convenience,numeric,Convenience,5.473159513265741,0.005363654216930053,0.9552941176470591,positive,try vs no +0.96 avg; maybe 4.09
+coffee_caffeine,coffee_caffeine,numeric,Caffeine importance,4.935555895683565,0.008781365578211261,1.1929411764705877,positive,try vs no +1.19 avg; maybe 3.67
+coffee_smooth,coffee_smooth,numeric,Smoothness,4.664874147416168,0.011273536909381163,1.032941176470588,positive,try vs no +1.03 avg; maybe 4.01

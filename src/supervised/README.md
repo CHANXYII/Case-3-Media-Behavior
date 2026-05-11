@@ -1,9 +1,9 @@
 # Supervised Learning
 
-Trains a binary classifier that predicts `target_try_new_rtd_coffee` (whether a
-respondent is willing to try a new RTD coffee product) using ONLY the 10 source
-variables flagged by the feature-selection step (`feature_selection_summary.csv`,
-ANOVA p ≤ 0.05, deduplicated by source variable).
+Trains a three-class classifier that predicts
+`target_try_new_rtd_coffee_choice`: `0 = ไม่ลอง`, `1 = อาจจะลอง`, and
+`2 = ลองแน่นอน`. The legacy binary column `target_try_new_rtd_coffee` is still
+written for reference, but the model and dashboard use the three-choice target.
 
 ## Features used
 
@@ -27,8 +27,9 @@ ANOVA p ≤ 0.05, deduplicated by source variable).
 - `outputs/feature_selection_summary.csv` — the selected-features file.
 
 The target column is derived in `feature_selection.derive_target` from
-`will_try_new_rtd_coffee`. Rows where the target is NaN (63 / 181) are
-dropped, leaving 118 labelled respondents (~79% positive, ~21% negative).
+`will_try_new_rtd_coffee`. Rows where the target is NaN are dropped; the latest
+static dashboard data has 118 labelled respondents: 25 `ไม่ลอง`, 76
+`อาจจะลอง`, and 17 `ลองแน่นอน`.
 
 ## What the pipeline does
 
@@ -41,12 +42,12 @@ dropped, leaving 118 labelled respondents (~79% positive, ~21% negative).
    models (no SMOTE; sample size is small, so re-weighting is safer).
 4. **Train/Test split** — stratified 80/20 hold-out (`random_state=42`).
 5. **Models** — three classifiers compared on the same pipeline:
-   - `LogisticRegression` (liblinear, balanced) — interpretable coefficients.
+   - `LogisticRegression` (lbfgs, balanced) — interpretable class coefficients.
    - `RandomForest` (400 trees, balanced) — non-linear baseline + impurity importance.
    - `GradientBoosting` (250 trees, lr=0.05, depth 3) — non-linear comparator.
-6. **Evaluation** — 5-fold stratified CV on the train set (Accuracy, Precision,
-   Recall, F1, ROC-AUC) plus the held-out test set with full classification
-   report and confusion matrix.
+6. **Evaluation** — 5-fold stratified CV on the train set (Accuracy, macro
+   Precision, macro Recall, macro F1, OVR ROC-AUC) plus the held-out test set
+   with full classification report and confusion matrix.
 
 ## Results (last run)
 
@@ -82,20 +83,13 @@ Artefacts written by `train.py`:
 
 `supervised_coefficients.csv` columns:
 
+- `class` / `class_label` — which target choice the coefficient belongs to.
 - `feature` — the encoded feature name (one-hot columns look like
   `most_freq_rtd_brand_Arabic`).
 - `coefficient` — log-odds change in the predicted probability when the
   (standardised) feature increases by one unit.
-- `odds_ratio` — `exp(coefficient)`. > 1 ⇒ increases the odds of "will try";
-  < 1 ⇒ decreases them.
-
-Top drivers from the latest run:
-
-- **Increases trial intent**: heavy online usage > 6 hrs/day (odds × 4.60),
-  RTD brand = Best (× 2.61), high `coffee_value` (× 2.21), presenter
-  influences purchase (× 1.82), high `coffee_aroma` (× 1.63).
-- **Decreases trial intent**: doesn't drink RTD coffee (odds × 0.26),
-  brand = กาแฟเน้จอร์กีฟ (× 0.29), online usage only 1–2 hrs/day (× 0.44).
+- `odds_ratio` — `exp(coefficient)`. For a class row, > 1 increases the odds of
+  that class relative to the others; < 1 decreases them.
 
 ## Run
 

@@ -28,7 +28,8 @@ COLUMN_MAPPING_JSON: Path = PROCESSED_DATA_DIR / "column_mapping.json"
 
 FONT_PATH: Path = ASSETS_DIR / "DB-Adman-X.ttf"
 
-TARGET_COLUMN: str = "target_try_new_rtd_coffee"
+LEGACY_BINARY_TARGET_COLUMN: str = "target_try_new_rtd_coffee"
+TARGET_COLUMN: str = "target_try_new_rtd_coffee_choice"
 
 
 def ensure_dirs() -> None:

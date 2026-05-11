@@ -35,6 +35,18 @@ from src.web._shared import (
     load_schema,
 )
 
+CLASS_LABELS = {
+    0: "ไม่ลอง",
+    1: "อาจจะลอง",
+    2: "ลองแน่นอน",
+}
+
+CLASS_COLORS = {
+    0: "#f43f5e",
+    1: "#f59e0b",
+    2: "#34d399",
+}
+
 st.set_page_config(
     page_title="AI-Driven Marketing Pipeline",
     page_icon="☕",
@@ -392,28 +404,30 @@ st.markdown(ARROW, unsafe_allow_html=True)
 # ---------------------------------------------------------------------------
 # STAGE 5 — Supervised
 # ---------------------------------------------------------------------------
-stage_open(5, "#f59e0b", "Supervised — Predict 'Will Try New RTD Coffee'",
+stage_open(5, "#f59e0b", "Supervised — Predict RTD Coffee Choice",
            "Logistic Regression · Random Forest · Gradient Boosting (5-fold CV)")
 if metrics:
-    best = metrics.get("best_model_by_cv_f1", "RandomForest")
+    best = metrics.get("best_model_by_cv_f1_macro", "RandomForest")
     cv = metrics["models"][best]["cv"]
     ho = metrics["models"][best]["holdout"]
     stat_block([
         ("Best model", best),
-        ("CV F1", f"{cv['cv_f1_mean']:.3f}"),
-        ("CV ROC-AUC", f"{cv['cv_roc_auc_mean']:.3f}"),
+        ("CV macro F1", f"{cv['cv_f1_macro_mean']:.3f}"),
+        ("CV ROC-AUC", f"{cv['cv_roc_auc_ovr_macro_mean']:.3f}"),
         ("Test accuracy", f"{ho['test_accuracy']:.3f}"),
-        ("Test recall", f"{ho['test_recall']:.3f}"),
+        ("Test macro recall", f"{ho['test_recall_macro']:.3f}"),
     ])
 
     if not coef_df.empty:
         st.markdown(
             "<div class='stage-sub' style='margin-top:14px'>"
-            "Logistic regression coefficients · standardised features · "
-            "green ↑ means more likely to try, red ↓ means less likely</div>",
+            "Logistic regression coefficients for ลองแน่นอน · standardised features · "
+            "green ↑ means more likely, red ↓ means less likely</div>",
             unsafe_allow_html=True,
         )
         ranked = coef_df.copy()
+        if "class" in ranked.columns:
+            ranked = ranked[ranked["class"].astype(int) == 2]
         ranked["abs"] = ranked["coefficient"].abs()
         ranked = ranked.sort_values("abs", ascending=False).head(8)
         max_abs = float(ranked["abs"].max())
@@ -505,21 +519,31 @@ if submitted:
     )
     X_one = pd.DataFrame([{c: inputs[c] for c in feature_order}])
     active = best_model if model_choice == best_name else logreg_model
-    proba = float(active.predict_proba(X_one)[0, 1])
+    probas = active.predict_proba(X_one)[0]
+    classes = [int(c) for c in active.named_steps["clf"].classes_]
+    prob_by_class = {cls: float(probas[idx]) for idx, cls in enumerate(classes)}
+    proba = prob_by_class.get(2, 0.0)
     pred = int(active.predict(X_one)[0])
 
+    pred_label = CLASS_LABELS.get(pred, str(pred))
+    pred_color = CLASS_COLORS.get(pred, "#94a3b8")
     pill = (
-        "<span class='result-pill result-yes'>✅ Likely to try</span>"
-        if pred == 1
-        else "<span class='result-pill result-no'>❌ Not likely to try</span>"
+        f"<span class='result-pill' style='color:{pred_color};border-color:{pred_color};"
+        f"background:rgba(255,255,255,0.06)'>{pred_label}</span>"
+    )
+    prob_rows = "".join(
+        f"<div style='color:#94a3b8;font-size:12px;margin-top:4px'>"
+        f"{CLASS_LABELS[cls]} · {prob_by_class.get(cls, 0.0) * 100:.1f}%</div>"
+        for cls in sorted(CLASS_LABELS)
     )
     st.markdown(
         f"""
 <div style='margin-top:16px; display:flex; align-items:center; gap:24px; flex-wrap:wrap;'>
     <div class='result-prob'>{proba * 100:.1f}%</div>
     <div>
-        <div style='color:#94a3b8;font-size:12px;letter-spacing:0.12em;text-transform:uppercase'>P(will try new RTD coffee)</div>
+        <div style='color:#94a3b8;font-size:12px;letter-spacing:0.12em;text-transform:uppercase'>P(ลองแน่นอน)</div>
         <div style='margin-top:8px'>{pill}</div>
+        {prob_rows}
         <div style='color:#94a3b8;font-size:12px;margin-top:6px'>Model · {model_choice}</div>
     </div>
 </div>
@@ -538,7 +562,8 @@ if submitted:
             elif name == "cat":
                 ohe = transformer.named_steps["onehot"]
                 names.extend(ohe.get_feature_names_out(raw_cols).tolist())
-        contribs = (clf.coef_.ravel() * transformed)
+        class_index = list(clf.classes_).index(2) if 2 in list(clf.classes_) else -1
+        contribs = (clf.coef_[class_index] * transformed)
         contrib_df = (
             pd.DataFrame({"feature": names, "logodds": contribs})
             .assign(abs_=lambda d: d["logodds"].abs())

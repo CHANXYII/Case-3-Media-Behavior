@@ -26,11 +26,12 @@ sidebar entries.
 - **Supervised Learning** — *the page the team asked for*:
   - Slider/dropdown form for the 10 features the feature-selection step
     flagged as significant.
-  - Click **Predict trial intent** to get the probability of "will try".
-  - Pick which model scores the respondent: the best-by-CV-F1 model
-    (RandomForest in the latest run) or the LogisticRegression model. With
+  - Click **Predict** to get probabilities for `ไม่ลอง`, `อาจจะลอง`, and
+    `ลองแน่นอน`.
+  - Pick which model scores the respondent: the best-by-CV-macro-F1 model or
+    the LogisticRegression model. With
     LogReg you also see a per-feature contribution bar chart so you can
-    explain *why* the model gave that probability.
+    explain what pushed the `ลองแน่นอน` probability.
   - Tabs for cross-validated model comparison, raw coefficient table, and
     diagnostic charts.
 - **Business Insight** — top positive/negative drivers from the LogReg

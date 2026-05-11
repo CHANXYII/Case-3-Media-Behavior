@@ -14,6 +14,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.config import (
     CLEAN_CSV,
+    LEGACY_BINARY_TARGET_COLUMN,
     OUTPUTS_DIR,
     RAW_CSV,
     TARGET_COLUMN,
@@ -68,8 +69,20 @@ def merge_province(series):
     return ",".join(values) if values else np.nan
 
 # Target Derivation Logic
+def derive_binary_target(value):
+    answers = split_answers(value)
+    if any("ลอง" in answer and answer != "ไม่ลอง" for answer in answers):
+        return 1.0
+    if answers and all(answer == "ไม่ลอง" for answer in answers):
+        return 0.0
+    return np.nan
+
 def derive_target(value):
     answers = split_answers(value)
+    if not answers:
+        return np.nan
+    if any(answer == "ลองเลย ชอบลองของออกใหม่อยู่แล้ว" for answer in answers):
+        return 2.0
     if any("ลอง" in answer and answer != "ไม่ลอง" for answer in answers):
         return 1.0
     if answers and all(answer == "ไม่ลอง" for answer in answers):
@@ -91,6 +104,7 @@ def build_clean_data():
 
     df["age_group"] = df["age_group_raw"].astype(str).replace("nan", np.nan)
     df["age"] = df["age_group"].map(age_group_mapping)
+    df[LEGACY_BINARY_TARGET_COLUMN] = df["will_try_new_rtd_coffee"].apply(derive_binary_target)
     df[target_column] = df["will_try_new_rtd_coffee"].apply(derive_target)
 
     ensure_dirs()
@@ -105,7 +119,8 @@ def prepare_feature_data(df):
     # Select numeric columns for scaling (including Likert scale columns)
     numeric_cols = [
         col for col in analysis_df.columns
-        if pd.api.types.is_numeric_dtype(analysis_df[col]) and col not in ["respondent_id", target_column]
+        if pd.api.types.is_numeric_dtype(analysis_df[col])
+        and col not in ["respondent_id", target_column, LEGACY_BINARY_TARGET_COLUMN]
     ]
     numeric_df = analysis_df[numeric_cols].fillna(analysis_df[numeric_cols].median(numeric_only=True))
     scaled_numeric = pd.DataFrame(
