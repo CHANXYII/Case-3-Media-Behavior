@@ -176,7 +176,7 @@ export default function Personas() {
                     </div>
                   </div>
 
-                  <div className="text-base font-semibold text-ink-0 leading-tight">{p.name}</div>
+                  <div className="text-base font-semibold text-ink-0 leading-snug">{p.name}</div>
                   <div className="text-xs text-ink-2 mt-1">{p.tagline}</div>
                   <p className="text-[13px] text-ink-2 mt-3 leading-relaxed">{p.description}</p>
 

@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { Coffee, Megaphone, Target, Wallet, Calendar } from "lucide-react";
 import { Card, SectionHeader, Pill } from "./UI";
+import { CountUp } from "./Motion";
 import { ds, PERSONA, PersonaKey, TARGET_CHOICES, fmtPct } from "@/lib/data";
 
 type PlanRow = {
@@ -86,7 +87,7 @@ export default function MarketingPlan() {
           <Card className="col-span-12 md:col-span-4">
             <div className="tag mb-2">คาดการณ์จากกลุ่มตัวอย่าง</div>
             <div className="text-4xl font-bold text-ink-0 tabular">
-              {Math.round(totalExpected)}
+              <CountUp to={Math.round(totalExpected)} duration={1.6} />
               <span className="text-xl text-ink-3">/{total}</span>
             </div>
             <p className="text-sm text-ink-2 mt-3 leading-relaxed">
@@ -96,17 +97,21 @@ export default function MarketingPlan() {
           <Card className="col-span-12 md:col-span-4">
             <div className="tag mb-2">สัดส่วนงบที่แนะนำ</div>
             <div className="flex h-10 rounded-md overflow-hidden mt-3 border border-ink-3/40">
-              {ranked.map((r) => {
+              {ranked.map((r, i) => {
                 const p = PERSONA[r.pid];
                 return (
-                  <div
+                  <motion.div
                     key={r.pid}
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${r.budgetShare}%` }}
+                    viewport={{ once: true, margin: "-10% 0px" }}
+                    transition={{ duration: 0.9, delay: 0.2 + i * 0.12, ease: [0.2, 0.8, 0.2, 1] }}
                     className="flex items-center justify-center text-xs font-mono font-medium text-white"
-                    style={{ width: `${r.budgetShare}%`, background: p.color }}
+                    style={{ background: p.color }}
                     title={`${p.code} · ${r.budgetShare}%`}
                   >
                     {r.budgetShare}%
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
@@ -163,7 +168,7 @@ export default function MarketingPlan() {
                         </div>
                         <div>
                           <div className="text-[11px] font-mono text-ink-2">{p.code}</div>
-                          <div className="text-base font-semibold leading-tight text-ink-0">{p.name}</div>
+                          <div className="text-base font-semibold leading-snug text-ink-0">{p.name}</div>
                         </div>
                       </div>
 

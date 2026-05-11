@@ -77,7 +77,7 @@ export default function PerClusterDrivers() {
                     n={c.labelled_size} · acc={(c.model.train_accuracy! * 100).toFixed(0)}%
                   </div>
                 </div>
-                <div className="text-base font-semibold text-ink-0 leading-tight">{p.name}</div>
+                <div className="text-base font-semibold text-ink-0 leading-snug">{p.name}</div>
                 <div className="text-xs text-ink-2 mt-1">{p.tagline}</div>
                 <div className="mt-3 grid grid-cols-3 gap-1 text-center">
                   {TARGET_CHOICES.map((ch) => (
@@ -105,7 +105,7 @@ export default function PerClusterDrivers() {
                     <Pill color={p.color}>{p.code}</Pill>
                     <div className="font-mono text-[11px] text-ink-2">n={c.labelled_size} · ข้าม</div>
                   </div>
-                  <div className="text-base font-semibold text-ink-0 leading-tight">{p.name}</div>
+                  <div className="text-base font-semibold text-ink-0 leading-snug">{p.name}</div>
                   <div className="text-xs text-ink-2 mt-1 leading-relaxed">
                     มีแค่ 10 คนที่ label และคลาส ‘ลองแน่นอน’ มี 1 คน — ฟิต logistic regression 3 คลาสบน 10 แถวจะแกว่ง. เก็บไว้เป็น watchlist.
                   </div>
@@ -231,7 +231,7 @@ export default function PerClusterDrivers() {
                           style={{ borderColor: `${p.color}30` }}
                         >
                           <div className="text-[11px] font-mono text-ink-2 mb-1">{p.code} · {choice.shortLabel}</div>
-                          <div className="text-sm font-semibold leading-tight text-ink-0">{p.name}</div>
+                          <div className="text-sm font-semibold leading-snug text-ink-0">{p.name}</div>
                           {top && (
                             <>
                               <div className="mt-3 text-[11px] font-mono text-ink-2 uppercase tracking-wider">ตัวขับอันดับ 1</div>

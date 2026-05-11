@@ -119,7 +119,7 @@ export default function FeatureSelection() {
             >
               <Card className="hover-lift h-full">
                 <div className="flex items-start justify-between gap-3 mb-2">
-                  <div className="text-[15px] font-semibold leading-tight text-ink-0">{f.feature}</div>
+                  <div className="text-[15px] font-semibold leading-snug text-ink-0">{f.feature}</div>
                   <div className="font-mono text-xs whitespace-nowrap" style={{ color: f.direction === 1 ? "#15803D" : "#B91C1C" }}>
                     {f.effect}
                   </div>

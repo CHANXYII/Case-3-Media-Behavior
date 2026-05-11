@@ -1,6 +1,7 @@
 "use client";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { WordReveal, CountUp } from "./Motion";
 
 export default function BrandBand() {
   const ref = useRef<HTMLDivElement>(null);
@@ -24,15 +25,19 @@ export default function BrandBand() {
 
         <motion.h2
           style={{ x: xLeft, opacity }}
-          className="font-display text-[40px] md:text-7xl lg:text-[92px] leading-[0.95] tracking-[-0.025em] font-bold text-white"
+          className="font-display text-[40px] md:text-7xl lg:text-[92px] leading-[1.15] tracking-[-0.025em] font-bold text-white py-2"
         >
-          เราไม่ได้ขายกาแฟ.
+          <WordReveal text="เราไม่ได้ขายกาแฟ." />
         </motion.h2>
         <motion.h2
           style={{ x: xRight, opacity }}
-          className="font-display text-[40px] md:text-7xl lg:text-[92px] leading-[0.95] tracking-[-0.025em] font-bold text-white mt-2"
+          className="font-display text-[40px] md:text-7xl lg:text-[92px] leading-[1.15] tracking-[-0.025em] font-bold text-white mt-3 py-2"
         >
-          เราขาย <span className="text-accent-gold">การตัดสินใจ</span> ที่ถูกคน.
+          <WordReveal text="เราขาย" delay={0.3} />{" "}
+          <span className="text-accent-gold inline-block">
+            <WordReveal text="การตัดสินใจ" delay={0.5} />
+          </span>{" "}
+          <WordReveal text="ที่ถูกคน." delay={0.75} />
         </motion.h2>
 
         <div className="mt-12 grid grid-cols-12 gap-6 items-end">
@@ -44,16 +49,23 @@ export default function BrandBand() {
           </div>
           <div className="col-span-12 md:col-span-5 grid grid-cols-3 gap-px bg-white/10 rounded-xl overflow-hidden">
             {[
-              { v: "60%", l: "งบลงสาย Mainstream" },
-              { v: "30%", l: "งบลงสายพรีเมียม" },
-              { v: "10%", l: "งบสำรอง · ชา/wellness" }
-            ].map((s) => (
-              <div key={s.l} className="bg-[#1c1917] p-4">
+              { v: 60, l: "งบลงสาย Mainstream" },
+              { v: 30, l: "งบลงสายพรีเมียม" },
+              { v: 10, l: "งบสำรอง · ชา/wellness" }
+            ].map((s, i) => (
+              <motion.div
+                key={s.l}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-10% 0px" }}
+                transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
+                className="bg-[#1c1917] p-4"
+              >
                 <div className="font-display text-2xl md:text-3xl font-bold text-accent-gold tabular leading-none">
-                  {s.v}
+                  <CountUp to={s.v} suffix="%" duration={1.6} />
                 </div>
                 <div className="text-[11px] text-white/60 mt-2 leading-snug">{s.l}</div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

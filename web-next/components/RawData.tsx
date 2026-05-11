@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { ds } from "@/lib/data";
 import { Card, SectionHeader, Pill, Callout } from "./UI";
+import { CountUp } from "./Motion";
 
 const GENDER_LABELS: Record<string, string> = { หญิง: "หญิง", ชาย: "ชาย", ไม่ระบุ: "ไม่ระบุ" };
 const AGE_LABELS: Record<string, string> = {
@@ -83,7 +84,9 @@ export default function RawData() {
         <div className="grid grid-cols-12 gap-5">
           <Card className="col-span-12 md:col-span-4">
             <div className="tag mb-2">จำนวนคนตอบ</div>
-            <div className="text-5xl font-bold text-ink-0 tabular">{total}</div>
+            <div className="text-5xl font-bold text-ink-0 tabular">
+              <CountUp to={total} duration={1.5} />
+            </div>
             <p className="text-ink-2 mt-3 text-sm leading-relaxed">
               <span className="text-ink-0 font-medium">181 คนที่ตอบครบ</span> หลังตัด 3 แถวที่เว้นข้อมูลพื้นฐาน.
               ไฟล์ดิบก่อนเคลียร์มี <span className="font-mono text-ink-1">200</span> แถว × <span className="font-mono text-ink-1">76</span> คอลัมน์.

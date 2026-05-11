@@ -37,14 +37,15 @@ export default function Hero() {
           </div>
         </Reveal>
 
-        <h1 className="font-display text-[44px] md:text-7xl lg:text-[88px] leading-[0.98] tracking-[-0.03em] font-bold text-ink-0 max-w-5xl">
-          <WordReveal text="จากร้านกาแฟ 4,000 สาขา" />
-          <br />
+        <h1 className="font-display text-[44px] md:text-7xl lg:text-[88px] leading-[1.25] tracking-[-0.03em] font-bold text-ink-0 max-w-5xl">
+          <span className="block py-3 md:py-4">
+            <WordReveal text="จากร้านกาแฟ 4,000 สาขา" />
+          </span>
           <motion.span
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.55, ease: [0.2, 0.8, 0.2, 1] }}
-            className="shine-text font-display inline-block"
+            className="shine-text font-display block py-3 md:py-4 mt-2 md:mt-3"
           >
             สู่ขวดบนชั้นในเซเว่น.
           </motion.span>

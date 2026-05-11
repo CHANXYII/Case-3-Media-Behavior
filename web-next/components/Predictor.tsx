@@ -119,9 +119,9 @@ export default function Predictor() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-[11px] font-mono text-ink-2">{p.code}</div>
-                    <div className="text-base font-semibold text-ink-0 leading-tight">{p.name}</div>
+                    <div className="text-base font-semibold text-ink-0 leading-snug">{p.name}</div>
                   </div>
-                  <div className="font-mono text-[11px] text-ink-2 text-right tabular leading-tight">
+                  <div className="font-mono text-[11px] text-ink-2 text-right tabular leading-snug">
                     n={b.labelled_size}
                     <br />
                     ลอง {fmtPct(b.try_rate)}
