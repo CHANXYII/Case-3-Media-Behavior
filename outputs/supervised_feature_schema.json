@@ -15,22 +15,6 @@
       "max": 5.0,
       "median": 4.0,
       "is_likert": true
-    },
-    {
-      "name": "coffee_convenience",
-      "label": "Convenience importance",
-      "min": 1.0,
-      "max": 5.0,
-      "median": 4.0,
-      "is_likert": true
-    },
-    {
-      "name": "coffee_nutrition",
-      "label": "Nutrition importance",
-      "min": 1.0,
-      "max": 5.0,
-      "median": 4.0,
-      "is_likert": true
     }
   ],
   "categorical": [
@@ -50,10 +34,62 @@
         "ไม่มี"
       ],
       "default": "ไม่ดื่มกาแฟ Ready to drink เลย"
+    },
+    {
+      "name": "most_freq_rtd_tea_brand",
+      "label": "Most Freq Rtd Tea Brand",
+      "choices": [
+        "Fukuro",
+        "ITONO",
+        "Inncutan",
+        "Orishi",
+        "Orishi Gold",
+        "Pokka",
+        "Shizikino",
+        "Tea P+",
+        "ไม่ดื่มชาพร้อมดื่ม (Ready to drink) เลย",
+        "ไม่ระบุ"
+      ],
+      "default": "Fukuro"
+    },
+    {
+      "name": "dur_online",
+      "label": "Daily online usage",
+      "choices": [
+        "1-2 ชม./วัน",
+        "3-4 ชม./วัน",
+        "5-6 ชม./วัน",
+        "มากกว่า 6 ชม./วัน"
+      ],
+      "default": "มากกว่า 6 ชม./วัน"
     }
   ],
-  "target": "target_try_new_rtd_coffee",
-  "best_model": "RandomForest",
+  "target": "target_try_new_rtd_coffee_choice",
+  "legacy_binary_target": "target_try_new_rtd_coffee",
+  "target_options": [
+    {
+      "value": 0,
+      "key": "no",
+      "label": "ไม่ลอง",
+      "short_label": "ไม่ลอง",
+      "color": "#D85A5A"
+    },
+    {
+      "value": 1,
+      "key": "maybe",
+      "label": "อาจจะลอง",
+      "short_label": "อาจจะ",
+      "color": "#E0A458"
+    },
+    {
+      "value": 2,
+      "key": "try",
+      "label": "ลองแน่นอน",
+      "short_label": "ลอง",
+      "color": "#5BB89A"
+    }
+  ],
+  "best_model": "LogisticRegression",
   "model_files": {
     "logreg": "supervised_logreg.joblib",
     "best": "supervised_best.joblib"

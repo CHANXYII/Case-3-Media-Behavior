@@ -139,38 +139,22 @@ def format_p_value(p_value):
 
 def get_feature_metadata(feature, analysis_df):
     if feature in analysis_df.columns:
-        return {
-            "source_var": feature,
-            "feature_type": "numeric",
-            "level": None,
-        }
-
+        return {"source_var": feature, "feature_type": "numeric", "level": None}
     for col in analysis_df.select_dtypes(include="object").columns:
         prefix = f"{col}_"
         if feature.startswith(prefix):
-            return {
-                "source_var": col,
-                "feature_type": "categorical",
-                "level": feature[len(prefix):],
-            }
-
-    return {
-        "source_var": feature,
-        "feature_type": "unknown",
-        "level": None,
-    }
+            return {"source_var": col, "feature_type": "categorical", "level": feature[len(prefix):]}
+    return {"source_var": feature, "feature_type": "unknown", "level": None}
 
 
 def get_feature_display_label(source_var, feature_type, level=None):
     if feature_type == "numeric":
         return numeric_feature_labels.get(source_var, nice_label_format(source_var).title())
-
     if feature_type == "categorical":
         if (source_var, level) in categorical_value_labels:
             return categorical_value_labels[(source_var, level)]
         base_label = categorical_feature_labels.get(source_var, nice_label_format(source_var).title())
         return f"{base_label} = {level}"
-
     return nice_label_format(source_var)
 
 
@@ -205,11 +189,7 @@ def summarize_feature_effect(source_var, feature_type, analysis_df, target, leve
             "effect_label": f"{lift:+.1f} pts definite try; {maybe_lift:+.1f} pts maybe",
         }
 
-    return {
-        "effect_value": np.nan,
-        "direction": "positive",
-        "effect_label": "",
-    }
+    return {"effect_value": np.nan, "direction": "positive", "effect_label": ""}
 
 
 def build_feature_summary_table(analysis_df, feature_scores, top_n=10):
@@ -218,14 +198,11 @@ def build_feature_summary_table(analysis_df, feature_scores, top_n=10):
 
     rows = []
     used_source_vars = set()
-
     for _, row in significant_scores.iterrows():
         metadata = get_feature_metadata(row["feature"], analysis_df)
         source_var = metadata["source_var"]
-
         if source_var in used_source_vars:
             continue
-
         effect_summary = summarize_feature_effect(
             source_var=source_var,
             feature_type=metadata["feature_type"],
@@ -233,7 +210,6 @@ def build_feature_summary_table(analysis_df, feature_scores, top_n=10):
             target=target,
             level=metadata["level"],
         )
-
         rows.append({
             "feature": row["feature"],
             "source_var": source_var,
@@ -248,7 +224,6 @@ def build_feature_summary_table(analysis_df, feature_scores, top_n=10):
             **effect_summary,
         })
         used_source_vars.add(source_var)
-
         if len(rows) >= top_n:
             break
 
@@ -346,15 +321,10 @@ def make_target_distribution(df):
     pcts = counts.values / total * 100
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 6))
-
-    # left: donut
     wedge_props = {"width": 0.5, "edgecolor": "white", "linewidth": 2}
     axes[0].pie(
-        pcts,
-        labels=None,
-        colors=colors,
-        autopct=lambda p: f"{p:.1f}%",
-        startangle=90,
+        pcts, labels=None, colors=colors,
+        autopct=lambda p: f"{p:.1f}%", startangle=90,
         wedgeprops=wedge_props,
         textprops={"fontsize": 14, "fontweight": "bold"},
         pctdistance=0.75,
@@ -362,22 +332,15 @@ def make_target_distribution(df):
     axes[0].set_title("Trial Intent Distribution\n(% of valid respondents)", fontsize=14, fontweight="bold")
     axes[0].legend(
         labels=[f"{l}  n={c}" for l, c in zip(labels, counts.values)],
-        loc="lower center",
-        frameon=False,
-        fontsize=11,
+        loc="lower center", frameon=False, fontsize=11,
     )
 
-    # right: horizontal bar with count + pct labels
     bars = axes[1].barh(labels, pcts, color=colors, alpha=0.9, height=0.45)
     axes[1].set_xlim(0, 110)
     for bar, pct, cnt in zip(bars, pcts, counts.values):
         axes[1].text(
-            bar.get_width() + 1.5,
-            bar.get_y() + bar.get_height() / 2,
-            f"{pct:.1f}%  (n={cnt})",
-            va="center",
-            fontsize=13,
-            fontweight="bold",
+            bar.get_width() + 1.5, bar.get_y() + bar.get_height() / 2,
+            f"{pct:.1f}%  (n={cnt})", va="center", fontsize=13, fontweight="bold",
         )
     axes[1].set_xlabel("Percent of valid respondents")
     axes[1].set_title("Count breakdown", fontsize=14, fontweight="bold")
@@ -387,9 +350,7 @@ def make_target_distribution(df):
 
     fig.suptitle(
         f"Target: Three-choice willingness to try new RTD coffee  |  n={total} valid  |  excluded NaN={len(df)-total}",
-        fontsize=13,
-        color="#555555",
-        y=1.01,
+        fontsize=13, color="#555555", y=1.01,
     )
     plt.tight_layout()
     plt.savefig(output_dir / "target_distribution.png", dpi=300, bbox_inches="tight")
@@ -410,7 +371,6 @@ def make_tryrate_by_segment(df, seg_cols, title, filename):
         if col not in valid.columns:
             ax.set_visible(False)
             continue
-
         grp = (
             valid.groupby(col, observed=True)["definite_try"]
             .agg(try_rate="mean", n="count")
@@ -420,20 +380,11 @@ def make_tryrate_by_segment(df, seg_cols, title, filename):
         grp["try_pct"] = grp["try_rate"] * 100
         overall = valid["definite_try"].mean() * 100
 
-        colors = [
-            positive_driver_color if v >= overall else negative_driver_color
-            for v in grp["try_pct"]
-        ]
+        colors = [positive_driver_color if v >= overall else negative_driver_color for v in grp["try_pct"]]
         bars = ax.barh(grp[col].astype(str), grp["try_pct"], color=colors, alpha=0.88, height=0.55)
-
         for bar, pct, n_val in zip(bars, grp["try_pct"], grp["n"]):
-            ax.text(
-                bar.get_width() + 0.8,
-                bar.get_y() + bar.get_height() / 2,
-                f"{pct:.1f}%  (n={n_val})",
-                va="center",
-                fontsize=10,
-            )
+            ax.text(bar.get_width() + 0.8, bar.get_y() + bar.get_height() / 2,
+                    f"{pct:.1f}%  (n={n_val})", va="center", fontsize=10)
 
         ax.axvline(overall, color="#555555", linestyle="--", linewidth=1.2, label=f"Overall {overall:.1f}%")
         ax.set_xlim(0, 110)
@@ -472,23 +423,15 @@ def make_likert_by_target(df):
         plot_df = valid[[col, target_column]].copy()
         plot_df[target_column] = plot_df[target_column].map(group_labels)
         sns.boxplot(
-            data=plot_df,
-            x=col,
-            y=target_column,
+            data=plot_df, x=col, y=target_column,
             palette={v: palette[k] for k, v in group_labels.items()},
-            orient="h",
-            ax=ax,
-            width=0.45,
+            orient="h", ax=ax, width=0.45,
             flierprops={"marker": "o", "markersize": 3, "alpha": 0.4},
         )
         mean_try = valid.loc[valid[target_column] == 2, col].mean()
         mean_not = valid.loc[valid[target_column] == 0, col].mean()
         delta = mean_try - mean_not
-        ax.set_title(
-            numeric_feature_labels.get(col, col.replace("_", " ").title()),
-            fontsize=11,
-            fontweight="bold",
-        )
+        ax.set_title(numeric_feature_labels.get(col, col.replace("_", " ").title()), fontsize=11, fontweight="bold")
         ax.set_xlabel(f"Likert score (1-5)  |  Δ mean = {delta:+.2f}", fontsize=9)
         ax.set_ylabel("")
         ax.spines["top"].set_visible(False)
@@ -497,12 +440,8 @@ def make_likert_by_target(df):
     for ax in axes_flat[n:]:
         ax.set_visible(False)
 
-    fig.suptitle(
-        "Likert Attribute Scores by Three-Choice Trial Intent Group",
-        fontsize=15,
-        fontweight="bold",
-        y=1.01,
-    )
+    fig.suptitle("Likert Attribute Scores by Three-Choice Trial Intent Group",
+                 fontsize=15, fontweight="bold", y=1.01)
     plt.tight_layout()
     plt.savefig(output_dir / "likert_by_target.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
@@ -516,10 +455,7 @@ def make_imbalance_summary(df):
     majority = int(counts.max())
     minority = int(counts[counts > 0].min()) if (counts > 0).any() else 0
     imbalance_ratio = majority / minority if minority > 0 else float("inf")
-    weights = {
-        cls: (total / (len(counts) * count) if count > 0 else 0)
-        for cls, count in counts.items()
-    }
+    weights = {cls: (total / (len(counts) * count) if count > 0 else 0) for cls, count in counts.items()}
     baseline_acc = majority / total * 100 if total else 0
 
     fig, axes = plt.subplots(1, 2, figsize=(13, 6))
@@ -528,12 +464,8 @@ def make_imbalance_summary(df):
     bars = axes[0].bar(labels, counts.values, color=colors, alpha=0.88, width=0.45)
     for bar, n_val in zip(bars, counts.values):
         pct = n_val / total * 100 if total else 0
-        axes[0].text(
-            bar.get_x() + bar.get_width() / 2,
-            bar.get_height() + 2,
-            f"n={n_val}\n({pct:.1f}%)",
-            ha="center", va="bottom", fontsize=12, fontweight="bold",
-        )
+        axes[0].text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 2,
+                     f"n={n_val}\n({pct:.1f}%)", ha="center", va="bottom", fontsize=12, fontweight="bold")
     axes[0].set_title("Class Distribution", fontsize=14, fontweight="bold")
     axes[0].set_ylabel("Count")
     axes[0].spines["top"].set_visible(False)
@@ -562,10 +494,8 @@ def make_imbalance_summary(df):
     )
     axes[1].set_title("Imbalance Diagnostics", fontsize=14, fontweight="bold")
 
-    fig.suptitle(
-        f"Target Imbalance Analysis  |  n={total} valid respondents",
-        fontsize=14, fontweight="bold", y=1.02,
-    )
+    fig.suptitle(f"Target Imbalance Analysis  |  n={total} valid respondents",
+                 fontsize=14, fontweight="bold", y=1.02)
     plt.tight_layout()
     plt.savefig(output_dir / "imbalance_summary.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
@@ -604,10 +534,8 @@ def make_minority_profile(df):
     for ax in axes_flat[len(seg_cols):]:
         ax.set_visible(False)
 
-    fig.suptitle(
-        f"Who Are the Definite Triers?  |  Minority class (choice=2) profile  |  n={n_minority}",
-        fontsize=14, fontweight="bold", y=1.02,
-    )
+    fig.suptitle(f"Who Are the Definite Triers?  |  Minority class (choice=2) profile  |  n={n_minority}",
+                 fontsize=14, fontweight="bold", y=1.02)
     plt.tight_layout()
     plt.savefig(output_dir / "minority_profile.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
@@ -628,9 +556,7 @@ def make_cohens_d_chart(df):
         if len(s1) < 2 or len(s0) < 2:
             continue
         n1, n0 = len(s1), len(s0)
-        pooled_std = np.sqrt(
-            ((n1 - 1) * s1.std(ddof=1) ** 2 + (n0 - 1) * s0.std(ddof=1) ** 2) / (n1 + n0 - 2)
-        )
+        pooled_std = np.sqrt(((n1 - 1) * s1.std(ddof=1) ** 2 + (n0 - 1) * s0.std(ddof=1) ** 2) / (n1 + n0 - 2))
         d = (s1.mean() - s0.mean()) / pooled_std if pooled_std > 0 else 0.0
         results.append({
             "feature": col,
@@ -653,10 +579,8 @@ def make_cohens_d_chart(df):
     ax.axvline(0.8, color="#888888", linewidth=0.8, linestyle=":", label="Large effect (d=0.8)")
     ax.axvline(-0.8, color="#888888", linewidth=0.8, linestyle=":")
     ax.set_xlabel("Cohen's d  (positive = definite triers rate this attribute higher than non-triers)")
-    ax.set_title(
-        "Imbalance-Robust Effect Size per Likert Attribute\n(Cohen's d, pooled SD)",
-        fontsize=13, fontweight="bold",
-    )
+    ax.set_title("Imbalance-Robust Effect Size per Likert Attribute\n(Cohen's d, pooled SD)",
+                 fontsize=13, fontweight="bold")
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.grid(axis="x", linestyle="--", alpha=0.2)
@@ -693,32 +617,24 @@ def make_high_value_segments(df, min_n=10, top_n=12):
     seg_df = pd.DataFrame(rows).sort_values("try_rate_pct", ascending=False).head(top_n)
     seg_df = seg_df.sort_values("try_rate_pct", ascending=True)
     seg_df["label"] = seg_df["dimension"] + ": " + seg_df["segment"]
-    colors = [
-        positive_driver_color if r >= overall_rate else negative_driver_color
-        for r in seg_df["try_rate_pct"]
-    ]
+    colors = [positive_driver_color if r >= overall_rate else negative_driver_color for r in seg_df["try_rate_pct"]]
 
     fig, ax = plt.subplots(figsize=(12, max(6, len(seg_df) * 0.55)))
     ax.barh(seg_df["label"], seg_df["try_rate_pct"], color=colors, alpha=0.88, height=0.55)
     for i, (pct, n_val) in enumerate(zip(seg_df["try_rate_pct"], seg_df["n"])):
         ax.text(pct + 0.8, i, f"{pct:.1f}%  (n={n_val})", va="center", fontsize=10)
-    ax.axvline(overall_rate, color="#555555", linestyle="--", linewidth=1.2,
-        label=f"Overall {overall_rate:.1f}%")
+    ax.axvline(overall_rate, color="#555555", linestyle="--", linewidth=1.2, label=f"Overall {overall_rate:.1f}%")
     ax.set_xlim(0, 115)
     ax.set_xlabel("Definite trial-intent rate (%)")
-    ax.set_title(
-        f"Top {top_n} High-Value Audience Segments by Definite Trial Intent\n(min n={min_n} per segment)",
-        fontsize=13, fontweight="bold",
-    )
+    ax.set_title(f"Top {top_n} High-Value Audience Segments by Definite Trial Intent\n(min n={min_n} per segment)",
+                 fontsize=13, fontweight="bold")
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.grid(axis="x", linestyle="--", alpha=0.2)
     ax.legend(fontsize=9, frameon=False)
-    fig.text(
-        0.01, 0.01,
-        "Segments above dashed line are above-average definite trial intent. Prioritize for RTD coffee launch targeting.",
-        ha="left", fontsize=9, color="#666666",
-    )
+    fig.text(0.01, 0.01,
+             "Segments above dashed line are above-average definite trial intent. Prioritize for RTD coffee launch targeting.",
+             ha="left", fontsize=9, color="#666666")
     plt.tight_layout(rect=[0, 0.04, 1, 1])
     plt.savefig(output_dir / "high_value_segments.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
@@ -726,18 +642,12 @@ def make_high_value_segments(df, min_n=10, top_n=12):
 
 def make_images(df):
     make_target_distribution(df)
-    make_tryrate_by_segment(
-        df,
+    make_tryrate_by_segment(df,
         ["gender", "age_group", "occupation", "income"],
-        "Definite Try Rate by Demographic Segment",
-        "tryrate_by_demographic.png",
-    )
-    make_tryrate_by_segment(
-        df,
+        "Definite Try Rate by Demographic Segment", "tryrate_by_demographic.png")
+    make_tryrate_by_segment(df,
         ["presenter_effect", "dur_online", "most_freq_coffee", "most_freq_rtd_brand"],
-        "Definite Try Rate by Behavior / Media Segment",
-        "tryrate_by_behavior.png",
-    )
+        "Definite Try Rate by Behavior / Media Segment", "tryrate_by_behavior.png")
     make_likert_by_target(df)
     make_imbalance_summary(df)
     make_minority_profile(df)
@@ -748,27 +658,20 @@ def make_images(df):
     distribution_df = make_distribution_table(analysis_df)
     correlation_df = make_correlation_table(analysis_df)
 
-    gender_counts = df["gender"].fillna("ไม่ระบุ").value_counts()
-    fig, ax = plt.subplots(figsize=(8, 6))
-    sns.barplot(x=gender_counts.index, y=gender_counts.values, ax=ax, palette="Blues_d")
-    ax.set_title("Demographic Profile: เพศ")
-    ax.set_xlabel("")
-    ax.set_ylabel("จำนวนคน")
-    ax.tick_params(axis="x", rotation=15)
-    plt.tight_layout()
-    plt.savefig(output_dir / "demographic_gender.png", dpi=300, bbox_inches="tight")
-    plt.close(fig)
-
-    age_counts = df["age_group"].fillna("ไม่ระบุ").value_counts()
-    fig, ax = plt.subplots(figsize=(8, 6))
-    sns.barplot(x=age_counts.index, y=age_counts.values, ax=ax, palette="Greens")
-    ax.set_title("Demographic Profile: ช่วงอายุ")
-    ax.set_xlabel("")
-    ax.set_ylabel("จำนวนคน")
-    ax.tick_params(axis="x", rotation=15)
-    plt.tight_layout()
-    plt.savefig(output_dir / "demographic_age.png", dpi=300, bbox_inches="tight")
-    plt.close(fig)
+    for col, palette, title, filename in [
+        ("gender", "Blues_d", "Demographic Profile: เพศ", "demographic_gender.png"),
+        ("age_group", "Greens", "Demographic Profile: ช่วงอายุ", "demographic_age.png"),
+    ]:
+        counts = df[col].fillna("ไม่ระบุ").value_counts()
+        fig, ax = plt.subplots(figsize=(8, 6))
+        sns.barplot(x=counts.index, y=counts.values, ax=ax, palette=palette)
+        ax.set_title(title)
+        ax.set_xlabel("")
+        ax.set_ylabel("จำนวนคน")
+        ax.tick_params(axis="x", rotation=15)
+        plt.tight_layout()
+        plt.savefig(output_dir / filename, dpi=300, bbox_inches="tight")
+        plt.close(fig)
 
     occupation_counts = df["occupation"].fillna("ไม่ระบุ").value_counts().head(8)
     fig, ax = plt.subplots(figsize=(9, 6))
@@ -784,51 +687,27 @@ def make_images(df):
     top_features.to_csv(output_dir / "feature_selection_summary.csv", index=False, encoding="utf-8-sig")
 
     plot_data = top_features.sort_values("f_score", ascending=True).copy()
-    colors = [
-        positive_driver_color if direction == "positive" else negative_driver_color
-        for direction in plot_data["direction"]
-    ]
+    colors = [positive_driver_color if direction == "positive" else negative_driver_color
+              for direction in plot_data["direction"]]
 
     fig, ax = plt.subplots(figsize=(13, 8))
     ax.barh(plot_data["display_label"], plot_data["f_score"], color=colors, alpha=0.95)
-
     max_score = plot_data["f_score"].max()
     x_padding = max_score * 0.32
     ax.set_xlim(0, max_score + x_padding)
 
     for idx, (_, row) in enumerate(plot_data.iterrows()):
         annotation = f"{format_p_value(row['p_value'])} | {row['effect_label']}"
-        ax.text(
-            row["f_score"] + max_score * 0.02,
-            idx,
-            annotation,
-            va="center",
-            ha="left",
-            fontsize=10,
-            color="#2F2F2F",
-        )
+        ax.text(row["f_score"] + max_score * 0.02, idx, annotation,
+                va="center", ha="left", fontsize=10, color="#2F2F2F")
 
-    ax.set_title(
-        "Top data-driven drivers of trial intent for new RTD coffee",
-        loc="left",
-        fontsize=18,
-        fontweight="bold",
-        pad=16,
-    )
-    ax.text(
-        0,
-        1.02,
-        (
-            f"ANOVA feature screening | n = {len(analysis_df)} valid respondents | "
-            f"definite try = {(analysis_df[target_column].eq(2)).mean():.1%} | "
-            f"maybe = {(analysis_df[target_column].eq(1)).mean():.1%}"
-        ),
-        transform=ax.transAxes,
-        ha="left",
-        va="bottom",
-        fontsize=11,
-        color="#555555",
-    )
+    ax.set_title("Top data-driven drivers of trial intent for new RTD coffee",
+                 loc="left", fontsize=18, fontweight="bold", pad=16)
+    ax.text(0, 1.02,
+        f"ANOVA feature screening | n = {len(analysis_df)} valid respondents | "
+        f"definite try = {(analysis_df[target_column].eq(2)).mean():.1%} | "
+        f"maybe = {(analysis_df[target_column].eq(1)).mean():.1%}",
+        transform=ax.transAxes, ha="left", va="bottom", fontsize=11, color="#555555")
     ax.set_xlabel("ANOVA F-score (higher = stronger separation across the three target choices)")
     ax.set_ylabel("")
     ax.grid(axis="x", linestyle="--", alpha=0.25)
@@ -836,25 +715,14 @@ def make_images(df):
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.spines["left"].set_visible(False)
-    ax.legend(
-        handles=[
-            Patch(facecolor=positive_driver_color, label="Positive association with trial intent"),
-            Patch(facecolor=negative_driver_color, label="Negative association with trial intent"),
-        ],
-        loc="lower right",
-        frameon=False,
-    )
-    fig.text(
-        0.01,
-        0.01,
-        (
-            "Note: F-score highlights statistical association, not causality. "
-            "Numeric effects compare definite triers vs non-triers; categorical effects show definite-try and maybe-rate gaps."
-        ),
-        ha="left",
-        fontsize=9,
-        color="#666666",
-    )
+    ax.legend(handles=[
+        Patch(facecolor=positive_driver_color, label="Positive association with trial intent"),
+        Patch(facecolor=negative_driver_color, label="Negative association with trial intent"),
+    ], loc="lower right", frameon=False)
+    fig.text(0.01, 0.01,
+        "Note: F-score highlights statistical association, not causality. "
+        "Numeric effects compare definite triers vs non-triers; categorical effects show definite-try and maybe-rate gaps.",
+        ha="left", fontsize=9, color="#666666")
     plt.tight_layout(rect=[0, 0.03, 1, 0.96])
     plt.savefig(output_dir / "feature_selection.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
@@ -880,21 +748,4 @@ if __name__ == "__main__":
     df = build_clean_data()
     make_images(df)
     print(f"Clean data file: {clean_data_path}")
-    print("Output images:")
-    print(output_dir / "target_distribution.png")
-    print(output_dir / "tryrate_by_demographic.png")
-    print(output_dir / "tryrate_by_behavior.png")
-    print(output_dir / "likert_by_target.png")
-    print(output_dir / "imbalance_summary.png")
-    print(output_dir / "minority_profile.png")
-    print(output_dir / "cohens_d_features.png")
-    print(output_dir / "high_value_segments.png")
-    print(output_dir / "demographic_gender.png")
-    print(output_dir / "demographic_age.png")
-    print(output_dir / "demographic_occupation.png")
-    print(output_dir / "feature_selection.png")
-    print(output_dir / "distribution_analysis.png")
-    print(output_dir / "correlation_heatmap.png")
-    print("Feature selection = f_classif")
-    print("Scale transformation = StandardScaler on numeric/Likert columns")
-    print("Encoding = pd.get_dummies on categorical columns")
+    print(f"Output dir: {output_dir}")

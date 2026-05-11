@@ -1,11 +1,11 @@
-feature,source_var,feature_type,display_label,f_score,p_value,effect_value,direction,effect_label
+﻿feature,source_var,feature_type,display_label,f_score,p_value,effect_value,direction,effect_label
 most_freq_rtd_brand_ไม่ดื่มกาแฟ Ready to drink เลย,most_freq_rtd_brand,categorical,No regular RTD coffee brand,15.611562622762639,1.003927292811605e-06,-21.551724137931032,negative,-21.6 pts definite try; -11.4 pts maybe
 coffee_value,coffee_value,numeric,Perceived value,7.874353357449927,0.0006236992437630669,1.3223529411764705,positive,try vs no +1.32 avg; maybe 3.67
-coffee_aroma,coffee_aroma,numeric,Aroma,6.811545432409927,0.001600614238132578,1.1105882352941179,positive,try vs no +1.11 avg; maybe 4.18
+coffee_aroma,coffee_aroma,numeric,Aroma preference,6.811545432409927,0.001600614238132578,1.1105882352941179,positive,try vs no +1.11 avg; maybe 4.18
 most_freq_rtd_tea_brand_Orishi Gold,most_freq_rtd_tea_brand,categorical,Primary RTD tea brand = Orishi Gold,6.768363479072523,0.0016636413207511038,62.71929824561404,positive,+62.7 pts definite try; -40.8 pts maybe
-dur_online_1-2 ชม./วัน,dur_online,categorical,Online use 1-2 hrs/day,6.63924697310773,0.0018675803868727586,38.18181818181819,positive,+38.2 pts definite try; -55.7 pts maybe
-coffee_nutrition,coffee_nutrition,numeric,Nutrition,5.788250436819439,0.004025533006740979,1.1623529411764704,positive,try vs no +1.16 avg; maybe 3.51
-holiday_streaming_ดูน้อยกว่าปกติ,holiday_streaming,categorical,Holiday streaming lower than usual,5.57337716244768,0.00489498279645269,32.280219780219774,positive,+32.3 pts definite try; -24.5 pts maybe
-coffee_convenience,coffee_convenience,numeric,Convenience,5.473159513265741,0.005363654216930053,0.9552941176470591,positive,try vs no +0.96 avg; maybe 4.09
+dur_online_1-2 ชม./วัน,dur_online,categorical,Daily online usage = 1-2 ชม./วัน,6.63924697310773,0.0018675803868727586,38.18181818181819,positive,+38.2 pts definite try; -55.7 pts maybe
+coffee_nutrition,coffee_nutrition,numeric,Nutrition importance,5.788250436819439,0.004025533006740979,1.1623529411764704,positive,try vs no +1.16 avg; maybe 3.51
+holiday_streaming_ดูน้อยกว่าปกติ,holiday_streaming,categorical,Holiday Streaming = ดูน้อยกว่าปกติ,5.57337716244768,0.00489498279645269,32.280219780219774,positive,+32.3 pts definite try; -24.5 pts maybe
+coffee_convenience,coffee_convenience,numeric,Convenience importance,5.473159513265741,0.005363654216930053,0.9552941176470591,positive,try vs no +0.96 avg; maybe 4.09
 coffee_caffeine,coffee_caffeine,numeric,Caffeine importance,4.935555895683565,0.008781365578211261,1.1929411764705877,positive,try vs no +1.19 avg; maybe 3.67
-coffee_smooth,coffee_smooth,numeric,Smoothness,4.664874147416168,0.011273536909381163,1.032941176470588,positive,try vs no +1.03 avg; maybe 4.01
+coffee_smooth,coffee_smooth,numeric,Smooth taste preference,4.664874147416168,0.011273536909381163,1.032941176470588,positive,try vs no +1.03 avg; maybe 4.01

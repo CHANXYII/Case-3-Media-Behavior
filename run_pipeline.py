@@ -1,17 +1,3 @@
-"""End-to-end pipeline runner for the Case 3 Media Behavior project.
-
-Runs every stage in order so the dataset, charts, models, and dashboard
-artefacts stay in sync:
-
-    raw csv ─► clean + feature selection ─► unsupervised personas
-                                       ─► supervised model + coefficients
-                                       ─► per-cluster supervised drivers
-                                       ─► web dashboard artefacts
-
-Usage::
-
-    python run_pipeline.py
-"""
 from __future__ import annotations
 
 import runpy
@@ -24,14 +10,10 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 STAGES: list[tuple[str, str]] = [
-    ("Clean + feature selection",
-     "src.feature_engineering.feature_selection_visualization"),
-    ("Unsupervised (K-Means / DBSCAN / IsolationForest)",
-     "src.unsupervised.unsupervised_learning"),
-    ("Supervised training",
-     "src.supervised.train"),
-    ("Per-cluster supervised drivers",
-     "src.supervised.per_cluster"),
+    ("Clean + feature selection", "src.feature_engineering.feature_selection_visualization"),
+    ("Unsupervised (K-Means / DBSCAN / IsolationForest)", "src.unsupervised.unsupervised_learning"),
+    ("Supervised training", "src.supervised.train"),
+    ("Per-cluster supervised drivers", "src.supervised.per_cluster"),
 ]
 
 

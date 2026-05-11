@@ -221,7 +221,7 @@ export default function Predictor() {
               <div>
                 <div className="uppercase tracking-widest">intercept</div>
                 <div className="text-ink-0 text-base tabular">
-                  {block.model.intercepts?.["2"]?.toFixed(2) ?? block.model.intercept?.toFixed(2)}
+                  {block.model.intercepts?.["2"]?.toFixed(2)}
                 </div>
               </div>
             </div>

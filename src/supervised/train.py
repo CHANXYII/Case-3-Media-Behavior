@@ -1,44 +1,3 @@
-"""Supervised learning pipeline for the RTD coffee choice classifier.
-
-Problem
--------
-Multiclass classification: predict ``target_try_new_rtd_coffee_choice``
-(0 = will not try, 1 = might try, 2 = will definitely try) using ONLY the features that
-the feature-selection step (``src/feature_engineering/feature_selection_visualization.py``)
-flagged as statistically significant (ANOVA p ≤ 0.05, deduplicated by source
-variable). This keeps the model parsimonious and makes the coefficients
-directly interpretable for the Business Insight dashboard.
-
-Pipeline
---------
-1. Load ``CLEAN_CSV`` (uses ``CLUSTERS_CSV`` only when nothing extra is asked).
-2. Read the selected features from
-   ``outputs/feature_selection_summary.csv`` and use those source variables
-   only. If the file is missing, fall back to a curated default list.
-3. Stratified train/test split (80/20).
-4. Train three models with balanced classes where supported:
-     * Logistic Regression  → exposes interpretable coefficients
-     * Random Forest        → non-linear baseline + impurity importance
-     * Gradient Boosting    → strong non-linear comparator
-5. Evaluate via 5-fold stratified CV (Accuracy / macro Precision / macro Recall /
-   macro F1 / OVR ROC-AUC) AND on the held-out test set.
-6. Persist artefacts:
-     * ``models/supervised_logreg.joblib`` (full pipeline)
-     * ``models/supervised_best.joblib``   (highest-CV-F1 model)
-     * ``outputs/supervised_metrics.json``
-     * ``outputs/supervised_coefficients.csv``
-     * ``outputs/supervised_coefficients.png``
-     * ``outputs/supervised_feature_importance.png``
-     * ``outputs/supervised_model_comparison.png``
-     * ``outputs/supervised_confusion_matrix.png``
-     * ``outputs/supervised_roc_curve.png``
-     * ``outputs/supervised_feature_schema.json`` (for the web UI)
-
-Run::
-
-    python -m src.feature_engineering.feature_selection_visualization
-    python -m src.supervised.train
-"""
 from __future__ import annotations
 
 import json
@@ -57,15 +16,8 @@ from sklearn.exceptions import ConvergenceWarning
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
-    accuracy_score,
-    auc,
-    classification_report,
-    confusion_matrix,
-    f1_score,
-    precision_score,
-    recall_score,
-    roc_auc_score,
-    roc_curve,
+    accuracy_score, auc, classification_report, confusion_matrix,
+    f1_score, precision_score, recall_score, roc_auc_score, roc_curve,
 )
 from sklearn.model_selection import StratifiedKFold, cross_validate, train_test_split
 from sklearn.pipeline import Pipeline
@@ -76,24 +28,15 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.config import (
-    CLEAN_CSV,
-    LEGACY_BINARY_TARGET_COLUMN,
-    MODELS_DIR,
-    OUTPUTS_DIR,
-    TARGET_COLUMN,
-    ensure_dirs,
-    setup_thai_font,
+    CLEAN_CSV, LEGACY_BINARY_TARGET_COLUMN, MODELS_DIR, OUTPUTS_DIR,
+    TARGET_COLUMN, ensure_dirs, setup_thai_font,
 )
 
 RANDOM_STATE = 42
 TEST_SIZE = 0.2
 CV_SPLITS = 5
-TOP_N_FEATURES = 5  # data-driven rule: top N source variables by ANOVA F-score
-CLASS_LABELS = {
-    0: "ไม่ลอง",
-    1: "อาจจะลอง",
-    2: "ลองแน่นอน",
-}
+TOP_N_FEATURES = 5
+CLASS_LABELS = {0: "ไม่ลอง", 1: "อาจจะลอง", 2: "ลองแน่นอน"}
 TARGET_OPTIONS = [
     {"value": 0, "key": "no", "label": CLASS_LABELS[0], "short_label": "ไม่ลอง", "color": "#D85A5A"},
     {"value": 1, "key": "maybe", "label": CLASS_LABELS[1], "short_label": "อาจจะ", "color": "#E0A458"},
@@ -101,14 +44,9 @@ TARGET_OPTIONS = [
 ]
 
 FEATURE_SUMMARY_CSV = OUTPUTS_DIR / "feature_selection_summary.csv"
-
-# Fallback in case the user runs train.py without the feature-selection step.
-# These are the source variables the feature-selection report currently keeps
-# (ANOVA p ≤ 0.05, deduped by source variable, capped at TOP_N_FEATURES).
 FALLBACK_NUMERIC = ["coffee_value", "coffee_aroma", "coffee_convenience", "coffee_nutrition"]
 FALLBACK_CATEGORICAL = ["most_freq_rtd_brand"]
 
-# Friendly labels reused across the model report and the web UI.
 FEATURE_LABELS: dict[str, str] = {
     "coffee_value": "Perceived value",
     "coffee_aroma": "Aroma preference",
@@ -137,18 +75,8 @@ def load_dataset() -> pd.DataFrame:
 
 
 def load_selected_features(df: pd.DataFrame) -> tuple[list[str], list[str]]:
-    """Read the deduped source variables from the feature-selection report.
-
-    Selection rule (data-driven, no human curation):
-        ``Top TOP_N_FEATURES rows by F-score from feature_selection_summary.csv,
-        after deduplicating by source variable.``
-    """
     if not FEATURE_SUMMARY_CSV.exists():
-        print(
-            f"NOTE: {FEATURE_SUMMARY_CSV.name} not found, using fallback feature list. "
-            "Run `python -m src.feature_engineering.feature_selection_visualization` "
-            "to refresh the selection."
-        )
+        print(f"NOTE: {FEATURE_SUMMARY_CSV.name} not found, using fallback feature list.")
         numeric = [c for c in FALLBACK_NUMERIC if c in df.columns]
         categorical = [c for c in FALLBACK_CATEGORICAL if c in df.columns]
         return numeric, categorical
@@ -167,10 +95,8 @@ def load_selected_features(df: pd.DataFrame) -> tuple[list[str], list[str]]:
             categorical.append(src)
         if len(numeric) + len(categorical) >= TOP_N_FEATURES:
             break
-    print(
-        f"Selected top {TOP_N_FEATURES} from {FEATURE_SUMMARY_CSV.name}: "
-        f"{len(numeric)} numeric + {len(categorical)} categorical"
-    )
+    print(f"Selected top {TOP_N_FEATURES} from {FEATURE_SUMMARY_CSV.name}: "
+          f"{len(numeric)} numeric + {len(categorical)} categorical")
     return numeric, categorical
 
 
@@ -181,7 +107,7 @@ def build_preprocessor(numeric_cols: list[str], categorical_cols: list[str]) -> 
     ])
     try:
         ohe = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
-    except TypeError:  # sklearn < 1.2
+    except TypeError:
         ohe = OneHotEncoder(handle_unknown="ignore", sparse=False)
     categorical_pipe = Pipeline([
         ("imputer", SimpleImputer(strategy="most_frequent")),
@@ -217,11 +143,9 @@ def cross_validate_model(model: Pipeline, X: pd.DataFrame, y: pd.Series) -> dict
         warnings.simplefilter("ignore", ConvergenceWarning)
         scores = cross_validate(model, X, y, cv=cv, scoring=scoring, n_jobs=-1)
     return {
-        f"cv_{metric}_mean": float(np.mean(scores[f"test_{metric}"]))
-        for metric in scoring
+        f"cv_{metric}_mean": float(np.mean(scores[f"test_{metric}"])) for metric in scoring
     } | {
-        f"cv_{metric}_std": float(np.std(scores[f"test_{metric}"]))
-        for metric in scoring
+        f"cv_{metric}_std": float(np.std(scores[f"test_{metric}"])) for metric in scoring
     }
 
 
@@ -241,12 +165,9 @@ def evaluate_holdout(model: Pipeline, X_test: pd.DataFrame, y_test: pd.Series) -
     labels = sorted(CLASS_LABELS)
     metrics["confusion_matrix"] = confusion_matrix(y_test, y_pred, labels=labels).tolist()
     metrics["classification_report"] = classification_report(
-        y_test,
-        y_pred,
-        labels=labels,
+        y_test, y_pred, labels=labels,
         target_names=[CLASS_LABELS[i] for i in labels],
-        zero_division=0,
-        output_dict=True,
+        zero_division=0, output_dict=True,
     )
     return metrics
 
@@ -287,11 +208,8 @@ def plot_confusion_matrices(results: dict[str, dict], path: Path) -> None:
     for ax, (name, info) in zip(axes, results.items()):
         cm = np.array(info["holdout"]["confusion_matrix"])
         labels = [CLASS_LABELS[i] for i in sorted(CLASS_LABELS)]
-        sns.heatmap(
-            cm, annot=True, fmt="d", cmap="Blues", cbar=False, ax=ax,
-            xticklabels=labels,
-            yticklabels=labels,
-        )
+        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", cbar=False, ax=ax,
+                    xticklabels=labels, yticklabels=labels)
         ax.set_title(f"{name}\nMacro F1 = {info['holdout']['test_f1_macro']:.3f}")
         ax.set_xlabel("Predicted")
         ax.set_ylabel("Actual")
@@ -340,9 +258,9 @@ def export_logreg_coefficients(model: Pipeline, feature_names: list[str]) -> pd.
                 "abs_coefficient": abs(coef),
             })
     coef_df = pd.DataFrame(rows).sort_values("abs_coefficient", ascending=False).reset_index(drop=True)
-
-    csv_path = OUTPUTS_DIR / "supervised_coefficients.csv"
-    coef_df.drop(columns="abs_coefficient").to_csv(csv_path, index=False, encoding="utf-8-sig")
+    coef_df.drop(columns="abs_coefficient").to_csv(
+        OUTPUTS_DIR / "supervised_coefficients.csv", index=False, encoding="utf-8-sig"
+    )
 
     plot_df = coef_df[coef_df["class"] == 2].head(15).iloc[::-1]
     fig, ax = plt.subplots(figsize=(10, max(5, 0.4 * len(plot_df))))
@@ -357,7 +275,6 @@ def export_logreg_coefficients(model: Pipeline, feature_names: list[str]) -> pd.
     plt.tight_layout()
     plt.savefig(OUTPUTS_DIR / "supervised_coefficients.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
-
     return coef_df
 
 
@@ -379,12 +296,7 @@ def export_tree_importance(model: Pipeline, feature_names: list[str]) -> None:
     plt.close(fig)
 
 
-def build_feature_schema(
-    df: pd.DataFrame,
-    numeric_cols: list[str],
-    categorical_cols: list[str],
-) -> dict:
-    """Describe each input feature so the web UI can build controls automatically."""
+def build_feature_schema(df: pd.DataFrame, numeric_cols: list[str], categorical_cols: list[str]) -> dict:
     schema: dict = {"numeric": [], "categorical": []}
     for col in numeric_cols:
         series = pd.to_numeric(df[col], errors="coerce").dropna()
@@ -397,11 +309,9 @@ def build_feature_schema(
             "is_likert": bool(series.dropna().between(1, 5).all() and series.nunique() <= 5),
         })
     for col in categorical_cols:
-        choices = (
-            df[col].dropna().astype(str).str.strip()
-            .replace("", np.nan).dropna().unique().tolist()
+        choices = sorted(
+            df[col].dropna().astype(str).str.strip().replace("", np.nan).dropna().unique().tolist()
         )
-        choices = sorted(choices)
         mode = df[col].mode(dropna=True)
         default = str(mode.iloc[0]) if len(mode) else (choices[0] if choices else "")
         schema["categorical"].append({
@@ -418,7 +328,6 @@ def main() -> None:
     setup_thai_font()
 
     df = load_dataset()
-
     if TARGET_COLUMN not in df.columns:
         raise KeyError(f"Target column '{TARGET_COLUMN}' missing from dataset.")
 
@@ -452,25 +361,15 @@ def main() -> None:
 
     model_specs = {
         "LogisticRegression": LogisticRegression(
-            max_iter=2000,
-            class_weight="balanced",
-            solver="lbfgs",
-            multi_class="auto",
-            random_state=RANDOM_STATE,
+            max_iter=2000, class_weight="balanced", solver="lbfgs",
+            multi_class="auto", random_state=RANDOM_STATE,
         ),
         "RandomForest": RandomForestClassifier(
-            n_estimators=400,
-            max_depth=None,
-            min_samples_leaf=2,
-            class_weight="balanced",
-            random_state=RANDOM_STATE,
-            n_jobs=-1,
+            n_estimators=400, max_depth=None, min_samples_leaf=2,
+            class_weight="balanced", random_state=RANDOM_STATE, n_jobs=-1,
         ),
         "GradientBoosting": GradientBoostingClassifier(
-            n_estimators=250,
-            learning_rate=0.05,
-            max_depth=3,
-            random_state=RANDOM_STATE,
+            n_estimators=250, learning_rate=0.05, max_depth=3, random_state=RANDOM_STATE,
         ),
     }
 
@@ -490,7 +389,6 @@ def main() -> None:
                 print(f"  {k:>17}: {v:.4f}")
         results[name] = {"model": pipe, "cv": cv_metrics, "holdout": holdout}
 
-    # Choose the best model by macro F1 (handles class imbalance better than accuracy).
     best_name = max(results, key=lambda n: results[n]["cv"]["cv_f1_macro_mean"])
     print(f"\nBest model by CV macro F1: {best_name} "
           f"(F1 = {results[best_name]['cv']['cv_f1_macro_mean']:.4f})")
@@ -517,10 +415,7 @@ def main() -> None:
     schema["legacy_binary_target"] = LEGACY_BINARY_TARGET_COLUMN
     schema["target_options"] = TARGET_OPTIONS
     schema["best_model"] = best_name
-    schema["model_files"] = {
-        "logreg": "supervised_logreg.joblib",
-        "best": "supervised_best.joblib",
-    }
+    schema["model_files"] = {"logreg": "supervised_logreg.joblib", "best": "supervised_best.joblib"}
     schema_path = OUTPUTS_DIR / "supervised_feature_schema.json"
     schema_path.write_text(json.dumps(schema, indent=2, ensure_ascii=False), encoding="utf-8")
 
@@ -535,10 +430,7 @@ def main() -> None:
         "categorical_features": categorical_cols,
         "split": {"test_size": TEST_SIZE, "random_state": RANDOM_STATE, "stratified": True},
         "cv": {"n_splits": CV_SPLITS, "stratified": True, "random_state": RANDOM_STATE},
-        "models": {
-            name: {"cv": info["cv"], "holdout": info["holdout"]}
-            for name, info in results.items()
-        },
+        "models": {name: {"cv": info["cv"], "holdout": info["holdout"]} for name, info in results.items()},
         "best_model_by_cv_f1_macro": best_name,
     }
     metrics_path = OUTPUTS_DIR / "supervised_metrics.json"

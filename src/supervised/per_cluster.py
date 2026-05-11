@@ -1,20 +1,3 @@
-"""Train one multinomial logistic regression per K-Means persona cluster.
-
-This stage links the **unsupervised** customer personas with the
-**supervised** trial-intent classifier, exposing the *behavioural
-drivers* of trial intent inside each persona instead of a single
-global coefficient set.
-
-Output: ``outputs/cluster_supervised.json``
-
-For every cluster we report:
-- size, labelled count, three-choice target distribution
-- per-feature coefficient (log-odds), odds ratio, mean Likert score,
-  and z-score relative to the global mean (so the dashboard can say
-  "Cluster 2 cares 1.4 SD more about packaging than the average")
-
-A *global* model on the full sample is also included for comparison.
-"""
 from __future__ import annotations
 
 import json
@@ -34,12 +17,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.config import CLUSTERS_CSV, LEGACY_BINARY_TARGET_COLUMN, OUTPUTS_DIR, TARGET_COLUMN, ensure_dirs
 
-CLASS_LABELS = {
-    0: "ไม่ลอง",
-    1: "อาจจะลอง",
-    2: "ลองแน่นอน",
-}
-
+CLASS_LABELS = {0: "ไม่ลอง", 1: "อาจจะลอง", 2: "ลองแน่นอน"}
 TARGET_OPTIONS = [
     {"value": 0, "key": "no", "label": CLASS_LABELS[0], "short_label": "ไม่ลอง", "color": "#D85A5A"},
     {"value": 1, "key": "maybe", "label": CLASS_LABELS[1], "short_label": "อาจจะ", "color": "#E0A458"},
@@ -47,16 +25,9 @@ TARGET_OPTIONS = [
 ]
 
 NUMERIC_FEATURES = [
-    "coffee_value",
-    "coffee_aroma",
-    "coffee_convenience",
-    "coffee_nutrition",
-    "coffee_smooth",
-    "coffee_brand_trust",
-    "coffee_packaging",
-    "coffee_fresh_taste",
-    "coffee_intensity",
-    "coffee_premium",
+    "coffee_value", "coffee_aroma", "coffee_convenience", "coffee_nutrition",
+    "coffee_smooth", "coffee_brand_trust", "coffee_packaging", "coffee_fresh_taste",
+    "coffee_intensity", "coffee_premium",
 ]
 
 FEATURE_LABELS = {
@@ -79,37 +50,26 @@ def fit_logreg(X: pd.DataFrame, y: pd.Series) -> tuple[np.ndarray, np.ndarray, d
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", ConvergenceWarning)
         clf = LogisticRegression(
-            max_iter=4000,
-            class_weight="balanced",
-            solver="lbfgs",
-            multi_class="auto",
-            C=1.0,
-            random_state=42,
+            max_iter=4000, class_weight="balanced", solver="lbfgs",
+            multi_class="auto", C=1.0, random_state=42,
         )
         clf.fit(Xs, y)
-    score = clf.score(Xs, y)
     return clf.coef_, clf.intercept_, {
         "classes": [int(c) for c in clf.classes_],
         "scaler_mean": scaler.mean_.tolist(),
         "scaler_scale": scaler.scale_.tolist(),
-        "train_accuracy": float(score),
+        "train_accuracy": float(clf.score(Xs, y)),
     }
 
 
 def cluster_summary(df: pd.DataFrame, features: list[str]) -> dict:
-    summary: dict = {}
-    summary["global_means"] = {f: float(df[f].mean()) for f in features}
-    summary["global_stds"] = {f: float(df[f].std(ddof=0)) for f in features}
-    return summary
+    return {
+        "global_means": {f: float(df[f].mean()) for f in features},
+        "global_stds": {f: float(df[f].std(ddof=0)) for f in features},
+    }
 
 
-def per_cluster_block(
-    df: pd.DataFrame,
-    cluster_id: int | None,
-    features: list[str],
-    glob_means: dict,
-    glob_stds: dict,
-) -> dict:
+def per_cluster_block(df, cluster_id, features, glob_means, glob_stds) -> dict:
     if cluster_id is None:
         sub = df
         label = "global"
@@ -119,17 +79,14 @@ def per_cluster_block(
 
     labelled = sub.dropna(subset=[TARGET_COLUMN]).copy()
     labelled[TARGET_COLUMN] = labelled[TARGET_COLUMN].astype(int)
-    choice_counts = {
-        str(i): int((labelled[TARGET_COLUMN] == i).sum())
-        for i in sorted(CLASS_LABELS)
-    }
+    choice_counts = {str(i): int((labelled[TARGET_COLUMN] == i).sum()) for i in sorted(CLASS_LABELS)}
     labelled_size = len(labelled)
     choice_rates = {
         str(i): (choice_counts[str(i)] / labelled_size if labelled_size else None)
         for i in sorted(CLASS_LABELS)
     }
 
-    feat_block: list[dict] = []
+    feat_block = []
     for f in features:
         m = float(sub[f].mean())
         s = glob_stds.get(f, 1.0) or 1.0
@@ -167,15 +124,13 @@ def per_cluster_block(
         coefs, intercepts, meta = fit_logreg(labelled[features], labelled[TARGET_COLUMN])
         coefficients_by_class: dict[str, list[dict]] = {}
         for class_value, class_coefs in zip(meta["classes"], coefs):
-            coef_rows = []
-            for fname, c in zip(features, class_coefs):
-                coef_rows.append({
-                    "feature": fname,
-                    "label": FEATURE_LABELS.get(fname, fname),
-                    "coefficient": float(c),
-                    "odds_ratio": float(np.exp(c)),
-                    "abs_coefficient": float(abs(c)),
-                })
+            coef_rows = [{
+                "feature": fname,
+                "label": FEATURE_LABELS.get(fname, fname),
+                "coefficient": float(c),
+                "odds_ratio": float(np.exp(c)),
+                "abs_coefficient": float(abs(c)),
+            } for fname, c in zip(features, class_coefs)]
             coef_rows.sort(key=lambda r: r["abs_coefficient"], reverse=True)
             coefficients_by_class[str(class_value)] = coef_rows
         block["model"] = {
@@ -199,9 +154,7 @@ def per_cluster_block(
 def main() -> None:
     ensure_dirs()
     if not CLUSTERS_CSV.exists():
-        raise FileNotFoundError(
-            f"{CLUSTERS_CSV} not found. Run the unsupervised stage first."
-        )
+        raise FileNotFoundError(f"{CLUSTERS_CSV} not found. Run the unsupervised stage first.")
     df = pd.read_csv(CLUSTERS_CSV)
     features = [f for f in NUMERIC_FEATURES if f in df.columns]
     df[features] = df[features].apply(pd.to_numeric, errors="coerce")
@@ -210,9 +163,7 @@ def main() -> None:
     glob_means = summary["global_means"]
     glob_stds = summary["global_stds"]
 
-    blocks: list[dict] = [
-        per_cluster_block(df, None, features, glob_means, glob_stds)
-    ]
+    blocks = [per_cluster_block(df, None, features, glob_means, glob_stds)]
     for cid in sorted(df["customer_persona_cluster"].dropna().unique()):
         blocks.append(per_cluster_block(df, int(cid), features, glob_means, glob_stds))
 

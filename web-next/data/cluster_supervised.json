@@ -113,7 +113,7 @@
       "maybe_rate": 0.6440677966101694,
       "try_rate": 0.1440677966101695,
       "interest_count": 93,
-      "interest_rate": 0.7881355932203389,
+      "interest_rate": 0.788135593220339,
       "feature_means": [
         {
           "name": "coffee_value",
@@ -518,7 +518,6 @@
             "abs_coefficient": 0.010112253790551425
           }
         ],
-        "intercept": -0.12032946727248701,
         "fitted": true
       }
     },
@@ -949,7 +948,6 @@
             "abs_coefficient": 0.009067614119343688
           }
         ],
-        "intercept": -0.14522538471654522,
         "fitted": true
       }
     },
@@ -1049,10 +1047,8 @@
         }
       ],
       "model": {
-        "type": "multinomial_logistic_regression",
         "fitted": false,
-        "reason": "insufficient rows or class count for 3-class model",
-        "min_class_count": 1
+        "reason": "insufficient or single-class data"
       }
     },
     {
@@ -1482,7 +1478,6 @@
             "abs_coefficient": 0.13161762561708396
           }
         ],
-        "intercept": -0.12756107241154396,
         "fitted": true
       }
     }

@@ -1,10 +1,9 @@
 import sys
 from pathlib import Path
 
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
+import numpy as np
+import pandas as pd
 import seaborn as sns
 
 from sklearn.preprocessing import StandardScaler
@@ -18,42 +17,30 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.config import (
-    CLEAN_CSV,
-    CLUSTERS_CSV,
-    OUTPUTS_DIR,
-    ensure_dirs,
-    setup_thai_font,
-)
+from src.config import CLEAN_CSV, CLUSTERS_CSV, OUTPUTS_DIR, ensure_dirs, setup_thai_font
 
 clean_data_path = CLEAN_CSV
 output_dir = OUTPUTS_DIR
 ensure_dirs()
 setup_thai_font()
 
-# Load & Prepare Data
+
 def load_and_prepare_data():
     df = pd.read_csv(clean_data_path)
-
     cluster_features = [col for col in df.columns if 'coffee_' in col or 'tea_' in col or 'freq_' in col]
     numeric_df = df[cluster_features].select_dtypes(include=[np.number])
     numeric_df = numeric_df.fillna(numeric_df.median())
-
     return df, numeric_df
 
 
-# Descriptive Statistics
 def descriptive_statistics(df, numeric_df):
     print("\n" + "="*60)
-
-    # Basic statistics
     print("\nBasic Descriptive Statistics: ")
     desc = numeric_df.describe().T
     desc["skewness"] = numeric_df.skew()
     desc["kurtosis"] = numeric_df.kurt()
     print(desc.round(3).to_string())
 
-    # Missing values
     print("\nMissing Values (original data): ")
     cluster_features = numeric_df.columns.tolist()
     missing = df[cluster_features].isnull().sum()
@@ -61,14 +48,12 @@ def descriptive_statistics(df, numeric_df):
     missing_report = pd.DataFrame({"missing_count": missing, "missing_%": missing_pct})
     print(missing_report[missing_report["missing_count"] > 0].to_string() or "  No missing values found.")
 
-    # Value distributions (categorical columns)
     print("Categorical Column Value Counts: ")
     cat_cols = df.select_dtypes(include=["object", "category"]).columns
-    for col in cat_cols[:5]:  # Show up to 5 columns
+    for col in cat_cols[:5]:
         print(f"\n  {col}:")
         print(df[col].value_counts().head(5).to_string())
 
-    # Distribution of clustering features
     plot_cols = numeric_df.columns[:9]
     n = len(plot_cols)
     ncols = 3
@@ -86,14 +71,13 @@ def descriptive_statistics(df, numeric_df):
                      ha="right", va="top", fontsize=8, color="gray")
     for j in range(i + 1, len(axes)):
         axes[j].set_visible(False)
-    
+
     plt.suptitle("Distribution of Clustering Features", fontsize=13, y=1.02)
     plt.tight_layout()
     plt.savefig(output_dir / "descriptive_distributions.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("\nSaved: descriptive_distributions.png")
 
-    # Plot: Boxplots for outlier overview
     fig, ax = plt.subplots(figsize=(14, 5))
     numeric_df[plot_cols].boxplot(ax=ax, vert=True, patch_artist=True,
                                    boxprops=dict(facecolor="#AFA9EC", alpha=0.7),
@@ -106,31 +90,25 @@ def descriptive_statistics(df, numeric_df):
     print("Saved: descriptive_boxplots.png")
 
 
-# Correlation Analysis
 def correlation_analysis(numeric_df):
     print("\n" + "="*60)
     corr_matrix = numeric_df.corr()
 
-    # Top correlated pairs
     print("\nTop 10 Correlated Feature Pairs (|r| > 0.5): ")
     corr_pairs = (
         corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(bool))
-        .stack()
-        .reset_index()
+        .stack().reset_index()
     )
     corr_pairs.columns = ["feature_1", "feature_2", "correlation"]
     corr_pairs["abs_corr"] = corr_pairs["correlation"].abs()
     top_pairs = corr_pairs[corr_pairs["abs_corr"] > 0.5].sort_values("abs_corr", ascending=False)
     print(top_pairs.head(10).to_string(index=False) if not top_pairs.empty else "  No pairs with |r| > 0.5 found.")
 
-    # Heatmap
     fig, ax = plt.subplots(figsize=(12, 10))
     mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
-    sns.heatmap(
-        corr_matrix, mask=mask, annot=True, fmt=".2f", cmap="RdYlGn",
-        center=0, linewidths=0.5, linecolor="white",
-        annot_kws={"size": 7}, ax=ax
-    )
+    sns.heatmap(corr_matrix, mask=mask, annot=True, fmt=".2f", cmap="RdYlGn",
+                center=0, linewidths=0.5, linecolor="white",
+                annot_kws={"size": 7}, ax=ax)
     ax.set_title("Correlation Matrix (lower triangle)", fontsize=13)
     plt.xticks(rotation=45, ha="right", fontsize=8)
     plt.yticks(fontsize=8)
@@ -139,25 +117,18 @@ def correlation_analysis(numeric_df):
     plt.close(fig)
     print("Saved: correlation_heatmap.png")
 
-    # Clustermap to reveal feature groups
-    try:
-        g = sns.clustermap(corr_matrix, cmap="RdYlGn", center=0, figsize=(12, 12),
-                           linewidths=0.3, annot=False)
-        g.fig.suptitle("Clustered Correlation Map", y=1.01, fontsize=13)
-        plt.savefig(output_dir / "correlation_clustermap.png", dpi=300, bbox_inches="tight")
-        plt.close()
-        print("Saved: correlation_clustermap.png")
-    except Exception as e:
-        print(f"Clustermap skipped: {e}")
+    g = sns.clustermap(corr_matrix, cmap="RdYlGn", center=0, figsize=(12, 12),
+                       linewidths=0.3, annot=False)
+    g.fig.suptitle("Clustered Correlation Map", y=1.01, fontsize=13)
+    plt.savefig(output_dir / "correlation_clustermap.png", dpi=300, bbox_inches="tight")
+    plt.close()
+    print("Saved: correlation_clustermap.png")
 
     return corr_matrix
 
 
-# Exploratory Data Analysis (EDA)
 def exploratory_data_analysis(df, numeric_df):
     print("\n" + "="*60)
-
-    # Pairplot of key features (first 5 numeric columns)
     sample_cols = numeric_df.columns[:5].tolist()
     pair_data = numeric_df[sample_cols].copy()
     g = sns.pairplot(pair_data, diag_kind="kde", plot_kws={"alpha": 0.5, "color": "#1D9E75"},
@@ -167,7 +138,6 @@ def exploratory_data_analysis(df, numeric_df):
     plt.close()
     print("\nSaved: eda_pairplot.png")
 
-    # Feature variance ranking (detect low-variance features)
     print("Feature Variance Ranking (top 10): ")
     variance = numeric_df.var().sort_values(ascending=False)
     print(variance.head(10).round(4).to_string())
@@ -181,7 +151,6 @@ def exploratory_data_analysis(df, numeric_df):
     plt.close(fig)
     print("Saved: eda_variance.png")
 
-    # Missing value heatmap
     cluster_features = numeric_df.columns.tolist()
     raw_slice = df[cluster_features]
     if raw_slice.isnull().any().any():
@@ -193,20 +162,14 @@ def exploratory_data_analysis(df, numeric_df):
         plt.savefig(output_dir / "eda_missing_values.png", dpi=300, bbox_inches="tight")
         plt.close(fig)
         print("Saved: eda_missing_values.png")
-    else:
-        print("No missing values found - skipped missing value heatmap.")
 
 
-# Unsupervised Learning Pipeline
 def perform_unsupervised_learning(original_df, numeric_df):
     print("\n" + "="*60)
-
-    # Feature Scaling
     scaler = StandardScaler()
     scaled_data = scaler.fit_transform(numeric_df)
     print(f"\nScaled {scaled_data.shape[1]} features for {scaled_data.shape[0]} samples.")
 
-    # Dimensionality Reduction (PCA)
     pca = PCA(n_components=2, random_state=42)
     pca_result = pca.fit_transform(scaled_data)
     explained = pca.explained_variance_ratio_
@@ -215,16 +178,10 @@ def perform_unsupervised_learning(original_df, numeric_df):
     print(f"PC2 explained variance: {explained[1]*100:.2f}%")
     print(f"Total explained: {explained.sum()*100:.2f}%")
 
-    # PCA loadings
-    loadings = pd.DataFrame(
-        pca.components_.T,
-        index=numeric_df.columns,
-        columns=["PC1", "PC2"]
-    )
+    loadings = pd.DataFrame(pca.components_.T, index=numeric_df.columns, columns=["PC1", "PC2"])
     print("\nTop 5 features by PC1 loading (absolute): ")
     print(loadings["PC1"].abs().sort_values(ascending=False).head(5).round(4).to_string())
 
-    # Plot: PCA loading bar
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     for i, ax in enumerate(axes):
         pc = f"PC{i+1}"
@@ -234,17 +191,13 @@ def perform_unsupervised_learning(original_df, numeric_df):
         axes[i].axvline(0, color="gray", linewidth=0.8, linestyle="--")
         axes[i].set_title(f"{pc} Loadings (top 10 features)")
         axes[i].set_xlabel("Loading coefficient")
-
     plt.suptitle("PCA Feature Loadings", fontsize=13)
     plt.tight_layout()
     plt.savefig(output_dir / "pca_loadings.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("Saved: pca_loadings.png")
 
-    # METHOD 1: K-Means Clustering
     print("\nMETHOD 1: K-Means Clustering")
-
-    # Elbow Method
     inertia = []
     silhouettes = []
     k_range = range(2, 8)
@@ -273,7 +226,6 @@ def perform_unsupervised_learning(original_df, numeric_df):
     plt.savefig(output_dir / "elbow_method.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
 
-    # Fit final K-Means
     optimal_k = 3
     kmeans = KMeans(n_clusters=optimal_k, random_state=42, n_init=10)
     kmeans_labels = kmeans.fit_predict(scaled_data)
@@ -281,10 +233,7 @@ def perform_unsupervised_learning(original_df, numeric_df):
     print(f"Optimal K = {optimal_k}")
     print(f"Silhouette Score (K-Means, K={optimal_k}): {kmeans_sil:.4f}")
 
-    # METHOD 2: DBSCAN Clustering 
     print("\nMETHOD 2: DBSCAN Clustering (auto-determines clusters)")
-
-    # Estimate eps with k-distance graph
     k_neighbors = 5
     nbrs = NearestNeighbors(n_neighbors=k_neighbors).fit(scaled_data)
     distances, _ = nbrs.kneighbors(scaled_data)
@@ -296,7 +245,6 @@ def perform_unsupervised_learning(original_df, numeric_df):
     ax.set_xlabel("Points sorted by distance")
     ax.set_ylabel(f"{k_neighbors}-NN distance")
 
-    # Annotate knee region
     knee_idx = np.argmax(np.diff(k_distances) < -0.01 * k_distances.max()) + 1
     if 0 < knee_idx < len(k_distances):
         ax.axhline(k_distances[knee_idx], color="#D85A30", linestyle="--", alpha=0.7,
@@ -307,7 +255,6 @@ def perform_unsupervised_learning(original_df, numeric_df):
     plt.close(fig)
     print("Saved: dbscan_kdistance.png")
 
-    # Fit DBSCAN - let data decide the structure
     n_samples = scaled_data.shape[0]
     auto_min_samples = max(5, int(np.log(n_samples)))
     suggested_eps = k_distances[knee_idx] if 0 < knee_idx < len(k_distances) else 1.5
@@ -329,19 +276,17 @@ def perform_unsupervised_learning(original_df, numeric_df):
         print(f"\nSilhouette Score (DBSCAN, core points): {dbscan_sil:.4f}")
     else:
         dbscan_sil = None
-        print("\nOnly 1 cluster detected — silhouette not applicable. Try adjusting eps.")
+        print("\nOnly 1 cluster detected — silhouette not applicable.")
 
-    # METHOD 3: Anomaly Detection (Isolation Forest)
     print("\nMETHOD 3: Anomaly Detection (Isolation Forest)")
     iso_forest = IsolationForest(contamination=0.05, random_state=42, n_estimators=200)
-    anomaly_labels = iso_forest.fit_predict(scaled_data)        # -1 = anomaly, 1 = normal
+    anomaly_labels = iso_forest.fit_predict(scaled_data)
     anomaly_scores = iso_forest.decision_function(scaled_data)
 
     n_anomalies = (anomaly_labels == -1).sum()
     anomaly_pct = n_anomalies / len(anomaly_labels) * 100
     print(f"Anomalies detected: {n_anomalies} ({anomaly_pct:.1f}% of data)")
 
-    # Store all results back in the DataFrame
     original_df['customer_persona_cluster'] = kmeans_labels
     original_df['dbscan_cluster'] = dbscan_labels
     original_df['is_anomaly'] = (anomaly_labels == -1).astype(int)
@@ -349,12 +294,10 @@ def perform_unsupervised_learning(original_df, numeric_df):
     original_df['pca_1'] = pca_result[:, 0]
     original_df['pca_2'] = pca_result[:, 1]
 
-    # Visualization: Side-by-side K-Means vs DBSCAN
     fig, axes = plt.subplots(1, 3, figsize=(18, 6))
     palette_km = sns.color_palette("Set2", optimal_k)
     palette_db = sns.color_palette("tab10", n_clusters_db + 1)
 
-    # K-Means
     for cluster_id in range(optimal_k):
         mask = original_df['customer_persona_cluster'] == cluster_id
         axes[0].scatter(original_df.loc[mask, 'pca_1'], original_df.loc[mask, 'pca_2'],
@@ -364,7 +307,6 @@ def perform_unsupervised_learning(original_df, numeric_df):
     axes[0].set_ylabel("PC2")
     axes[0].legend(title="Cluster")
 
-    # DBSCAN
     unique_labels = sorted(set(dbscan_labels))
     for idx, label in enumerate(unique_labels):
         mask = original_df['dbscan_cluster'] == label
@@ -380,7 +322,6 @@ def perform_unsupervised_learning(original_df, numeric_df):
     axes[1].set_ylabel("PC2")
     axes[1].legend(title="Cluster")
 
-    # Anomaly Detection
     normal_mask = original_df['is_anomaly'] == 0
     anomaly_mask = original_df['is_anomaly'] == 1
     axes[2].scatter(original_df.loc[normal_mask, 'pca_1'], original_df.loc[normal_mask, 'pca_2'],
@@ -399,12 +340,10 @@ def perform_unsupervised_learning(original_df, numeric_df):
     plt.close(fig)
     print("\nSaved: clustering_comparison.png")
 
-    # Model Comparison Summary
     print("\nModel Comparison Summary: ")
     print(f"{'Method':<30} {'Clusters':>10} {'Silhouette':>12} {'Notes'}")
     print(f"{'-'*65}")
     print(f"{'K-Means (K=3)':<30} {optimal_k:>10} {kmeans_sil:>12.4f}  {'Requires K pre-defined'}")
-
     db_sil_str = f"{dbscan_sil:.4f}" if dbscan_sil else "N/A"
     print(f"{'DBSCAN (auto)':<30} {n_clusters_db:>10} {db_sil_str:>12}  {'Auto-detects; marks noise'}")
     print(f"{'Isolation Forest':<30} {'-':>10} {'N/A':>12}  {f'{n_anomalies} anomalies ({anomaly_pct:.1f}%)'}")
@@ -412,75 +351,58 @@ def perform_unsupervised_learning(original_df, numeric_df):
     return original_df, n_clusters_db, dbscan_sil
 
 
-# Customer Persona Analysis
 def analyze_personas(df, numeric_df):
     print("\n" + "="*60)
-
     cluster_col = 'customer_persona_cluster'
     n_clusters = df[cluster_col].nunique()
- 
-    # Cluster size
+
     print("\nCluster Size Distribution: ")
     counts = df[cluster_col].value_counts().sort_index()
     pcts = (counts / len(df) * 100).round(1)
     for c, cnt in counts.items():
         print(f"  Cluster {c}: {cnt} customers ({pcts[c]}%)")
- 
-    # Mean profile per cluster
+
     print("\nMean Feature Values per Cluster: ")
     profile = df.groupby(cluster_col)[numeric_df.columns.tolist()].mean().round(3)
     print(profile.T.to_string())
- 
-    # Radar chart per cluster
-    cluster_features = numeric_df.columns.tolist()
-    top_features = (
-        profile.std(axis=0)
-        .sort_values(ascending=False)
-        .head(8)
-        .index.tolist()
-    )
- 
+
+    top_features = profile.std(axis=0).sort_values(ascending=False).head(8).index.tolist()
+
     angles = np.linspace(0, 2 * np.pi, len(top_features), endpoint=False).tolist()
     angles += angles[:1]
- 
-    fig, axes = plt.subplots(1, n_clusters, figsize=(6 * n_clusters, 6),
-                              subplot_kw=dict(polar=True))
+
+    fig, axes = plt.subplots(1, n_clusters, figsize=(6 * n_clusters, 6), subplot_kw=dict(polar=True))
     if n_clusters == 1:
         axes = [axes]
     colors = ["#D85A30", "#1D9E75", "#378ADD", "#7F77DD", "#E24B4A"]
- 
-    # Use raw Likert scale (1–5) directly from the profile means for better interpretability
+
     for i, ax in enumerate(axes):
         values = profile.loc[i, top_features].tolist()
         values += values[:1]
-
         ax.plot(angles, values, color=colors[i % len(colors)], linewidth=2)
         ax.fill(angles, values, color=colors[i % len(colors)], alpha=0.25)
         ax.set_xticks(angles[:-1])
         ax.set_xticklabels(top_features, size=8)
-        ax.set_ylim(0, 5)       # Likert 1–5 scale
+        ax.set_ylim(0, 5)
         ax.set_yticks([1, 2, 3, 4, 5])
         ax.set_yticklabels(["1", "2", "3", "4", "5"], size=7, color="gray")
         ax.set_title(f"Cluster {i}", fontsize=13, color=colors[i % len(colors)], pad=15)
- 
+
     plt.suptitle("Customer Persona Radar Charts\n(top 8 most discriminating features, Likert scale 1-5)", fontsize=13)
     plt.tight_layout()
     plt.savefig(output_dir / "persona_radar.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("\nSaved: persona_radar.png")
- 
-    # Heatmap: Cluster profiles
-    # Normalize per-column (across clusters)
+
     feat_min = profile[top_features].min()
     feat_max = profile[top_features].max()
     feat_range = (feat_max - feat_min).replace(0, 1)
     normalized = ((profile[top_features] - feat_min) / feat_range)
- 
+
     fig, ax = plt.subplots(figsize=(min(len(top_features) * 1.2, 16), 4))
     sns.heatmap(normalized, annot=profile[top_features].round(2), fmt=".2f",
                 cmap="RdYlGn", linewidths=0.5, ax=ax,
                 annot_kws={"size": 8}, cbar_kws={"label": "Relative score (0=lowest cluster, 1=highest)"})
-    
     ax.set_title("Cluster Profile Heatmap (color = relative rank per feature, number = raw Likert mean)")
     ax.set_ylabel("Cluster")
     ax.set_xticklabels(ax.get_xticklabels(), rotation=40, ha="right", fontsize=8)
@@ -488,8 +410,7 @@ def analyze_personas(df, numeric_df):
     plt.savefig(output_dir / "persona_heatmap.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("Saved: persona_heatmap.png")
- 
-    # Auto-generate Persona Names based on top/bottom features
+
     print("\nAuto-Generated Persona Descriptions: ")
     persona_names = {}
     for cluster_id in range(n_clusters):
@@ -499,15 +420,13 @@ def analyze_personas(df, numeric_df):
         name = f"Persona {cluster_id}: High {', '.join(high)} / Low {', '.join(low)}"
         persona_names[cluster_id] = name
         print(f"{name}")
- 
-    # Plot: Bar chart - cluster size
+
     fig, ax = plt.subplots(figsize=(6, 4))
     colors_bar = [colors[i % len(colors)] for i in range(n_clusters)]
     bars = ax.bar(counts.index.astype(str), counts.values, color=colors_bar, alpha=0.85, edgecolor="white")
     for bar, pct in zip(bars, pcts.values):
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1,
                 f"{pct}%", ha="center", va="bottom", fontsize=10)
-        
     ax.set_title("Customer Count per Persona Cluster")
     ax.set_xlabel("Cluster")
     ax.set_ylabel("Number of Customers")
@@ -515,21 +434,17 @@ def analyze_personas(df, numeric_df):
     plt.savefig(output_dir / "persona_cluster_size.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("Saved: persona_cluster_size.png")
- 
-    # PCA scatter with personas labeled
+
     fig, ax = plt.subplots(figsize=(10, 8))
     for i in range(n_clusters):
         mask = df[cluster_col] == i
         ax.scatter(df.loc[mask, 'pca_1'], df.loc[mask, 'pca_2'],
                    color=colors[i % len(colors)], alpha=0.7, s=80, label=f"Cluster {i}")
-        
-        # Centroid label
         cx = df.loc[mask, 'pca_1'].mean()
         cy = df.loc[mask, 'pca_2'].mean()
         ax.text(cx, cy, f"C{i}", fontsize=12, fontweight="bold",
                 ha="center", va="center", color="white",
                 bbox=dict(boxstyle="round,pad=0.3", facecolor=colors[i % len(colors)], alpha=0.85))
-        
     ax.set_title("Customer Segmentation - PCA 2D Projection\n(K-Means Personas)")
     ax.set_xlabel("Principal Component 1")
     ax.set_ylabel("Principal Component 2")
@@ -538,19 +453,15 @@ def analyze_personas(df, numeric_df):
     plt.savefig(output_dir / "customer_clusters_pca.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("Saved: customer_clusters_pca.png")
- 
-    # 6.8 Anomaly summary per cluster
+
     if 'is_anomaly' in df.columns:
         print("\nAnomaly Distribution per Cluster (K-Means):")
         anomaly_by_cluster = df.groupby(cluster_col)['is_anomaly'].agg(['sum', 'mean']).round(3)
         anomaly_by_cluster.columns = ['anomaly_count', 'anomaly_rate']
         print(anomaly_by_cluster.to_string())
- 
-    # Save final output CSV
-    output_data_path = CLUSTERS_CSV
-    df.to_csv(output_data_path, index=False, encoding="utf-8-sig")
-    print(f"Saved final data with clusters to: {output_data_path}")
- 
+
+    df.to_csv(CLUSTERS_CSV, index=False, encoding="utf-8-sig")
+    print(f"Saved final data with clusters to: {CLUSTERS_CSV}")
     return persona_names
 
 
@@ -559,19 +470,10 @@ if __name__ == "__main__":
     print(f"\nLoaded data: {original_df.shape[0]} rows, {original_df.shape[1]} columns")
     print(f"Clustering features selected: {len(numeric_df.columns)}")
 
-    # Descriptive Statistics
     descriptive_statistics(original_df, numeric_df)
-
-    # Correlation Analysis
     correlation_analysis(numeric_df)
-
-    # EDA
     exploratory_data_analysis(original_df, numeric_df)
-
-    # Unsupervised Learning (K-Means + DBSCAN + Isolation Forest)
     clustered_df, n_db_clusters, db_sil = perform_unsupervised_learning(original_df, numeric_df)
-
-    # Customer Persona Analysis
     personas = analyze_personas(clustered_df, numeric_df)
 
     print(f"\nOutput charts saved to: ./{output_dir}/")

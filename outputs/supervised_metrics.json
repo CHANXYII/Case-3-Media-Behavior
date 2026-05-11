@@ -1,22 +1,47 @@
 {
-  "target": "target_try_new_rtd_coffee",
+  "target": "target_try_new_rtd_coffee_choice",
+  "legacy_binary_target": "target_try_new_rtd_coffee",
+  "target_options": [
+    {
+      "value": 0,
+      "key": "no",
+      "label": "ไม่ลอง",
+      "short_label": "ไม่ลอง",
+      "color": "#D85A5A"
+    },
+    {
+      "value": 1,
+      "key": "maybe",
+      "label": "อาจจะลอง",
+      "short_label": "อาจจะ",
+      "color": "#E0A458"
+    },
+    {
+      "value": 2,
+      "key": "try",
+      "label": "ลองแน่นอน",
+      "short_label": "ลอง",
+      "color": "#5BB89A"
+    }
+  ],
   "n_labelled": 118,
   "class_distribution": {
     "0": 25,
-    "1": 93
+    "1": 76,
+    "2": 17
   },
   "feature_counts": {
-    "numeric": 4,
-    "categorical": 1
+    "numeric": 2,
+    "categorical": 3
   },
   "numeric_features": [
     "coffee_value",
-    "coffee_aroma",
-    "coffee_convenience",
-    "coffee_nutrition"
+    "coffee_aroma"
   ],
   "categorical_features": [
-    "most_freq_rtd_brand"
+    "most_freq_rtd_brand",
+    "most_freq_rtd_tea_brand",
+    "dur_online"
   ],
   "split": {
     "test_size": 0.2,
@@ -31,57 +56,70 @@
   "models": {
     "LogisticRegression": {
       "cv": {
-        "cv_accuracy_mean": 0.7760233918128655,
-        "cv_precision_mean": 0.9303296703296704,
-        "cv_recall_mean": 0.7819047619047619,
-        "cv_f1_mean": 0.8450384331643702,
-        "cv_roc_auc_mean": 0.8359523809523809,
-        "cv_accuracy_std": 0.06362186090741119,
-        "cv_precision_std": 0.07314290997462165,
-        "cv_recall_std": 0.07416351365307346,
-        "cv_f1_std": 0.04614960732610592,
-        "cv_roc_auc_std": 0.08807721823424082
+        "cv_accuracy_mean": 0.6403508771929824,
+        "cv_precision_macro_mean": 0.6165319865319866,
+        "cv_recall_macro_mean": 0.6555555555555554,
+        "cv_f1_macro_mean": 0.6158017023234413,
+        "cv_roc_auc_ovr_macro_mean": 0.7974801587301588,
+        "cv_accuracy_std": 0.10928008071857852,
+        "cv_precision_macro_std": 0.07040366199757571,
+        "cv_recall_macro_std": 0.07576767609436588,
+        "cv_f1_macro_std": 0.07876709552608037,
+        "cv_roc_auc_ovr_macro_std": 0.0788276346299666
       },
       "holdout": {
-        "test_accuracy": 0.8333333333333334,
-        "test_precision": 0.8947368421052632,
-        "test_recall": 0.8947368421052632,
-        "test_f1": 0.8947368421052632,
-        "test_roc_auc": 0.8842105263157894,
+        "test_accuracy": 0.5416666666666666,
+        "test_precision_macro": 0.4643939393939394,
+        "test_recall_macro": 0.4986111111111111,
+        "test_f1_macro": 0.4594017094017094,
+        "test_roc_auc_ovr_macro": 0.8052990549289891,
         "confusion_matrix": [
           [
             3,
-            2
+            2,
+            0
+          ],
+          [
+            3,
+            9,
+            4
           ],
           [
             2,
-            17
+            0,
+            1
           ]
         ],
         "classification_report": {
-          "0": {
-            "precision": 0.6,
+          "ไม่ลอง": {
+            "precision": 0.375,
             "recall": 0.6,
-            "f1-score": 0.6,
+            "f1-score": 0.46153846153846156,
             "support": 5.0
           },
-          "1": {
-            "precision": 0.8947368421052632,
-            "recall": 0.8947368421052632,
-            "f1-score": 0.8947368421052632,
-            "support": 19.0
+          "อาจจะลอง": {
+            "precision": 0.8181818181818182,
+            "recall": 0.5625,
+            "f1-score": 0.6666666666666666,
+            "support": 16.0
           },
-          "accuracy": 0.8333333333333334,
+          "ลองแน่นอน": {
+            "precision": 0.2,
+            "recall": 0.3333333333333333,
+            "f1-score": 0.25,
+            "support": 3.0
+          },
+          "accuracy": 0.5416666666666666,
           "macro avg": {
-            "precision": 0.7473684210526316,
-            "recall": 0.7473684210526316,
-            "f1-score": 0.7473684210526316,
+            "precision": 0.4643939393939394,
+            "recall": 0.4986111111111111,
+            "f1-score": 0.4594017094017094,
             "support": 24.0
           },
           "weighted avg": {
-            "precision": 0.8333333333333334,
-            "recall": 0.8333333333333334,
-            "f1-score": 0.8333333333333334,
+            "precision": 0.6485795454545454,
+            "recall": 0.5416666666666666,
+            "f1-score": 0.5718482905982906,
             "support": 24.0
           }
         }
@@ -89,57 +127,70 @@
     },
     "RandomForest": {
       "cv": {
-        "cv_accuracy_mean": 0.8298245614035087,
-        "cv_precision_mean": 0.9139705882352942,
-        "cv_recall_mean": 0.8771428571428572,
-        "cv_f1_mean": 0.8896648745519714,
-        "cv_roc_auc_mean": 0.8576190476190476,
-        "cv_accuracy_std": 0.051328908204658935,
-        "cv_precision_std": 0.07431928687348988,
-        "cv_recall_std": 0.08083464828161122,
-        "cv_f1_std": 0.03213266926134153,
-        "cv_roc_auc_std": 0.13430470990267177
+        "cv_accuracy_mean": 0.639766081871345,
+        "cv_precision_macro_mean": 0.6153607503607503,
+        "cv_recall_macro_mean": 0.5611111111111111,
+        "cv_f1_macro_mean": 0.5551251646903822,
+        "cv_roc_auc_ovr_macro_mean": 0.8040343915343915,
+        "cv_accuracy_std": 0.09873174077382588,
+        "cv_precision_macro_std": 0.07305826099956161,
+        "cv_recall_macro_std": 0.135400640077266,
+        "cv_f1_macro_std": 0.12326842577421994,
+        "cv_roc_auc_ovr_macro_std": 0.07916019630284156
       },
       "holdout": {
-        "test_accuracy": 0.875,
-        "test_precision": 0.8636363636363636,
-        "test_recall": 1.0,
-        "test_f1": 0.926829268292683,
-        "test_roc_auc": 0.8736842105263158,
+        "test_accuracy": 0.5416666666666666,
+        "test_precision_macro": 0.3216374269005848,
+        "test_recall_macro": 0.31666666666666665,
+        "test_f1_macro": 0.3119047619047619,
+        "test_roc_auc_ovr_macro": 0.6512368159983292,
         "confusion_matrix": [
           [
+            1,
+            4,
+            0
+          ],
+          [
             2,
-            3
+            12,
+            2
           ],
           [
             0,
-            19
+            3,
+            0
           ]
         ],
         "classification_report": {
-          "0": {
-            "precision": 1.0,
-            "recall": 0.4,
-            "f1-score": 0.5714285714285714,
+          "ไม่ลอง": {
+            "precision": 0.3333333333333333,
+            "recall": 0.2,
+            "f1-score": 0.25,
             "support": 5.0
           },
-          "1": {
-            "precision": 0.8636363636363636,
-            "recall": 1.0,
-            "f1-score": 0.926829268292683,
-            "support": 19.0
+          "อาจจะลอง": {
+            "precision": 0.631578947368421,
+            "recall": 0.75,
+            "f1-score": 0.6857142857142857,
+            "support": 16.0
           },
-          "accuracy": 0.875,
+          "ลองแน่นอน": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1-score": 0.0,
+            "support": 3.0
+          },
+          "accuracy": 0.5416666666666666,
           "macro avg": {
-            "precision": 0.9318181818181819,
-            "recall": 0.7,
-            "f1-score": 0.7491289198606272,
+            "precision": 0.3216374269005848,
+            "recall": 0.31666666666666665,
+            "f1-score": 0.3119047619047619,
             "support": 24.0
           },
           "weighted avg": {
-            "precision": 0.8920454545454546,
-            "recall": 0.875,
-            "f1-score": 0.8527874564459931,
+            "precision": 0.49049707602339176,
+            "recall": 0.5416666666666666,
+            "f1-score": 0.5092261904761904,
             "support": 24.0
           }
         }
@@ -147,62 +198,75 @@
     },
     "GradientBoosting": {
       "cv": {
-        "cv_accuracy_mean": 0.8198830409356723,
-        "cv_precision_mean": 0.8683333333333334,
-        "cv_recall_mean": 0.9180952380952381,
-        "cv_f1_mean": 0.8888969095420709,
-        "cv_roc_auc_mean": 0.8016666666666665,
-        "cv_accuracy_std": 0.07021441412773627,
-        "cv_precision_std": 0.06999999999999998,
-        "cv_recall_std": 0.07913363077272757,
-        "cv_f1_std": 0.044926264864942965,
-        "cv_roc_auc_std": 0.16852299546352717
+        "cv_accuracy_mean": 0.6929824561403509,
+        "cv_precision_macro_mean": 0.6607864357864357,
+        "cv_recall_macro_mean": 0.611111111111111,
+        "cv_f1_macro_mean": 0.6037590911503955,
+        "cv_roc_auc_ovr_macro_mean": 0.7846031746031746,
+        "cv_accuracy_std": 0.09955270848499022,
+        "cv_precision_macro_std": 0.07620372988050578,
+        "cv_recall_macro_std": 0.18341748910243533,
+        "cv_f1_macro_std": 0.15669182680292668,
+        "cv_roc_auc_ovr_macro_std": 0.14924284001601
       },
       "holdout": {
-        "test_accuracy": 0.7916666666666666,
-        "test_precision": 0.7916666666666666,
-        "test_recall": 1.0,
-        "test_f1": 0.8837209302325582,
-        "test_roc_auc": 0.8842105263157893,
+        "test_accuracy": 0.5833333333333334,
+        "test_precision_macro": 0.3074074074074074,
+        "test_recall_macro": 0.33749999999999997,
+        "test_f1_macro": 0.32156862745098036,
+        "test_roc_auc_ovr_macro": 0.7582891691033139,
         "confusion_matrix": [
           [
-            0,
-            5
+            1,
+            4,
+            0
           ],
           [
-            0,
-            19
+            2,
+            13,
+            1
+          ],
+          [
+            2,
+            1,
+            0
           ]
         ],
         "classification_report": {
-          "0": {
+          "ไม่ลอง": {
+            "precision": 0.2,
+            "recall": 0.2,
+            "f1-score": 0.2,
+            "support": 5.0
+          },
+          "อาจจะลอง": {
+            "precision": 0.7222222222222222,
+            "recall": 0.8125,
+            "f1-score": 0.7647058823529411,
+            "support": 16.0
+          },
+          "ลองแน่นอน": {
             "precision": 0.0,
             "recall": 0.0,
             "f1-score": 0.0,
-            "support": 5.0
+            "support": 3.0
           },
-          "1": {
-            "precision": 0.7916666666666666,
-            "recall": 1.0,
-            "f1-score": 0.8837209302325582,
-            "support": 19.0
-          },
-          "accuracy": 0.7916666666666666,
+          "accuracy": 0.5833333333333334,
           "macro avg": {
-            "precision": 0.3958333333333333,
-            "recall": 0.5,
-            "f1-score": 0.4418604651162791,
+            "precision": 0.3074074074074074,
+            "recall": 0.33749999999999997,
+            "f1-score": 0.32156862745098036,
             "support": 24.0
           },
           "weighted avg": {
-            "precision": 0.626736111111111,
-            "recall": 0.7916666666666666,
-            "f1-score": 0.6996124031007752,
+            "precision": 0.5231481481481481,
+            "recall": 0.5833333333333334,
+            "f1-score": 0.551470588235294,
             "support": 24.0
           }
         }
       }
     }
   },
-  "best_model_by_cv_f1": "RandomForest"
+  "best_model_by_cv_f1_macro": "LogisticRegression"
 }
