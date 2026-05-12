@@ -87,7 +87,7 @@ npm run dev
 | Cleaning | `src/data_cleaning/` | Standardizes column names, derives `customer_segment`, writes the cleaned CSV and a Thai→English column dictionary. |
 | Feature engineering | `src/feature_engineering/` | EDA charts, ANOVA F-scores, target-aware imbalance / Cohen's d / high-value-segment diagnostics. |
 | Unsupervised | `src/unsupervised/` | Scaling + PCA, K-Means and DBSCAN clustering, anomaly detection, persona radar/heatmap/PCA plots. |
-| Supervised | `src/supervised/` | Multinomial logistic regression / GradientBoosting on the top-5 ANOVA-selected features; LogReg used for both production and client-side prediction; per-cluster drivers exported as JSON. |
+| Supervised | `src/supervised/` | Multinomial logistic regression on the top-5 ANOVA-selected features; LogReg used for production export and coefficient-based interpretation; per-cluster drivers exported as JSON. |
 | Web | `src/web/` | Next.js dashboard — surfaces personas, drivers, and a live predictor backed by the supervised JSON. |
 
 ---
@@ -97,4 +97,3 @@ npm run dev
 - All scripts read paths from `src/config.py`, so they work no matter the current working directory.
 - The Thai-friendly font in `assets/DB-Adman-X.ttf` is loaded automatically by `setup_thai_font()`.
 - Generated artifacts (`data/processed/`, `outputs/`) can be regenerated end-to-end from the raw CSV.
-

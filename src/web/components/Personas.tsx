@@ -20,13 +20,16 @@ import { ds, PERSONA, PersonaKey, TARGET_CHOICES, fmtPct } from "@/lib/data";
 import { useState } from "react";
 
 const RADAR_FEATURES = [
-  "coffee_aroma", "coffee_value", "coffee_brand_trust", "coffee_packaging",
-  "coffee_premium", "coffee_smooth", "coffee_convenience", "coffee_nutrition"
+  "coffee_aroma", "coffee_value", "coffee_nutrition",
+  "coffee_convenience", "coffee_caffeine", "coffee_smooth"
 ];
 const SHORT: Record<string, string> = {
-  coffee_aroma: "กลิ่น", coffee_value: "คุ้มราคา", coffee_brand_trust: "เชื่อแบรนด์",
-  coffee_packaging: "แพ็กเกจ", coffee_premium: "พรีเมียม", coffee_smooth: "นุ่ม",
-  coffee_convenience: "หยิบง่าย", coffee_nutrition: "สุขภาพ"
+  coffee_aroma: "กลิ่น",
+  coffee_value: "คุ้มค่า",
+  coffee_nutrition: "โภชนาการ",
+  coffee_convenience: "สะดวก",
+  coffee_caffeine: "คาเฟอีน",
+  coffee_smooth: "นุ่ม"
 };
 
 const TIP = {
@@ -61,8 +64,8 @@ export default function Personas() {
         <SectionHeader
           index="04"
           kicker="Unsupervised — K-Means"
-          title="3 กลุ่มลูกค้าที่ data จับเองโดยไม่ต้องบอก"
-          subtitle="เอาคะแนนกาแฟ/ชา 19 ตัว มา standardize แล้วยุบลง 2 มิติด้วย PCA (PC1 = 31.4%, PC2 = 12.8%) จากนั้นรัน K-Means ที่ K=3 (silhouette = 0.30 สูงสุดในช่วง K=2..7). ชื่อ persona เกิดจากค่าเฉลี่ยของจุดศูนย์กลาง — ไม่ได้กำหนดมาก่อน."
+          title="3 กลุ่มลูกค้าที่แบ่งจากพฤติกรรมจริง"
+          subtitle="ใช้คะแนนความชอบกาแฟ/ชาหลายข้อ ทำ standardize แล้วลดมิติด้วย PCA ก่อนรัน K-Means ที่ K=3 (silhouette = 0.30) แต่ละกลุ่มมีลักษณะที่แตกต่างกันชัดเจน ชื่อ persona มาจากค่าเฉลี่ยของคะแนนในกลุ่ม"
         />
 
         <div className="grid grid-cols-12 gap-5">
@@ -106,13 +109,13 @@ export default function Personas() {
             </div>
 
             <p className="mt-3 text-xs text-ink-2 leading-relaxed">
-              <span className="text-ink-0 font-medium">PC1</span> แยกฝั่ง ‘เน้นแบรนด์/พรีเมียม’ (ขวา) ออกจาก ‘เน้นราคา’ (ซ้าย).{" "}
-              <span className="text-ink-0 font-medium">PC2</span> มาจาก <span className="font-mono">coffee_intensity</span> — บนคือสายเข้มจัด, ล่างคือสายนุ่ม.
+              <span className="text-ink-0 font-medium">PC1</span> แยกกลุ่มตามความชอบโดยรวม{" "}
+              <span className="text-ink-0 font-medium">PC2</span> แยกตามความแตกต่างเฉพาะด้าน แต่ละจุดคือ 1 คน สีแสดงว่าอยู่กลุ่มไหน
             </p>
           </Card>
 
           <Card className="col-span-12 lg:col-span-5">
-            <div className="tag mb-2">ลายนิ้วมือคลัสเตอร์ · 8 ค่าเฉลี่ย Likert</div>
+            <div className="tag mb-2">ลายนิ้วมือคลัสเตอร์ · 6 ค่าเฉลี่ย Likert</div>
             <div className="h-[380px]">
               <ResponsiveContainer>
                 <RadarChart data={radarData}>
@@ -138,7 +141,7 @@ export default function Personas() {
               </ResponsiveContainer>
             </div>
             <p className="text-xs text-ink-2 leading-relaxed">
-              คลิกการ์ด persona ด้านล่าง — เส้นจะเด้งตาม. รัศมีคือค่าเฉลี่ย Likert (4.5 = ‘เกือบทุกคนในกลุ่มบอกข้อนี้สำคัญมาก’).
+              คลิกการ์ด persona ด้านล่าง เส้นจะเด้งตาม รัศมีคือค่าเฉลี่ยคะแนน 1-5 ที่กลุ่มนั้นให้กับแต่ละคุณสมบัติ
             </p>
           </Card>
 

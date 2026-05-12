@@ -1,0 +1,324 @@
+Case 3 Final Project
+สรุปโค้ดและการทำงานของระบบ
+
+==================================================
+1) โครงสร้างโปรแกรมโดยรวม
+==================================================
+
+โปรเจกต์นี้เป็นระบบวิเคราะห์ข้อมูลพฤติกรรมผู้บริโภค เพื่อช่วยวางแผนการสื่อสาร
+สำหรับการเปิดตัวสินค้า RTD Coffee โดยโครงสร้างหลักแบ่งเป็น 5 ส่วน คือ
+
+1. Data Cleaning
+2. Feature Engineering / Feature Selection
+3. Unsupervised Learning
+4. Supervised Learning
+5. Web Dashboard
+
+โครงสร้างโฟลเดอร์หลัก
+
+Case_3_Final_Project_F/
+|- data/
+|  |- raw/
+|  |  |- Case_3_Media_Behavior.csv
+|  |- processed/
+|     |- media_behavior_cleaned.csv
+|     |- media_behavior_with_clusters.csv
+|     |- column_mapping.json
+|
+|- outputs/
+|  |- ไฟล์ภาพ, CSV, JSON ที่สร้างจากการวิเคราะห์แต่ละขั้น
+|
+|- src/
+|  |- config.py
+|  |- data_cleaning/
+|  |  |- data_cleaning.py
+|  |- feature_engineering/
+|  |  |- feature_selection_visualization.py
+|  |- unsupervised/
+|  |  |- unsupervised_learning.py
+|  |- supervised/
+|  |  |- train.py
+|  |  |- per_cluster.py
+|  |  |- README.md
+|  |- web/
+|     |- app/
+|     |- components/
+|     |- data/
+|     |- lib/
+|     |- package.json
+|
+|- run_pipeline.py
+|- README.md
+|- info.md
+
+แนวคิดของโครงสร้างนี้คือ แยกงานเป็น stage ชัดเจน
+แต่ละ stage อ่านผลลัพธ์จาก stage ก่อนหน้า แล้วสร้าง artifact ของตัวเองส่งต่อไปยัง stage ถัดไป
+ทำให้ระบบ debug ง่าย, รันซ้ำได้, และอธิบาย flow ได้ชัดเจน
+
+
+==================================================
+2) Software Diagram / Workflow
+==================================================
+
+ภาพรวมการไหลของข้อมูลในระบบ
+
+data/raw/Case_3_Media_Behavior.csv
+        |
+        v
+src/data_cleaning/data_cleaning.py
+        |
+        |--> data/processed/media_behavior_cleaned.csv
+        |--> data/processed/column_mapping.json
+        v
+src/feature_engineering/feature_selection_visualization.py
+        |
+        |--> outputs/feature_selection_summary.csv
+        |--> outputs/*.png (EDA / feature selection / target analysis)
+        v
+src/unsupervised/unsupervised_learning.py
+        |
+        |--> data/processed/media_behavior_with_clusters.csv
+        |--> outputs/persona_*.png, clustering_*.png
+        v
+src/supervised/train.py
+        |
+        |--> outputs/supervised_metrics.json
+        |--> outputs/supervised_coefficients.csv
+        |--> outputs/supervised_*.png
+        |--> outputs/supervised_feature_schema.json
+        v
+src/supervised/per_cluster.py
+        |
+        |--> outputs/cluster_supervised.json
+        v
+src/web/
+        |
+        |--> แสดงผลผ่าน Next.js Dashboard
+        |--> Predictor / Personas / Drivers / Marketing Plan
+
+Workflow โดยสรุป
+
+1. โหลดข้อมูลดิบจากไฟล์ CSV
+2. ทำความสะอาดข้อมูลและแปลงชื่อคอลัมน์ให้ใช้งานได้
+3. สร้าง target และเลือก feature ที่มีความสำคัญ
+4. ทำ clustering เพื่อหา persona ของลูกค้า
+5. สร้าง supervised model เพื่อทำนายโอกาสการลองสินค้า
+6. วิเคราะห์ driver ของแต่ละ persona แยกตามคลัสเตอร์
+7. ส่งออกผลลัพธ์เป็นไฟล์ JSON / CSV / PNG
+8. นำผลทั้งหมดไปแสดงผลบน Web Dashboard
+
+
+==================================================
+3) คำอธิบายหน้าที่การทำงานของแต่ละไฟล์ Code โดยสรุป
+==================================================
+
+3.1 run_pipeline.py
+หน้าที่:
+- เป็นตัวรัน pipeline หลักแบบ end-to-end
+- เรียกแต่ละ module ตามลำดับของระบบ
+- ช่วยให้สามารถรันโปรเจกต์ทั้งหมดได้ด้วยคำสั่งเดียว
+
+สรุป:
+- เป็นจุดเริ่มต้นของระบบทั้งหมด
+
+
+3.2 src/config.py
+หน้าที่:
+- เก็บ path กลางของโปรเจกต์ เช่น data, outputs, models, assets
+- ตั้งค่าคงที่สำคัญ เช่นชื่อ target column
+- มี utility สำหรับสร้างโฟลเดอร์ที่จำเป็นและตั้งค่าฟอนต์ไทย
+
+สรุป:
+- เป็นศูนย์กลางการตั้งค่าของทั้งระบบ
+
+
+3.3 src/data_cleaning/data_cleaning.py
+หน้าที่:
+- โหลดข้อมูลดิบจากแบบสอบถาม
+- เปลี่ยนชื่อคอลัมน์ภาษาไทยเป็นอังกฤษ
+- แก้รูปแบบข้อมูล เช่น จังหวัด, อายุ, timestamp
+- แปลงคำตอบแบบ Likert เป็นตัวเลข 1-5
+- จัดการคำตอบแบบเลือกหลายข้อ
+- สร้าง target สำหรับงานวิเคราะห์และโมเดล
+- สร้าง customer segment แบบ rule-based
+- บันทึกข้อมูลที่ clean แล้วลงในไฟล์ processed
+
+สรุป:
+- เป็นขั้นตอนสำคัญที่สุดก่อนวิเคราะห์ เพราะเปลี่ยนข้อมูลดิบให้พร้อมใช้งาน
+
+
+3.4 src/feature_engineering/feature_selection_visualization.py
+หน้าที่:
+- อ่านข้อมูลที่ผ่านการ cleaning แล้ว
+- ทำ EDA เพื่อดู distribution, imbalance, demographic profile
+- คำนวณ ANOVA F-score และ p-value เพื่อหา feature สำคัญ
+- สร้างกราฟสรุป เช่น target distribution, feature selection, Cohen's d, correlation heatmap
+- บันทึกผลคัดเลือก feature ลงใน feature_selection_summary.csv
+
+สรุป:
+- เป็นส่วนที่เปลี่ยนข้อมูลให้กลายเป็น insight และคัด feature ก่อนเข้าโมเดล
+
+
+3.5 src/unsupervised/unsupervised_learning.py
+หน้าที่:
+- เลือกตัวแปรด้านพฤติกรรมและความชอบสินค้า
+- ทำ StandardScaler เพื่อปรับสเกลข้อมูล
+- ใช้ PCA เพื่อลดมิติสำหรับการมองภาพรวม
+- ใช้ K-Means เพื่อแบ่งลูกค้าออกเป็นกลุ่ม persona
+- ใช้ DBSCAN และ Isolation Forest เป็นการวิเคราะห์เสริม
+- สร้างกราฟ persona radar, cluster size, PCA scatter, heatmap
+- บันทึกข้อมูลพร้อม cluster ลงใน media_behavior_with_clusters.csv
+
+สรุป:
+- ใช้ค้นหารูปแบบลูกค้าแบบไม่ต้องอาศัย target
+
+
+3.6 src/supervised/train.py
+หน้าที่:
+- อ่านข้อมูล clean และผล feature selection
+- เลือก feature ที่จะใช้เทรนโมเดล
+- สร้าง preprocessing pipeline สำหรับ numeric และ categorical
+- เทรน Logistic Regression เป็น supervised model หลักของระบบ
+- ประเมินผลด้วย Stratified Cross Validation และ Holdout Test Set
+- บันทึกโมเดลที่เลือก, metric, coefficient, confusion matrix และ ROC curve
+- export schema สำหรับใช้ในหน้าเว็บ predictor
+
+สรุป:
+- เป็นหัวใจของส่วนทำนายว่าใครมีแนวโน้มจะลองสินค้าใหม่
+
+
+3.7 src/supervised/per_cluster.py
+หน้าที่:
+- อ่านข้อมูลที่มี cluster จาก unsupervised stage
+- สร้างโมเดล Logistic Regression แยกในแต่ละ cluster
+- วิเคราะห์ว่าปัจจัยใดเป็นตัวขับการตัดสินใจของแต่ละ persona
+- คำนวณ try_rate, maybe_rate, no_rate ของแต่ละกลุ่ม
+- ส่งออกเป็น cluster_supervised.json เพื่อใช้บน dashboard
+
+สรุป:
+- เป็นส่วนเชื่อมระหว่าง segmentation กับ business action
+
+
+3.8 src/web/
+หน้าที่:
+- เป็น frontend ของระบบ สร้างด้วย Next.js
+- อ่านข้อมูลจาก JSON/CSV ที่ pipeline ส่งออกไว้
+- แสดงผลข้อมูลในรูปของ dashboard ที่ใช้งานจริงได้
+- มี component สำคัญ เช่น
+  - Hero
+  - Cleaning
+  - FeatureSelection
+  - Personas
+  - PerClusterDrivers
+  - Predictor
+  - MarketingPlan
+
+สรุป:
+- เป็นส่วนที่ทำให้ผลวิเคราะห์ถูกนำไปใช้งานและนำเสนอได้จริง
+
+
+3.9 outputs/
+หน้าที่:
+- เก็บผลลัพธ์ที่ได้จาก pipeline
+- มีทั้งไฟล์ภาพประกอบ, ตารางสรุป, metric และ JSON สำหรับหน้าเว็บ
+
+สรุป:
+- เป็นพื้นที่รวมผลลัพธ์จากทุก stage
+
+
+3.10 models/
+หน้าที่:
+- เก็บไฟล์โมเดลที่ผ่านการ train แล้ว
+
+สรุป:
+- ใช้สำหรับนำโมเดลไปใช้งานต่อในระบบหรือในการทดสอบ
+
+
+==================================================
+4) ขั้นตอนการทำงานของระบบหรือโมเดล
+==================================================
+
+4.1 ขั้นตอนการทำงานของระบบ
+
+ขั้นที่ 1: รับข้อมูลดิบ
+- ระบบอ่านข้อมูลจากไฟล์ survey CSV
+- ข้อมูลยังเป็นภาษาไทยและมีรูปแบบที่ยังใช้วิเคราะห์ตรง ๆ ไม่ได้
+
+ขั้นที่ 2: Data Cleaning
+- ลบหรือแก้ข้อมูลที่ไม่สมบูรณ์
+- แปลงชื่อคอลัมน์ให้เป็นภาษาอังกฤษ
+- แปลงข้อมูลข้อความให้เป็นตัวเลขหรือรูปแบบมาตรฐาน
+- สร้าง target และตัวแปรใหม่ที่จำเป็น
+
+ขั้นที่ 3: Data Exploration และ Feature Selection
+- วิเคราะห์การกระจายของข้อมูล
+- ดู class imbalance ของ target
+- หา feature ที่เกี่ยวข้องกับการตัดสินใจลองสินค้า
+- เลือก feature ที่เหมาะสมเพื่อส่งต่อให้โมเดล
+
+ขั้นที่ 4: Unsupervised Learning
+- ใช้ข้อมูลพฤติกรรมที่สำคัญมาหา pattern ของลูกค้า
+- แบ่งลูกค้าออกเป็นหลายกลุ่มด้วย K-Means
+- ตีความกลุ่มเหล่านี้เป็น persona ที่ใช้งานทางธุรกิจได้
+
+ขั้นที่ 5: Supervised Learning
+- ใช้ target 3 class คือ ไม่ลอง / อาจจะลอง / ลองแน่นอน
+- เทรนโมเดลเพื่อทำนายแนวโน้มของผู้ตอบแต่ละคน
+- เปรียบเทียบหลายโมเดลและเลือกโมเดลที่เหมาะสมที่สุด
+
+ขั้นที่ 6: Per-Cluster Analysis
+- วิเคราะห์แยกต่อว่าแต่ละ persona มี driver ต่างกันอย่างไร
+- ทำให้สามารถออกแบบ message และกลยุทธ์เฉพาะกลุ่มได้
+
+ขั้นที่ 7: Export ผลลัพธ์
+- ส่งออก metric, coefficient, feature schema, cluster summary และภาพประกอบ
+
+ขั้นที่ 8: Web Dashboard
+- แสดงผลทุกอย่างในรูปแบบ dashboard
+- ผู้ใช้สามารถดู persona, driver และทดลอง predictor ได้
+
+
+4.2 ขั้นตอนการทำงานของโมเดล Supervised
+
+1. รับข้อมูลที่ clean แล้วจาก media_behavior_cleaned.csv
+2. เลือกเฉพาะแถวที่มี target พร้อมใช้งาน
+3. โหลด feature ที่ผ่านการคัดเลือกจาก feature_selection_summary.csv
+4. แยก feature เป็น numeric และ categorical
+5. ทำ preprocessing
+   - numeric: เติม missing และ scale
+   - categorical: เติม missing และ one-hot encode
+6. แบ่งข้อมูลเป็น train/test แบบ stratified
+7. เทรนโมเดลหลายแบบ
+8. ประเมินผลด้วย CV และ holdout test
+9. เลือกโมเดลที่ดีที่สุด
+10. บันทึกโมเดลและผลลัพธ์ทั้งหมดออกมาใช้งานต่อ
+
+
+4.3 ขั้นตอนการทำงานของโมเดล Unsupervised
+
+1. เลือก feature ที่สะท้อนพฤติกรรมและความชอบของลูกค้า
+2. ทำ scaling เพื่อให้ทุก feature อยู่ในระดับที่เปรียบเทียบกันได้
+3. ใช้ PCA เพื่อลดมิติและใช้สำหรับ visualization
+4. ใช้ K-Means เพื่อแบ่งกลุ่มลูกค้า
+5. วิเคราะห์จุดเด่นของแต่ละ cluster
+6. ตั้งชื่อเชิงธุรกิจให้แต่ละ cluster เป็น persona
+7. export ผลลัพธ์เป็นไฟล์ข้อมูลและภาพประกอบ
+
+
+4.4 ประโยชน์ของระบบนี้ในเชิงธุรกิจ
+
+- รู้ว่ากลุ่มลูกค้าไหนควรเป็น target หลักของการเปิดตัว RTD
+- รู้ว่าแต่ละกลุ่มให้ความสำคัญกับปัจจัยอะไร
+- รู้ว่าควรใช้ message และสื่อแบบไหนกับ persona แต่ละกลุ่ม
+- สามารถสื่อสารผลลัพธ์ให้ stakeholder เข้าใจได้ง่ายผ่าน dashboard
+- ทำให้ข้อมูลวิเคราะห์ถูกนำไปใช้ตัดสินใจจริง ไม่ได้หยุดอยู่แค่รายงาน
+
+
+==================================================
+สรุปท้ายเอกสาร
+==================================================
+
+โปรเจกต์นี้ถูกออกแบบเป็น pipeline ที่เชื่อมโยงตั้งแต่ข้อมูลดิบ ไปจนถึงโมเดล
+และการนำเสนอผลลัพธ์ผ่านหน้าเว็บ โดยแต่ละไฟล์มีหน้าที่เฉพาะของตัวเองอย่างชัดเจน
+โครงสร้างแบบนี้ช่วยให้ระบบมีความเป็นระเบียบ, ตรวจสอบได้, ขยายต่อได้ง่าย
+และเหมาะกับการนำไปใช้ทั้งในงานวิเคราะห์ข้อมูลและการนำเสนอเชิงธุรกิจ

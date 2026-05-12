@@ -173,7 +173,7 @@ data/raw/Case_3_Media_Behavior.csv
 - เป้าหมายของ global supervised คือทำนายว่า respondent จะอยู่ในคลาส `ไม่ลอง / อาจจะลอง / ลองแน่นอน`
 - ฟีเจอร์ที่ใช้จริงใน global model มี 5 ตัว: `coffee_value`, `coffee_aroma`, `most_freq_rtd_brand`, `most_freq_rtd_tea_brand`, `dur_online`
 - Preprocessing คือ `impute -> scale numeric -> one-hot categorical -> classifier`
-- เปรียบเทียบ `Logistic Regression` กับ `Gradient Boosting`
+- ใช้ `Logistic Regression` เป็นโมเดล supervised หลัก เพราะตีความ coefficient ได้ตรงและ export เป็น artifact เดียวใช้งานต่อได้
 - ประเมินด้วย `5-fold stratified CV` และ `20% stratified holdout`
 
 ---
@@ -183,10 +183,9 @@ data/raw/Case_3_Media_Behavior.csv
 | Model | CV F1 macro | CV ROC-AUC | Holdout F1 macro | Holdout ROC-AUC |
 |---|---:|---:|---:|---:|
 | Logistic Regression | 0.616 | 0.797 | 0.459 | 0.805 |
-| Gradient Boosting | 0.604 | 0.785 | 0.322 | 0.758 |
 
-- `Logistic Regression` ชนะด้วย `CV F1 macro` และยังอธิบาย coefficient ได้ตรงกับ business use case
-- ถึง `Gradient Boosting` จะมี holdout accuracy สูงกว่าเล็กน้อย แต่แยกคลาส `ลองแน่นอน` ได้แย่กว่า
+- `Logistic Regression` เป็นโมเดล supervised ที่ export ออกมาใช้งานจริงใน pipeline นี้
+- จุดแข็งคือตีความ coefficient ได้, ทำงานร่วมกับ preprocessing pipeline ได้ครบ, และโยงต่อกับ artifact ฝั่ง presentation ได้ง่าย
 - Insight สำคัญคือโมเดลนี้เหมาะกับ `prioritization` และ `what-if analysis` มากกว่าการ auto-approve แบบ production เต็มรูปแบบ
 - Visual: `outputs/supervised_model_comparison.png`, `outputs/supervised_confusion_matrix.png`, `outputs/supervised_roc_curve.png`
 

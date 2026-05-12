@@ -5,13 +5,11 @@ import sys
 import warnings
 from pathlib import Path
 
-import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
@@ -28,7 +26,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.config import (
-    CLEAN_CSV, LEGACY_BINARY_TARGET_COLUMN, MODELS_DIR, OUTPUTS_DIR,
+    CLEAN_CSV, LEGACY_BINARY_TARGET_COLUMN, OUTPUTS_DIR,
     TARGET_COLUMN, ensure_dirs, setup_thai_font,
 )
 
@@ -56,6 +54,7 @@ FEATURE_LABELS: dict[str, str] = {
     "coffee_fresh_taste": "Fresh taste preference",
     "coffee_caffeine": "Caffeine importance",
     "most_freq_rtd_brand": "Primary RTD coffee brand",
+    "most_freq_rtd_tea_brand": "Primary RTD tea brand",
     "dur_online": "Daily online usage",
     "presenter_effect": "Presenter influence",
 }
@@ -162,12 +161,64 @@ def plot_model_comparison(results: dict[str, dict], path: Path):
     sns.barplot(data=cmp_df, x="metric", y="score", hue="model", ax=ax, palette="Set2")
     ax.set_xticklabels(["Accuracy", "Precision\nmacro", "Recall\nmacro", "F1\nmacro", "ROC-AUC\nOVR"])
     ax.set_ylim(0, 1)
-    ax.set_title("Model Comparison — 5-fold Stratified CV (mean)")
+    if len(results) == 1:
+        only_model = next(iter(results))
+        ax.set_title(f"{only_model} — 5-fold Stratified CV (mean)")
+    else:
+        ax.set_title("Model Comparison — 5-fold Stratified CV (mean)")
     ax.set_ylabel("Score")
     ax.set_xlabel("")
     for container in ax.containers:
         ax.bar_label(container, fmt="%.2f", fontsize=8, padding=2)
-    ax.legend(title="Model", loc="lower right")
+    if len(results) > 1:
+        ax.legend(title="Model", loc="lower right")
+    elif ax.legend_ is not None:
+        ax.legend_.remove()
+    plt.tight_layout()
+    plt.savefig(path, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_per_class_performance(results: dict[str, dict], path: Path):
+    """Plot precision, recall, F1 for each class separately (hold-out test set)"""
+    rows = []
+    for model_name, info in results.items():
+        report = info["holdout"]["classification_report"]
+        for class_value in sorted(CLASS_LABELS.keys()):
+            class_label = CLASS_LABELS[class_value]
+            if class_label in report:
+                class_metrics = report[class_label]
+                rows.append({
+                    "model": model_name,
+                    "class": class_label,
+                    "class_value": class_value,
+                    "precision": class_metrics["precision"],
+                    "recall": class_metrics["recall"],
+                    "f1-score": class_metrics["f1-score"],
+                    "support": class_metrics["support"],
+                })
+
+    per_class_df = pd.DataFrame(rows)
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+    metrics_to_plot = ["precision", "recall", "f1-score"]
+    metric_labels = ["Precision", "Recall", "F1-Score"]
+
+    for ax, metric, label in zip(axes, metrics_to_plot, metric_labels):
+        plot_data = per_class_df.pivot(index="class", columns="model", values=metric)
+        colors = [TARGET_OPTIONS[i]["color"] for i in range(len(CLASS_LABELS))]
+        plot_data.plot(kind="bar", ax=ax, color=colors, legend=False, width=0.7)
+        ax.set_title(f"{label} by Class", fontsize=12, fontweight="bold")
+        ax.set_ylabel(label)
+        ax.set_xlabel("")
+        ax.set_ylim(0, 1)
+        ax.set_xticklabels(ax.get_xticklabels(), rotation=0)
+        ax.grid(axis="y", alpha=0.3)
+
+        for container in ax.containers:
+            ax.bar_label(container, fmt="%.2f", fontsize=9, padding=2)
+
+    plt.suptitle("Per-Class Performance (Hold-out Test Set)", fontsize=14, fontweight="bold", y=1.02)
     plt.tight_layout()
     plt.savefig(path, dpi=300, bbox_inches="tight")
     plt.close(fig)
@@ -310,9 +361,6 @@ def main():
         "LogisticRegression": LogisticRegression(
             max_iter=2000, class_weight="balanced", solver="lbfgs",
         ),
-        "GradientBoosting": GradientBoostingClassifier(
-            n_estimators=250, learning_rate=0.05, max_depth=3, random_state=RANDOM_STATE,
-        ),
     }
 
     results: dict[str, dict] = {}
@@ -336,6 +384,7 @@ def main():
           f"(F1 = {results[best_name]['cv']['cv_f1_macro_mean']:.4f})")
 
     plot_model_comparison(results, OUTPUTS_DIR / "supervised_model_comparison.png")
+    plot_per_class_performance(results, OUTPUTS_DIR / "supervised_per_class_performance.png")
     plot_confusion_matrices(results, OUTPUTS_DIR / "supervised_confusion_matrix.png")
     plot_roc_curves(results, X_test, y_test, OUTPUTS_DIR / "supervised_roc_curve.png")
 
@@ -345,13 +394,11 @@ def main():
     print("\nLogistic-regression coefficients (sorted by |coef|):")
     print(coef_df.head(15).to_string(index=False))
 
-    joblib.dump(logreg_pipe, MODELS_DIR / "supervised_logreg.joblib")
     schema = build_feature_schema(labelled, numeric_cols, categorical_cols)
     schema["target"] = TARGET_COLUMN
     schema["legacy_binary_target"] = LEGACY_BINARY_TARGET_COLUMN
     schema["target_options"] = TARGET_OPTIONS
     schema["best_model"] = "LogisticRegression"
-    schema["model_files"] = {"logreg": "supervised_logreg.joblib"}
     schema_path = OUTPUTS_DIR / "supervised_feature_schema.json"
     schema_path.write_text(json.dumps(schema, indent=2, ensure_ascii=False), encoding="utf-8")
 
@@ -375,6 +422,5 @@ def main():
     print(f"\nSaved metrics:        {metrics_path}")
     print(f"Saved coefficients:   {OUTPUTS_DIR / 'supervised_coefficients.csv'}")
     print(f"Saved feature schema: {schema_path}")
-    print(f"Saved model (LogReg): {MODELS_DIR / 'supervised_logreg.joblib'}")
 if __name__ == "__main__":
     main()

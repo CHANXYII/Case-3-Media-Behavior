@@ -53,10 +53,10 @@ export default function Hero() {
 
         <Reveal delay={0.55} className="mt-7">
           <p className="text-[16px] md:text-lg text-ink-2 max-w-2xl leading-relaxed">
-            แบรนด์กำลังขยายจากร้านกาแฟ 4,000+ สาขา ออกมาเป็นกาแฟพร้อมดื่ม (RTD)
-            ในร้านสะดวกซื้อ — คำถามคือ <strong className="text-ink-0 font-semibold">ควรคุยกับใคร</strong>,
-            พูดเรื่องอะไร, แล้ว <strong className="text-ink-0 font-semibold">เทงบไปทางไหน</strong> ถึงจะคุ้ม.
-            เราเก็บแบบสอบถาม 181 คน เคลียร์ 120 ฟีเจอร์ แบ่ง 3 กลุ่ม แล้วเทรนโมเดลแยกทีละกลุ่ม.
+            แบรนด์กาแฟที่มีร้านกว่า 4,000 สาขากำลังจะออกกาแฟพร้อมดื่มขายในเซเว่น
+            คำถามคือ <strong className="text-ink-0 font-semibold">ควรคุยกับใคร</strong>
+            ขายจุดไหน แล้ว <strong className="text-ink-0 font-semibold">เทงบไปช่องทางไหน</strong> ถึงจะคุ้ม
+            เราเก็บแบบสอบถาม 181 คน แบ่งเป็น 3 กลุ่ม แล้วสร้างโมเดลแยกทีละกลุ่มเพื่อหาคำตอบ
           </p>
         </Reveal>
 

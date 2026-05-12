@@ -52,9 +52,7 @@ Case_3_Final_Project_F/
 │       ├── media_behavior_with_clusters.csv    # หลัง K-Means + DBSCAN + IsolationForest
 │       └── column_mapping.json                 # dictionary คอลัมน์ ไทย→อังกฤษ
 ├── assets/DB-Adman-X.ttf                       # ฟอนต์ไทยสำหรับ matplotlib
-├── models/
-│   ├── supervised_logreg.joblib                  # โมเดล LogisticRegression
-│   └── supervised_logreg.joblib                # LogReg แบบ interpretable
+├── models/                                     # reserved for reusable model artifacts
 ├── outputs/                                    # PNG / CSV / JSON ทุกขั้นตอน (~40 ไฟล์)
 ├── src/
 │   ├── config.py                               # path กลาง + Thai font setup
@@ -143,7 +141,6 @@ Case_3_Final_Project_F/
                   ║ • 80/20 stratified hold-out        ║
                   ║ • export coefficients + SHAP-lite  ║
                   ╚══════════════════┬═════════════════╝
-                                     │ supervised_logreg.joblib
                                      │ supervised_metrics.json
                                      │ supervised_coefficients.csv
                                      │ supervised_feature_schema.json
@@ -367,18 +364,13 @@ ColumnTransformer
 2. อ่าน `feature_selection_summary.csv` → เลือก **top-5** (numeric 4 + categorical 1) เรียงตาม F-score
    - fallback: `coffee_value`, `coffee_aroma`, `coffee_convenience`, `coffee_nutrition`, `most_freq_rtd_brand`
 3. **Stratified train_test_split** 80/20 (`random_state=42`)
-4. สร้าง `Pipeline` สำหรับ 3 โมเดล:
+4. สร้าง `Pipeline` สำหรับ Logistic Regression:
    - `LogisticRegression(max_iter=2000, class_weight='balanced', solver='lbfgs')`
-   - `LogisticRegression(max_iter=2000, class_weight="balanced")`
-   - `GradientBoostingClassifier(n_estimators=250, learning_rate=0.05, max_depth=3)`
 5. **5-fold Stratified Cross-Validation** บน train set, metric: `accuracy`, `precision_macro`, `recall_macro`, `f1_macro`, `roc_auc_ovr`
 6. ประเมิน hold-out test set: confusion matrix + classification report + ROC AUC (One-vs-Rest)
-7. เลือก best model จาก `cv_f1_macro_mean`
-8. Export
-   - `models/supervised_logreg.joblib` (best pipeline เต็มทั้ง preprocessor + classifier)
-   - `models/supervised_logreg.joblib` (LogReg, ใช้สำหรับ live predictor)
+7. Export
    - `outputs/supervised_coefficients.csv` (coefficient + odds_ratio ของ LogReg ทุก class)
-      - `outputs/supervised_model_comparison.png` (CV metric bar chart)
+       - `outputs/supervised_model_comparison.png` (CV metric bar chart)
    - `outputs/supervised_confusion_matrix.png`
    - `outputs/supervised_roc_curve.png`
    - `outputs/supervised_metrics.json` (CV + holdout metric + class distribution + feature list)
@@ -508,9 +500,9 @@ src/web/
 2. โหลด top-5 features จาก `feature_selection_summary.csv`
 3. Stratified split 80/20
 4. Build `ColumnTransformer` (median impute + StandardScaler / mode impute + OHE)
-5. 5-fold Stratified CV เทียบ 3 โมเดล
-6. Refit best model ทั้ง train set → evaluate hold-out
-7. Export joblib + JSON + PNG
+5. 5-fold Stratified CV สำหรับ Logistic Regression
+6. Fit model บน train set → evaluate hold-out
+7. Export JSON + PNG
 
 **Best model:** LogisticRegression (CV F1 = 0.843, Test F1 = 0.895)
 
@@ -540,7 +532,7 @@ src/web/
 | Test ROC-AUC (OVR) | **0.926** |
 | K-Means K | **3** |
 | Isolation Forest contamination | 5% |
-| Output artifacts | ~40 ไฟล์ (PNG/CSV/JSON/joblib) |
+| Output artifacts | ~40 ไฟล์ (PNG/CSV/JSON) |
 
 ---
 

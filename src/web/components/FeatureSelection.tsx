@@ -103,7 +103,7 @@ export default function FeatureSelection() {
               </li>
               <li>
                 <div className="text-ink-0 font-semibold text-sm mb-0.5">Top-K</div>
-                dedupe ตาม source variable แล้วเก็บ <span className="font-mono">5</span> ตัวที่ F สูงสุด ส่งต่อไปเทรน Logistic Regression / Random Forest / Gradient Boosting.
+                dedupe ตาม source variable แล้วเก็บ <span className="font-mono">5</span> ตัวที่ F สูงสุด ส่งต่อไปเทรน Logistic Regression.
               </li>
             </ul>
           </Card>

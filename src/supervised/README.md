@@ -49,19 +49,18 @@ static dashboard data has 118 labelled respondents:ง`, 76
 | **LogisticRegreression`** — strong CV F1 (0.843) and excellent
 generalisation (test F1 = 0.895, test ROC-AUC = 0.863). Interpretable
 coefficients enable business communication and client-side web prediction.
-Used for both production and interactive demo.
+Used for production export and coefficient-based interpretation.
 
 ## Outputs
 
 Artefacts written by `train.py`:
 
-- `models/supervised_logreg.joblib` — LogisticRegression pipeline (preprocessor + classifier).
 - `outputs/supervised_metrics.json` — full CV + hold-out metrics, feature
   lists, and class distribution.
 - `outputs/supervised_coefficients.csv` — every logistic-regression coefficient
   with its odds ratio, sorted by absolute weight.
 - `outputs/supervised_coefficients.png` — coefficient bar chart.
-- `outputs/supervised_model_comparison.png` — CV metric comparison across models.
+- `outputs/supervised_model_comparison.png` — cross-validated metric summary for the exported model.
 - `outputs/supervised_confusion_matrix.png` — hold-out confusion matris.
 - `outputs/supervised_roc_curve.png` — hold-out ROC curves.
 - `outputs/supervised_feature_schema.json` — feature schema for the web UI.

@@ -37,7 +37,7 @@
     },
     {
       "name": "most_freq_rtd_tea_brand",
-      "label": "Most Freq Rtd Tea Brand",
+      "label": "Primary RTD tea brand",
       "choices": [
         "Fukuro",
         "ITONO",
@@ -89,8 +89,5 @@
       "color": "#5BB89A"
     }
   ],
-  "best_model": "LogisticRegression",
-  "model_files": {
-    "logreg": "supervised_logreg.joblib"
-  }
+  "best_model": "LogisticRegression"
 }

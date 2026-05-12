@@ -77,8 +77,8 @@ export default function RawData() {
         <SectionHeader
           index="01"
           kicker="ข้อมูลดิบ"
-          title="เริ่มจากตัวเลขพวกนี้ก่อน"
-          subtitle="เก็บข้อมูลจากแบบสอบถามภาษาไทย 76 ข้อผ่าน Google Forms — ถามตั้งแต่ข้อมูลส่วนตัว พฤติกรรมเสพสื่อ 4 ช่องทาง ความชอบกาแฟ/ชาแบบเลือกคะแนน 1–5 ไปจนถึงจะลอง RTD ตัวใหม่ไหม."
+          title="เริ่มจากข้อมูลพื้นฐานก่อน"
+          subtitle="เก็บข้อมูลจากแบบสอบถามภาษาไทย 76 ข้อ ถามเรื่องข้อมูลส่วนตัว พฤติกรรมดูสื่อ ความชอบกาแฟ/ชา (ให้คะแนน 1-5) และจะลองกาแฟพร้อมดื่มตัวใหม่ไหม"
         />
 
         <div className="grid grid-cols-12 gap-5">
@@ -88,8 +88,8 @@ export default function RawData() {
               <CountUp to={total} duration={1.5} />
             </div>
             <p className="text-ink-2 mt-3 text-sm leading-relaxed">
-              <span className="text-ink-0 font-medium">181 คนที่ตอบครบ</span> หลังตัด 3 แถวที่เว้นข้อมูลพื้นฐาน.
-              ไฟล์ดิบก่อนเคลียร์มี <span className="font-mono text-ink-1">200</span> แถว × <span className="font-mono text-ink-1">76</span> คอลัมน์.
+              <span className="text-ink-0 font-medium">181 คนที่ตอบครบ</span> หลังตัดแถวที่ข้อมูลไม่ครบออก
+              ไฟล์ดิบตอนแรกมี <span className="font-mono text-ink-1">200</span> แถว × <span className="font-mono text-ink-1">76</span> คอลัมน์
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Pill>ภาษาไทย</Pill>
@@ -132,7 +132,7 @@ export default function RawData() {
               </ResponsiveContainer>
             </div>
             <p className="text-xs text-ink-2 mt-2 leading-relaxed">
-              ผู้หญิงเยอะกว่า (<span className="font-mono text-ink-1">{demo.gender["หญิง"]}/{total}</span> = {((demo.gender["หญิง"] / total) * 100).toFixed(0)}%).
+              ผู้หญิงมากกว่า (<span className="font-mono text-ink-1">{demo.gender["หญิง"]}/{total}</span> คน หรือ {((demo.gender["หญิง"] / total) * 100).toFixed(0)}%)
             </p>
           </Card>
 
@@ -154,7 +154,7 @@ export default function RawData() {
               </ResponsiveContainer>
             </div>
             <p className="text-xs text-ink-2 mt-2 leading-relaxed">
-              ช่วง <span className="font-mono text-accent-gold">30–39</span> มาเยอะสุด {demo.age_group["30-39ปี"]} คน (39%) — กลุ่มหลักที่ซื้อ RTD ในร้านสะดวกซื้อ.
+              อายุ <span className="font-mono text-accent-gold">30-39</span> มากที่สุด {demo.age_group["30-39ปี"]} คน (39%) ซึ่งเป็นกลุ่มหลักที่ซื้อกาแฟพร้อมดื่มในเซเว่น
             </p>
           </Card>
 

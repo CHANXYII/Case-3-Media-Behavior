@@ -19,16 +19,12 @@ function softmax(logits: number[]) {
 }
 
 const FEATURE_HELP: Record<string, string> = {
-  coffee_value: "‘ราคาเทียบกับคุณภาพ ต้องคุ้ม’ — 1=ไม่สน, 5=ตัดสินใจจากข้อนี้.",
-  coffee_aroma: "‘กลิ่นต้องโดน — ต้องดมตอนเปิดขวด’.",
-  coffee_convenience: "‘ขอแบบหยิบเดินดื่ม ไม่ต้องชง’.",
-  coffee_nutrition: "‘น้ำตาลน้อย/มีฟังก์ชันเสริม สำคัญ’.",
-  coffee_smooth: "‘นุ่ม ไม่ขม ดื่มเย็นได้สบาย’.",
-  coffee_brand_trust: "‘ขอแบรนด์ที่รู้จักและไว้ใจอยู่แล้ว’.",
-  coffee_packaging: "‘ดีไซน์ขวด/กระป๋อง มีผลตอนเดินผ่านชั้น’.",
-  coffee_fresh_taste: "‘ต้องเหมือนกาแฟสดเพิ่งชง’.",
-  coffee_intensity: "‘ขอเข้มจัด คั่วเข้ม’.",
-  coffee_premium: "‘รู้สึกพรีเมียม จ่ายเพิ่มได้’."
+  coffee_value: "ราคาเทียบกับคุณภาพต้องคุ้ม — 1=ไม่สน, 5=สำคัญมาก",
+  coffee_aroma: "กลิ่นต้องหอม ดมแล้วรู้สึกอยากดื่ม",
+  coffee_nutrition: "น้ำตาลน้อย หรือมีส่วนผสมเพื่อสุขภาพ",
+  coffee_convenience: "หยิบง่าย ดื่มได้เลย ไม่ต้องชง",
+  coffee_caffeine: "คาเฟอีนพอให้ตื่นตัว ช่วยให้ทำงานได้",
+  coffee_smooth: "รสชาตินุ่ม ไม่ขม ดื่มง่าย"
 };
 
 export default function Predictor() {
@@ -129,16 +125,17 @@ export default function Predictor() {
 
         <div className="grid grid-cols-12 gap-5">
           <Card className="col-span-12 lg:col-span-7">
-            <div className="tag mb-3">ลากสไลเดอร์ทั้ง 10 ข้อ</div>
+            <div className="tag mb-3">ให้คะแนนความสำคัญ {featureOrder.length} ข้อ</div>
             <div className="space-y-4">
               {featureOrder.map((f) => {
                 const label = featureLabels[f] ?? f;
+                const helpText = FEATURE_HELP[f] ?? `ให้คะแนนความสำคัญของ ${label} ต่อการตัดสินใจลองสินค้า`;
                 const v = values[f];
                 return (
                   <div key={f} className="grid grid-cols-12 gap-3 items-center">
                     <div className="col-span-12 md:col-span-4">
                       <div className="text-sm text-ink-0 font-medium">{label}</div>
-                      <div className="text-[11px] text-ink-2 leading-snug">{FEATURE_HELP[f]}</div>
+                      <div className="text-[11px] text-ink-2 leading-snug">{helpText}</div>
                     </div>
                     <div className="col-span-9 md:col-span-7">
                       <input
@@ -249,7 +246,7 @@ export default function Predictor() {
                 })}
               </div>
               <p className="text-[11px] text-ink-2 mt-3 leading-relaxed">
-                แท่งคือ ‘แต่ละฟีเจอร์ผลัก logit ของคลาสลองแน่นอนไปเท่าไร’. โมเดลมี logit แยก 3 คลาส แล้วเข้า <span className="font-mono">softmax</span> เป็นเปอร์เซ็นต์ด้านบน.
+                แท่งแสดงว่าแต่ละข้อมีผลต่อโอกาสที่จะลองแน่นอนมากน้อยแค่ไหน สีเขียวคือดันให้ลอง สีแดงคือลดโอกาส โมเดลรวมทุกอย่างแล้วคำนวณเป็นเปอร์เซ็นต์ด้านบน
               </p>
             </div>
           </Card>

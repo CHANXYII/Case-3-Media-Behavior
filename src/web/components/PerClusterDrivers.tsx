@@ -54,8 +54,8 @@ export default function PerClusterDrivers() {
         <SectionHeader
           index="05"
           kicker="Supervised × Unsupervised"
-          title="ฟิตโมเดลแยกทีละกลุ่ม — นี่คือไฮไลต์"
-          subtitle="โมเดลรวมก้อนเดียวบอกแค่ ‘กลิ่นสำคัญ’. แต่ target แยก 3 คำตอบ. เราเทรน Logistic Regression แยกทีละ cluster และแสดง coefficient แยกตาม choice. ทุกฟีเจอร์ Likert ผ่าน standardize — แท่งคือ ‘log-odds เปลี่ยนเท่าไรเมื่อ +1 SD’."
+          title="แยกโมเดลทีละกลุ่ม เพื่อหาตัวขับที่แตกต่างกัน"
+          subtitle="โมเดลรวมบอกแค่ภาพรวม แต่แต่ละกลุ่มมีเหตุผลในการตัดสินใจที่ต่างกัน เราเทรน Logistic Regression แยกทีละคลัสเตอร์ และแสดงค่า coefficient ของแต่ละคำตอบ แท่งบอกว่าแต่ละคุณสมบัติมีผลต่อการตัดสินใจมากน้อยแค่ไหน"
         />
 
         <div className="grid grid-cols-12 gap-3 mb-6">
@@ -105,7 +105,7 @@ export default function PerClusterDrivers() {
                   </div>
                   <div className="text-base font-semibold text-ink-0 leading-snug">{p.name}</div>
                   <div className="text-xs text-ink-2 mt-1 leading-relaxed">
-                    มีแค่ 10 คนที่ label และคลาส ‘ลองแน่นอน’ มี 1 คน — ฟิต logistic regression 3 คลาสบน 10 แถวจะแกว่ง. เก็บไว้เป็น watchlist.
+                    มีข้อมูลแค่ 10 คน และคนที่ตอบ ‘ลองแน่นอน’ มีแค่ 1 คน ข้อมูลน้อยเกินไปที่จะสร้างโมเดลที่เชว้เป็น watchlist
                   </div>
                 </div>
               );
@@ -167,7 +167,7 @@ export default function PerClusterDrivers() {
             </div>
 
             <p className="text-xs text-ink-2 mt-2 leading-relaxed">
-              <span className="text-ink-0 font-medium">วิธีอ่าน:</span> coefficient +0.9 บนกลิ่นแปลว่า คนที่ใส่ใจกลิ่นมากกว่าค่าเฉลี่ย 1 SD จะมีโอกาสเข้า ‘{choice.label}’ <span className="font-mono text-accent-gold">e^0.9 ≈ 2.46×</span> ของคนทั่วไปในกลุ่ม. แท่งลบคือกลับด้าน.
+              <span className="text-ink-0 font-medium">วิธีอ่าน:</span> ค่า +0.9 แปลว่าคนที่ให้คะแนนสูงกว่าค่าเฉลี่ยจะมีโอกาส ‘{choice.label}’ มากขึ้นประมาณ 2.5 เท่า แท่งสีเขียวคือดันให้ลอง แท่งสีแดงคือลดโอกาส
             </p>
           </Card>
 
@@ -187,7 +187,7 @@ export default function PerClusterDrivers() {
               </ResponsiveContainer>
             </div>
             <p className="text-xs text-ink-2 mt-2 leading-relaxed">
-              เปลี่ยน choice ด้านบนแล้วกราฟจะสลับ coefficient ตามคลาสทันที. ฟีเจอร์เดียวกันอาจดัน ‘อาจจะลอง’ แต่กด ‘ลองแน่นอน’ ลงได้ — จึงไม่ควรรวม target เป็น binary.
+              เปลี่ยนคำตอบด้านบนแล้วกราฟจะเปลี่ยนตาม คุณสมบัติเดียวกันอาจดัน ‘อาจจะลอง’ แต่กลับลด ‘ลองแน่นอน’ ได้ เพราะฉะนั้นต้องแยกวิเคราะห์ทั้ง 3 คำตอบ
             </p>
           </Card>
 
@@ -204,15 +204,15 @@ export default function PerClusterDrivers() {
                   <ul className="space-y-3 text-[14px] leading-relaxed text-ink-2">
                     <li>
                       <span className="text-accent-gold font-bold">P0 ·</span>{" "}
-                      สาย Mainstream ที่จะลองแน่นอนถูกดันด้วยโภชนาการ + กลิ่น — เน้น <span className="font-mono text-ink-1">+0.55 Nutrition</span>, <span className="font-mono text-ink-1">+0.54 Aroma</span>.
+                      กลุ่มหลักที่จะลองแน่นอนถูกดันด้วยโภชนาการและกลิ่นลุ่มนี้ลอง ต้องเน้นว่าดีต่อสุขภาพและมีกลิ่นหอม
                     </li>
                     <li>
                       <span className="text-accent-jade font-bold">P2 ·</span>{" "}
-                      สาย Premium ที่จะลองแน่นอนถูกดันด้วยกลิ่น + ความคุ้มค่า — เน้น <span className="font-mono text-ink-1">+0.75 Aroma</span>, <span className="font-mono text-ink-1">+0.63 Value</span>; ห้ามขายความนุ่มเกินไป.
+                      กลุ่มพรีเมียมที่จะลองแน่นอนถูกดันด้วยกลิ่นและความคุ้มค่า ต้องขายว่ากลิ่นดีและราคาคุ้มกับคุณภาพ
                     </li>
                     <li>
                       <span className="text-accent-violet font-bold">P1 ·</span>{" "}
-                      สายไม่กาแฟมี ‘ลองแน่นอน’ แค่ 1 คนจาก 10 — ยังไม่พอทำ coefficient. เก็บไว้ยิงด้วย SKU ชา/wellness แทน.
+                      กลุ่มไม่กาแฟมีคนที่จะลองแน่นอนแค่ 1 คนจาก 10 ข้อมูลน้อยเกินไปที่จะวิเคราะห์ ควรลองเสนอชาหรือเครื่องดื่มเพื่อสุขภาพแทน
                     </li>
                   </ul>
                 </div>
