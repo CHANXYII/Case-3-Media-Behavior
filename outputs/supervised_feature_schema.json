@@ -91,7 +91,6 @@
   ],
   "best_model": "LogisticRegression",
   "model_files": {
-    "logreg": "supervised_logreg.joblib",
-    "best": "supervised_best.joblib"
+    "logreg": "supervised_logreg.joblib"
   }
 }

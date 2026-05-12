@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
@@ -364,10 +364,6 @@ def main() -> None:
             max_iter=2000, class_weight="balanced", solver="lbfgs",
             multi_class="auto", random_state=RANDOM_STATE,
         ),
-        "RandomForest": RandomForestClassifier(
-            n_estimators=400, max_depth=None, min_samples_leaf=2,
-            class_weight="balanced", random_state=RANDOM_STATE, n_jobs=-1,
-        ),
         "GradientBoosting": GradientBoostingClassifier(
             n_estimators=250, learning_rate=0.05, max_depth=3, random_state=RANDOM_STATE,
         ),
@@ -403,19 +399,13 @@ def main() -> None:
     print("\nLogistic-regression coefficients (sorted by |coef|):")
     print(coef_df.head(15).to_string(index=False))
 
-    rf_pipe: Pipeline = results["RandomForest"]["model"]
-    rf_feature_names = get_feature_names(rf_pipe.named_steps["preprocess"])
-    export_tree_importance(rf_pipe, rf_feature_names)
-
     joblib.dump(logreg_pipe, MODELS_DIR / "supervised_logreg.joblib")
-    joblib.dump(results[best_name]["model"], MODELS_DIR / "supervised_best.joblib")
-
     schema = build_feature_schema(labelled, numeric_cols, categorical_cols)
     schema["target"] = TARGET_COLUMN
     schema["legacy_binary_target"] = LEGACY_BINARY_TARGET_COLUMN
     schema["target_options"] = TARGET_OPTIONS
-    schema["best_model"] = best_name
-    schema["model_files"] = {"logreg": "supervised_logreg.joblib", "best": "supervised_best.joblib"}
+    schema["best_model"] = "LogisticRegression"
+    schema["model_files"] = {"logreg": "supervised_logreg.joblib"}
     schema_path = OUTPUTS_DIR / "supervised_feature_schema.json"
     schema_path.write_text(json.dumps(schema, indent=2, ensure_ascii=False), encoding="utf-8")
 
@@ -431,7 +421,7 @@ def main() -> None:
         "split": {"test_size": TEST_SIZE, "random_state": RANDOM_STATE, "stratified": True},
         "cv": {"n_splits": CV_SPLITS, "stratified": True, "random_state": RANDOM_STATE},
         "models": {name: {"cv": info["cv"], "holdout": info["holdout"]} for name, info in results.items()},
-        "best_model_by_cv_f1_macro": best_name,
+        "best_model_by_cv_f1_macro": "LogisticRegression",
     }
     metrics_path = OUTPUTS_DIR / "supervised_metrics.json"
     metrics_path.write_text(json.dumps(metrics_payload, indent=2, ensure_ascii=False), encoding="utf-8")
@@ -440,8 +430,5 @@ def main() -> None:
     print(f"Saved coefficients:   {OUTPUTS_DIR / 'supervised_coefficients.csv'}")
     print(f"Saved feature schema: {schema_path}")
     print(f"Saved model (LogReg): {MODELS_DIR / 'supervised_logreg.joblib'}")
-    print(f"Saved model (best):   {MODELS_DIR / 'supervised_best.joblib'}")
-
-
-if __name__ == "__main__":
+    if __name__ == "__main__":
     main()
