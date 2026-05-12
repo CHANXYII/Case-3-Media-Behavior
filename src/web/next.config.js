@@ -1,7 +1,5 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+module.exports = {
   reactStrictMode: true,
   output: "standalone",
   experimental: { optimizePackageImports: ["recharts", "lucide-react"] }
 };
-module.exports = nextConfig;

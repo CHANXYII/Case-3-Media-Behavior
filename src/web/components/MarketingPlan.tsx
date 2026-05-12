@@ -13,7 +13,6 @@ type PlanRow = {
   budgetShare: number;
   songkran: string;
   kpi: string;
-  estTrial: number;
 };
 
 const PLANS: PlanRow[] = [
@@ -29,8 +28,7 @@ const PLANS: PlanRow[] = [
     ],
     budgetShare: 60,
     songkran: "ออกบูธรอบโซนสงกรานต์ใหญ่ (สีลม, ข้าวสาร) — แจกตัวอย่าง 50,000 ขวดเย็น พร้อมฝาขูดที่เผยกลิ่น.",
-    kpi: "อย่างน้อย 70% ตอบ ‘จะลอง’ ตอน intercept survey ที่บูธ; week 4 ซื้อซ้ำ ≥ 12%.",
-    estTrial: 0.83
+    kpi: "อย่างน้อย 70% ตอบ ‘จะลอง’ ตอน intercept survey ที่บูธ; week 4 ซื้อซ้ำ ≥ 12%."
   },
   {
     pid: 2,
@@ -44,8 +42,7 @@ const PLANS: PlanRow[] = [
     ],
     budgetShare: 30,
     songkran: "ป๊อปอัปในห้างพรีเมียม (EmSphere, ICONSIAM); จัด tasting flight โดยบาริสต้า. ห้ามแจกแมส.",
-    kpi: "≥ 80% probability บน Predictor สำหรับ persona พรีเมียม; AOV +15%.",
-    estTrial: 0.81
+    kpi: "≥ 80% probability บน Predictor สำหรับ persona พรีเมียม; AOV +15%."
   },
   {
     pid: 1,
@@ -54,8 +51,7 @@ const PLANS: PlanRow[] = [
     channels: [{ name: "พักไว้ก่อน (ไม่เทงบ)", share: 100 }],
     budgetShare: 10,
     songkran: "ใช้เป็นกลุ่มควบคุม — วัดแค่การรับรู้แบบ organic.",
-    kpi: "Re-survey Q3; ถ้าอัตรา ‘ลองแน่นอน’ ของชา ≥ 50% บน N=40 ค่อยปลดล็อกงบทำชา launch.",
-    estTrial: 0.4
+    kpi: "Re-survey Q3; ถ้าอัตรา ‘ลองแน่นอน’ ของชา ≥ 50% บน N=40 ค่อยปลดล็อกงบทำชา launch."
   }
 ];
 
@@ -64,9 +60,9 @@ export default function MarketingPlan() {
   const blocks = ds.clusterSupervised.blocks;
 
   const ranked = PLANS.map((p) => {
-    const block = blocks.find((b) => b.cluster_id === p.pid);
-    const size = block?.size ?? 0;
-    const tryRate = block?.try_rate ?? p.estTrial;
+    const block = blocks.find((b) => b.cluster_id === p.pid)!;
+    const size = block.size;
+    const tryRate = block.try_rate;
     const expected = size * tryRate;
     return { ...p, block, size, tryRate, expected };
   });
@@ -197,7 +193,7 @@ export default function MarketingPlan() {
                         <div className="mt-3 grid grid-cols-3 gap-1 text-center">
                           {TARGET_CHOICES.map((ch) => (
                             <div key={ch.key}>
-                              <div className="text-sm font-semibold tabular" style={{ color: ch.color }}>{fmtPct(r.block?.choice_rates?.[ch.key])}</div>
+                              <div className="text-sm font-semibold tabular" style={{ color: ch.color }}>{fmtPct(r.block.choice_rates[ch.key])}</div>
                               <div className="text-[9px] text-ink-2 font-mono uppercase">{ch.shortLabel}</div>
                             </div>
                           ))}

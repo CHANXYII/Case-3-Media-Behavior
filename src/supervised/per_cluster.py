@@ -51,7 +51,6 @@ def fit_logreg(X: pd.DataFrame, y: pd.Series) -> tuple[np.ndarray, np.ndarray, d
         warnings.simplefilter("ignore", ConvergenceWarning)
         clf = LogisticRegression(
             max_iter=4000, class_weight="balanced", solver="lbfgs",
-            multi_class="auto", C=1.0, random_state=42,
         )
         clf.fit(Xs, y)
     return clf.coef_, clf.intercept_, {
@@ -151,10 +150,8 @@ def per_cluster_block(df, cluster_id, features, glob_means, glob_stds) -> dict:
     return block
 
 
-def main() -> None:
+def main():
     ensure_dirs()
-    if not CLUSTERS_CSV.exists():
-        raise FileNotFoundError(f"{CLUSTERS_CSV} not found. Run the unsupervised stage first.")
     df = pd.read_csv(CLUSTERS_CSV)
     features = [f for f in NUMERIC_FEATURES if f in df.columns]
     df[features] = df[features].apply(pd.to_numeric, errors="coerce")

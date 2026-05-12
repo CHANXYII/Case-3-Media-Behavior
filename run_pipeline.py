@@ -17,14 +17,14 @@ STAGES: list[tuple[str, str]] = [
 ]
 
 
-def run_stage(label: str, module: str) -> None:
+def run_stage(label: str, module: str):
     print(f"\n{'='*72}\n▶ {label}  ({module})\n{'='*72}")
     start = time.time()
     runpy.run_module(module, run_name="__main__")
     print(f"   done in {time.time() - start:.1f}s")
 
 
-def main() -> None:
+def main():
     for label, module in STAGES:
         run_stage(label, module)
     print("\nAll stages completed. Launch the dashboard from `web-next/`:")

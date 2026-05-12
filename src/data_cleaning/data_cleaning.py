@@ -308,15 +308,6 @@ def derive_target(value):
 
 
 def build_clean_data(age_group_mapping):
-    """
-    Build complete cleaned dataset with derived features and target variables.
-
-    Args:
-        age_group_mapping: Dictionary mapping age group strings to numeric values
-
-    Returns:
-        DataFrame with cleaned data and derived target columns
-    """
     raw_df = pd.read_csv(RAW_CSV)
     raw_df["age_group_raw"] = raw_df["อายุ"]
 

@@ -19,14 +19,12 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.config import CLEAN_CSV, CLUSTERS_CSV, OUTPUTS_DIR, ensure_dirs, setup_thai_font
 
-clean_data_path = CLEAN_CSV
-output_dir = OUTPUTS_DIR
 ensure_dirs()
 setup_thai_font()
 
 
 def load_and_prepare_data():
-    df = pd.read_csv(clean_data_path)
+    df = pd.read_csv(CLEAN_CSV)
     cluster_features = [col for col in df.columns if 'coffee_' in col or 'tea_' in col or 'freq_' in col]
     numeric_df = df[cluster_features].select_dtypes(include=[np.number])
     numeric_df = numeric_df.fillna(numeric_df.median())
@@ -74,7 +72,7 @@ def descriptive_statistics(df, numeric_df):
 
     plt.suptitle("Distribution of Clustering Features", fontsize=13, y=1.02)
     plt.tight_layout()
-    plt.savefig(output_dir / "descriptive_distributions.png", dpi=300, bbox_inches="tight")
+    plt.savefig(OUTPUTS_DIR / "descriptive_distributions.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("\nSaved: descriptive_distributions.png")
 
@@ -85,7 +83,7 @@ def descriptive_statistics(df, numeric_df):
     ax.set_title("Boxplots of Clustering Features (first 9)")
     ax.set_xticklabels(plot_cols, rotation=45, ha="right", fontsize=9)
     plt.tight_layout()
-    plt.savefig(output_dir / "descriptive_boxplots.png", dpi=300, bbox_inches="tight")
+    plt.savefig(OUTPUTS_DIR / "descriptive_boxplots.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("Saved: descriptive_boxplots.png")
 
@@ -113,18 +111,16 @@ def correlation_analysis(numeric_df):
     plt.xticks(rotation=45, ha="right", fontsize=8)
     plt.yticks(fontsize=8)
     plt.tight_layout()
-    plt.savefig(output_dir / "correlation_heatmap.png", dpi=300, bbox_inches="tight")
+    plt.savefig(OUTPUTS_DIR / "correlation_heatmap.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("Saved: correlation_heatmap.png")
 
     g = sns.clustermap(corr_matrix, cmap="RdYlGn", center=0, figsize=(12, 12),
                        linewidths=0.3, annot=False)
     g.fig.suptitle("Clustered Correlation Map", y=1.01, fontsize=13)
-    plt.savefig(output_dir / "correlation_clustermap.png", dpi=300, bbox_inches="tight")
+    plt.savefig(OUTPUTS_DIR / "correlation_clustermap.png", dpi=300, bbox_inches="tight")
     plt.close()
     print("Saved: correlation_clustermap.png")
-
-    return corr_matrix
 
 
 def exploratory_data_analysis(df, numeric_df):
@@ -134,7 +130,7 @@ def exploratory_data_analysis(df, numeric_df):
     g = sns.pairplot(pair_data, diag_kind="kde", plot_kws={"alpha": 0.5, "color": "#1D9E75"},
                      diag_kws={"color": "#1D9E75"})
     g.fig.suptitle("Pairplot of Key Clustering Features", y=1.01, fontsize=13)
-    plt.savefig(output_dir / "eda_pairplot.png", dpi=300, bbox_inches="tight")
+    plt.savefig(OUTPUTS_DIR / "eda_pairplot.png", dpi=300, bbox_inches="tight")
     plt.close()
     print("\nSaved: eda_pairplot.png")
 
@@ -147,7 +143,7 @@ def exploratory_data_analysis(df, numeric_df):
     ax.set_title("Feature Variance (top 15)")
     ax.set_xlabel("Variance")
     plt.tight_layout()
-    plt.savefig(output_dir / "eda_variance.png", dpi=300, bbox_inches="tight")
+    plt.savefig(OUTPUTS_DIR / "eda_variance.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("Saved: eda_variance.png")
 
@@ -159,7 +155,7 @@ def exploratory_data_analysis(df, numeric_df):
         ax.set_title("Missing Value Map (red = missing)")
         plt.xticks(rotation=45, ha="right", fontsize=8)
         plt.tight_layout()
-        plt.savefig(output_dir / "eda_missing_values.png", dpi=300, bbox_inches="tight")
+        plt.savefig(OUTPUTS_DIR / "eda_missing_values.png", dpi=300, bbox_inches="tight")
         plt.close(fig)
         print("Saved: eda_missing_values.png")
 
@@ -193,7 +189,7 @@ def perform_unsupervised_learning(original_df, numeric_df):
         axes[i].set_xlabel("Loading coefficient")
     plt.suptitle("PCA Feature Loadings", fontsize=13)
     plt.tight_layout()
-    plt.savefig(output_dir / "pca_loadings.png", dpi=300, bbox_inches="tight")
+    plt.savefig(OUTPUTS_DIR / "pca_loadings.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("Saved: pca_loadings.png")
 
@@ -217,13 +213,13 @@ def perform_unsupervised_learning(original_df, numeric_df):
     ax2.set_title("Silhouette Score by K")
     ax2.set_xlabel("Number of Clusters (K)")
     ax2.set_ylabel("Silhouette Score")
-    best_k = list(k_range)[silhouettes.index(max(silhouettes))]
+    best_k = max(k_range, key=lambda k: silhouettes[k - 2])
     ax2.axvline(best_k, color="gray", linestyle=":", alpha=0.8)
     ax2.text(best_k + 0.1, max(silhouettes), f"Best K={best_k}", fontsize=9, color="gray")
 
     plt.suptitle("Choosing Optimal K for K-Means", fontsize=13)
     plt.tight_layout()
-    plt.savefig(output_dir / "elbow_method.png", dpi=300, bbox_inches="tight")
+    plt.savefig(OUTPUTS_DIR / "elbow_method.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
 
     optimal_k = 3
@@ -251,7 +247,7 @@ def perform_unsupervised_learning(original_df, numeric_df):
                    label=f"Suggested eps ≈ {k_distances[knee_idx]:.3f}")
         ax.legend(fontsize=9)
     plt.tight_layout()
-    plt.savefig(output_dir / "dbscan_kdistance.png", dpi=300, bbox_inches="tight")
+    plt.savefig(OUTPUTS_DIR / "dbscan_kdistance.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("Saved: dbscan_kdistance.png")
 
@@ -336,7 +332,7 @@ def perform_unsupervised_learning(original_df, numeric_df):
 
     plt.suptitle("Comparison of Unsupervised Learning Methods (PCA 2D Projection)", fontsize=14)
     plt.tight_layout()
-    plt.savefig(output_dir / "clustering_comparison.png", dpi=300, bbox_inches="tight")
+    plt.savefig(OUTPUTS_DIR / "clustering_comparison.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("\nSaved: clustering_comparison.png")
 
@@ -344,11 +340,10 @@ def perform_unsupervised_learning(original_df, numeric_df):
     print(f"{'Method':<30} {'Clusters':>10} {'Silhouette':>12} {'Notes'}")
     print(f"{'-'*65}")
     print(f"{'K-Means (K=3)':<30} {optimal_k:>10} {kmeans_sil:>12.4f}  {'Requires K pre-defined'}")
-    db_sil_str = f"{dbscan_sil:.4f}" if dbscan_sil else "N/A"
+    db_sil_str = f"{dbscan_sil:.4f}" if dbscan_sil is not None else "N/A"
     print(f"{'DBSCAN (auto)':<30} {n_clusters_db:>10} {db_sil_str:>12}  {'Auto-detects; marks noise'}")
     print(f"{'Isolation Forest':<30} {'-':>10} {'N/A':>12}  {f'{n_anomalies} anomalies ({anomaly_pct:.1f}%)'}")
-
-    return original_df, n_clusters_db, dbscan_sil
+    return original_df
 
 
 def analyze_personas(df, numeric_df):
@@ -390,7 +385,7 @@ def analyze_personas(df, numeric_df):
 
     plt.suptitle("Customer Persona Radar Charts\n(top 8 most discriminating features, Likert scale 1-5)", fontsize=13)
     plt.tight_layout()
-    plt.savefig(output_dir / "persona_radar.png", dpi=300, bbox_inches="tight")
+    plt.savefig(OUTPUTS_DIR / "persona_radar.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("\nSaved: persona_radar.png")
 
@@ -407,18 +402,16 @@ def analyze_personas(df, numeric_df):
     ax.set_ylabel("Cluster")
     ax.set_xticklabels(ax.get_xticklabels(), rotation=40, ha="right", fontsize=8)
     plt.tight_layout()
-    plt.savefig(output_dir / "persona_heatmap.png", dpi=300, bbox_inches="tight")
+    plt.savefig(OUTPUTS_DIR / "persona_heatmap.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("Saved: persona_heatmap.png")
 
     print("\nAuto-Generated Persona Descriptions: ")
-    persona_names = {}
     for cluster_id in range(n_clusters):
         row = profile.loc[cluster_id, top_features]
         high = row.nlargest(2).index.tolist()
         low = row.nsmallest(2).index.tolist()
         name = f"Persona {cluster_id}: High {', '.join(high)} / Low {', '.join(low)}"
-        persona_names[cluster_id] = name
         print(f"{name}")
 
     fig, ax = plt.subplots(figsize=(6, 4))
@@ -431,7 +424,7 @@ def analyze_personas(df, numeric_df):
     ax.set_xlabel("Cluster")
     ax.set_ylabel("Number of Customers")
     plt.tight_layout()
-    plt.savefig(output_dir / "persona_cluster_size.png", dpi=300, bbox_inches="tight")
+    plt.savefig(OUTPUTS_DIR / "persona_cluster_size.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("Saved: persona_cluster_size.png")
 
@@ -450,19 +443,17 @@ def analyze_personas(df, numeric_df):
     ax.set_ylabel("Principal Component 2")
     ax.legend(title="Persona Cluster", loc="upper right")
     plt.tight_layout()
-    plt.savefig(output_dir / "customer_clusters_pca.png", dpi=300, bbox_inches="tight")
+    plt.savefig(OUTPUTS_DIR / "customer_clusters_pca.png", dpi=300, bbox_inches="tight")
     plt.close(fig)
     print("Saved: customer_clusters_pca.png")
 
-    if 'is_anomaly' in df.columns:
-        print("\nAnomaly Distribution per Cluster (K-Means):")
-        anomaly_by_cluster = df.groupby(cluster_col)['is_anomaly'].agg(['sum', 'mean']).round(3)
-        anomaly_by_cluster.columns = ['anomaly_count', 'anomaly_rate']
-        print(anomaly_by_cluster.to_string())
+    print("\nAnomaly Distribution per Cluster (K-Means):")
+    anomaly_by_cluster = df.groupby(cluster_col)['is_anomaly'].agg(['sum', 'mean']).round(3)
+    anomaly_by_cluster.columns = ['anomaly_count', 'anomaly_rate']
+    print(anomaly_by_cluster.to_string())
 
     df.to_csv(CLUSTERS_CSV, index=False, encoding="utf-8-sig")
     print(f"Saved final data with clusters to: {CLUSTERS_CSV}")
-    return persona_names
 
 
 if __name__ == "__main__":
@@ -473,8 +464,8 @@ if __name__ == "__main__":
     descriptive_statistics(original_df, numeric_df)
     correlation_analysis(numeric_df)
     exploratory_data_analysis(original_df, numeric_df)
-    clustered_df, n_db_clusters, db_sil = perform_unsupervised_learning(original_df, numeric_df)
-    personas = analyze_personas(clustered_df, numeric_df)
+    clustered_df = perform_unsupervised_learning(original_df, numeric_df)
+    analyze_personas(clustered_df, numeric_df)
 
-    print(f"\nOutput charts saved to: ./{output_dir}/")
+    print(f"\nOutput charts saved to: ./{OUTPUTS_DIR}/")
     print(f"Final CSV: {CLUSTERS_CSV}")

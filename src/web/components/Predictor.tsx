@@ -33,42 +33,35 @@ const FEATURE_HELP: Record<string, string> = {
 
 export default function Predictor() {
   const data = ds.clusterSupervised;
-  const featureOrder = data.features.map((f) => f.name);
   const blocks = data.blocks.filter((b) => b.cluster_id !== null && b.model.fitted);
+  const featureOrder = data.features.map((f) => f.name);
+  const featureLabels = Object.fromEntries(data.features.map((f) => [f.name, f.label])) as Record<string, string>;
 
-  const [activeId, setActiveId] = useState<PersonaKey>(0);
+  const [activeId, setActiveId] = useState<PersonaKey>(blocks[0]!.cluster_id as PersonaKey);
   const [values, setValues] = useState<Record<string, number>>(() => {
     const obj: Record<string, number> = {};
     featureOrder.forEach((f) => (obj[f] = 4));
     return obj;
   });
 
-  const block = blocks.find((b) => b.cluster_id === activeId) || blocks[0];
+  const block = blocks.find((b) => b.cluster_id === activeId)!;
   const persona = PERSONA[block.cluster_id as PersonaKey];
 
   const { probs, predicted, logit, contributions } = useMemo(() => {
     const m = block.model;
-    if (!m.fitted) {
-      return {
-        probs: { "0": 0, "1": 0, "2": 0 } as Record<TargetChoiceKey, number>,
-        predicted: TARGET_CHOICES[0],
-        logit: 0,
-        contributions: []
-      };
-    }
-    const classes = (m.classes ?? [0, 1, 2]).map(String) as TargetChoiceKey[];
-    const logits = classes.map((cls) => m.intercepts?.[cls] ?? 0);
+    const classes = m.classes!.map(String) as TargetChoiceKey[];
+    const logits = classes.map((cls) => m.intercepts![cls]);
     const tryClass = "2" as TargetChoiceKey;
-    const tryIndex = Math.max(0, classes.indexOf(tryClass));
+    const tryIndex = classes.indexOf(tryClass);
     const contribs: { feature: string; label: string; z: number; coef: number; contrib: number }[] = [];
-    const tryCoefficients = m.coefficients_by_class?.[tryClass] ?? m.coefficients ?? [];
+    const tryCoefficients = m.coefficients_by_class![tryClass];
     featureOrder.forEach((f, i) => {
       const x = values[f];
-      const mean = (m.scaler_mean ?? [])[i] ?? 0;
-      const scale = (m.scaler_scale ?? [])[i] || 1;
+      const mean = m.scaler_mean![i];
+      const scale = m.scaler_scale![i] || 1;
       const z = (x - mean) / scale;
       classes.forEach((cls, clsIndex) => {
-        const coefRow = (m.coefficients_by_class?.[cls] ?? []).find((c: any) => c.feature === f);
+        const coefRow = m.coefficients_by_class![cls].find((c: any) => c.feature === f);
         const coef = coefRow ? coefRow.coefficient : 0;
         logits[clsIndex] += z * coef;
       });
@@ -85,10 +78,10 @@ export default function Predictor() {
     const predicted = TARGET_CHOICES.reduce((best, choice) =>
       probs[choice.key] > probs[best.key] ? choice : best
     );
-    return { probs, predicted, logit: logits[tryIndex] ?? 0, contributions: contribs };
+    return { probs, predicted, logit: logits[tryIndex], contributions: contribs };
   }, [block, values, featureOrder]);
 
-  const tryProb = probs["2"] ?? 0;
+  const tryProb = probs["2"];
   const probPct = tryProb * 100;
   const probColor = predicted.color;
   const radial = [{ name: "p", value: probPct, fill: probColor }];
@@ -139,7 +132,7 @@ export default function Predictor() {
             <div className="tag mb-3">ลากสไลเดอร์ทั้ง 10 ข้อ</div>
             <div className="space-y-4">
               {featureOrder.map((f) => {
-                const label = data.features.find((x) => x.name === f)?.label ?? f;
+                const label = featureLabels[f] ?? f;
                 const v = values[f];
                 return (
                   <div key={f} className="grid grid-cols-12 gap-3 items-center">
@@ -218,12 +211,12 @@ export default function Predictor() {
                 <div className="uppercase tracking-widest">logit</div>
                 <div className="text-ink-0 text-base tabular">{logit.toFixed(2)}</div>
               </div>
-              <div>
-                <div className="uppercase tracking-widest">intercept</div>
-                <div className="text-ink-0 text-base tabular">
-                  {block.model.intercepts?.["2"]?.toFixed(2)}
+                <div>
+                  <div className="uppercase tracking-widest">intercept</div>
+                  <div className="text-ink-0 text-base tabular">
+                    {block.model.intercepts!["2"].toFixed(2)}
+                  </div>
                 </div>
-              </div>
             </div>
 
             <div className="mt-5">

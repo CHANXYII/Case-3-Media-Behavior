@@ -25,7 +25,7 @@ LEGACY_BINARY_TARGET_COLUMN: str = "target_try_new_rtd_coffee"
 TARGET_COLUMN: str = "target_try_new_rtd_coffee_choice"
 
 
-def ensure_dirs() -> None:
+def ensure_dirs():
     PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
     OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
     MODELS_DIR.mkdir(parents=True, exist_ok=True)

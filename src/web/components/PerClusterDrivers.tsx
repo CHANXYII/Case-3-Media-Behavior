@@ -27,23 +27,23 @@ const TIP = {
 
 export default function PerClusterDrivers() {
   const blocks = ds.clusterSupervised.blocks;
+  const globalBlock = blocks.find((b) => b.cluster_id === null)!;
   const fittedClusters = blocks.filter((b) => b.cluster_id !== null && b.model.fitted);
-  const [activeId, setActiveId] = useState<PersonaKey>(0);
+  const skippedClusters = blocks.filter((b) => b.cluster_id !== null && !b.model.fitted);
+  const [activeId, setActiveId] = useState<PersonaKey>(fittedClusters[0]!.cluster_id as PersonaKey);
   const [activeChoice, setActiveChoice] = useState<TargetChoiceKey>("2");
-  const active = fittedClusters.find((b) => b.cluster_id === activeId) || fittedClusters[0];
+  const active = fittedClusters.find((b) => b.cluster_id === activeId)!;
   const persona = PERSONA[active.cluster_id as PersonaKey];
-  const choice = TARGET_CHOICES.find((c) => c.key === activeChoice) ?? TARGET_CHOICES[2];
+  const choice = TARGET_CHOICES.find((c) => c.key === activeChoice)!;
+  const activeCoefs = active.model.coefficients_by_class![activeChoice];
+  const globalCoefs = globalBlock.model.coefficients_by_class![activeChoice];
 
-  const coefRows = (active.model.coefficients_by_class?.[activeChoice] ?? active.model.coefficients ?? [])
+  const coefRows = activeCoefs
     .slice()
     .sort((a, b) => b.coefficient - a.coefficient)
     .map((c) => ({ label: c.label, coef: Number(c.coefficient.toFixed(3)), odds: c.odds_ratio }));
 
-  const globalBlock = blocks.find((b) => b.cluster_id === null);
-  const compareData = (active.model.coefficients_by_class?.[activeChoice] ?? active.model.coefficients ?? []).map((c) => {
-    const globalCoefs = globalBlock?.model.fitted
-      ? globalBlock.model.coefficients_by_class?.[activeChoice] ?? globalBlock.model.coefficients ?? []
-      : [];
+  const compareData = activeCoefs.map((c) => {
     const g = globalCoefs.find((x) => x.feature === c.feature);
     return { label: c.label, cluster: Number(c.coefficient.toFixed(3)), global: g ? Number(g.coefficient.toFixed(3)) : 0 };
   });
@@ -92,9 +92,7 @@ export default function PerClusterDrivers() {
               </button>
             );
           })}
-          {blocks
-            .filter((b) => b.cluster_id !== null && !b.model.fitted)
-            .map((c) => {
+          {skippedClusters.map((c) => {
               const p = PERSONA[c.cluster_id as PersonaKey];
               return (
                 <div
@@ -223,7 +221,7 @@ export default function PerClusterDrivers() {
                   <div className="grid grid-cols-2 gap-3">
                     {fittedClusters.map((c) => {
                       const p = PERSONA[c.cluster_id as PersonaKey];
-                      const top = (c.model.coefficients_by_class?.[activeChoice] ?? c.model.coefficients ?? [])[0];
+                      const top = c.model.coefficients_by_class![activeChoice][0];
                       return (
                         <div
                           key={c.cluster_id}

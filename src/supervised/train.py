@@ -44,8 +44,6 @@ TARGET_OPTIONS = [
 ]
 
 FEATURE_SUMMARY_CSV = OUTPUTS_DIR / "feature_selection_summary.csv"
-FALLBACK_NUMERIC = ["coffee_value", "coffee_aroma", "coffee_convenience", "coffee_nutrition"]
-FALLBACK_CATEGORICAL = ["most_freq_rtd_brand"]
 
 FEATURE_LABELS: dict[str, str] = {
     "coffee_value": "Perceived value",
@@ -64,37 +62,17 @@ FEATURE_LABELS: dict[str, str] = {
 
 
 def load_dataset() -> pd.DataFrame:
-    if not CLEAN_CSV.exists():
-        raise FileNotFoundError(
-            f"{CLEAN_CSV} not found. Run "
-            "`python -m src.feature_engineering.feature_selection_visualization` first."
-        )
     df = pd.read_csv(CLEAN_CSV)
     print(f"Loaded {df.shape[0]} rows x {df.shape[1]} cols from {CLEAN_CSV.name}")
     return df
 
 
 def load_selected_features(df: pd.DataFrame) -> tuple[list[str], list[str]]:
-    if not FEATURE_SUMMARY_CSV.exists():
-        print(f"NOTE: {FEATURE_SUMMARY_CSV.name} not found, using fallback feature list.")
-        numeric = [c for c in FALLBACK_NUMERIC if c in df.columns]
-        categorical = [c for c in FALLBACK_CATEGORICAL if c in df.columns]
-        return numeric, categorical
-
     summary = pd.read_csv(FEATURE_SUMMARY_CSV).sort_values("f_score", ascending=False)
-    numeric, categorical = [], []
-    seen: set[str] = set()
-    for _, row in summary.iterrows():
-        src = row["source_var"]
-        if src in seen or src not in df.columns:
-            continue
-        seen.add(src)
-        if row["feature_type"] == "numeric":
-            numeric.append(src)
-        elif row["feature_type"] == "categorical":
-            categorical.append(src)
-        if len(numeric) + len(categorical) >= TOP_N_FEATURES:
-            break
+    summary = summary[summary["source_var"].isin(df.columns)].drop_duplicates("source_var")
+    selected = summary.head(TOP_N_FEATURES)
+    numeric = selected.loc[selected["feature_type"] == "numeric", "source_var"].tolist()
+    categorical = selected.loc[selected["feature_type"] == "categorical", "source_var"].tolist()
     print(f"Selected top {TOP_N_FEATURES} from {FEATURE_SUMMARY_CSV.name}: "
           f"{len(numeric)} numeric + {len(categorical)} categorical")
     return numeric, categorical
@@ -105,13 +83,9 @@ def build_preprocessor(numeric_cols: list[str], categorical_cols: list[str]) -> 
         ("imputer", SimpleImputer(strategy="median")),
         ("scaler", StandardScaler()),
     ])
-    try:
-        ohe = OneHotEncoder(handle_unknown="ignore", sparse_output=False)
-    except TypeError:
-        ohe = OneHotEncoder(handle_unknown="ignore", sparse=False)
     categorical_pipe = Pipeline([
         ("imputer", SimpleImputer(strategy="most_frequent")),
-        ("onehot", ohe),
+        ("onehot", OneHotEncoder(handle_unknown="ignore", sparse_output=False)),
     ])
     return ColumnTransformer([
         ("num", numeric_pipe, numeric_cols),
@@ -151,17 +125,16 @@ def cross_validate_model(model: Pipeline, X: pd.DataFrame, y: pd.Series) -> dict
 
 def evaluate_holdout(model: Pipeline, X_test: pd.DataFrame, y_test: pd.Series) -> dict:
     y_pred = model.predict(X_test)
-    proba = model.predict_proba(X_test) if hasattr(model, "predict_proba") else None
+    proba = model.predict_proba(X_test)
     metrics = {
         "test_accuracy": float(accuracy_score(y_test, y_pred)),
         "test_precision_macro": float(precision_score(y_test, y_pred, average="macro", zero_division=0)),
         "test_recall_macro": float(recall_score(y_test, y_pred, average="macro", zero_division=0)),
         "test_f1_macro": float(f1_score(y_test, y_pred, average="macro", zero_division=0)),
     }
-    if proba is not None:
-        metrics["test_roc_auc_ovr_macro"] = float(
-            roc_auc_score(y_test, proba, multi_class="ovr", average="macro")
-        )
+    metrics["test_roc_auc_ovr_macro"] = float(
+        roc_auc_score(y_test, proba, multi_class="ovr", average="macro")
+    )
     labels = sorted(CLASS_LABELS)
     metrics["confusion_matrix"] = confusion_matrix(y_test, y_pred, labels=labels).tolist()
     metrics["classification_report"] = classification_report(
@@ -172,7 +145,7 @@ def evaluate_holdout(model: Pipeline, X_test: pd.DataFrame, y_test: pd.Series) -
     return metrics
 
 
-def plot_model_comparison(results: dict[str, dict], path: Path) -> None:
+def plot_model_comparison(results: dict[str, dict], path: Path):
     metrics = ["accuracy", "precision_macro", "recall_macro", "f1_macro", "roc_auc_ovr_macro"]
     rows = []
     for model_name, info in results.items():
@@ -200,7 +173,7 @@ def plot_model_comparison(results: dict[str, dict], path: Path) -> None:
     plt.close(fig)
 
 
-def plot_confusion_matrices(results: dict[str, dict], path: Path) -> None:
+def plot_confusion_matrices(results: dict[str, dict], path: Path):
     n = len(results)
     fig, axes = plt.subplots(1, n, figsize=(5 * n, 4.5))
     if n == 1:
@@ -219,12 +192,10 @@ def plot_confusion_matrices(results: dict[str, dict], path: Path) -> None:
     plt.close(fig)
 
 
-def plot_roc_curves(results: dict[str, dict], X_test: pd.DataFrame, y_test: pd.Series, path: Path) -> None:
+def plot_roc_curves(results: dict[str, dict], X_test: pd.DataFrame, y_test: pd.Series, path: Path):
     fig, ax = plt.subplots(figsize=(7, 6))
     for name, info in results.items():
         model = info["model"]
-        if not hasattr(model, "predict_proba"):
-            continue
         proba = model.predict_proba(X_test)
         classes = list(model.named_steps["clf"].classes_)
         if 2 not in classes:
@@ -278,24 +249,6 @@ def export_logreg_coefficients(model: Pipeline, feature_names: list[str]) -> pd.
     return coef_df
 
 
-def export_tree_importance(model: Pipeline, feature_names: list[str]) -> None:
-    clf = model.named_steps["clf"]
-    if not hasattr(clf, "feature_importances_"):
-        return
-    imp = pd.DataFrame({
-        "feature": feature_names,
-        "importance": clf.feature_importances_,
-    }).sort_values("importance", ascending=False).iloc[::-1]
-
-    fig, ax = plt.subplots(figsize=(10, max(5, 0.4 * len(imp))))
-    ax.barh(imp["feature"], imp["importance"], color="#7F77DD", alpha=0.85)
-    ax.set_title("Random Forest — Feature Importances")
-    ax.set_xlabel("Mean decrease in impurity")
-    plt.tight_layout()
-    plt.savefig(OUTPUTS_DIR / "supervised_feature_importance.png", dpi=300, bbox_inches="tight")
-    plt.close(fig)
-
-
 def build_feature_schema(df: pd.DataFrame, numeric_cols: list[str], categorical_cols: list[str]) -> dict:
     schema: dict = {"numeric": [], "categorical": []}
     for col in numeric_cols:
@@ -323,14 +276,11 @@ def build_feature_schema(df: pd.DataFrame, numeric_cols: list[str], categorical_
     return schema
 
 
-def main() -> None:
+def main():
     ensure_dirs()
     setup_thai_font()
 
     df = load_dataset()
-    if TARGET_COLUMN not in df.columns:
-        raise KeyError(f"Target column '{TARGET_COLUMN}' missing from dataset.")
-
     labelled = df.dropna(subset=[TARGET_COLUMN]).copy()
     labelled[TARGET_COLUMN] = labelled[TARGET_COLUMN].astype(int)
     print(f"Labelled rows: {len(labelled)} (dropped {len(df) - len(labelled)} unlabelled)")
@@ -346,9 +296,6 @@ def main() -> None:
         print(f"  categorical : {col}  ({FEATURE_LABELS.get(col, col)})")
 
     feature_cols = numeric_cols + categorical_cols
-    if not feature_cols:
-        raise RuntimeError("No features selected — check feature_selection_summary.csv.")
-
     X = labelled[feature_cols]
     y = labelled[TARGET_COLUMN]
 
@@ -362,7 +309,6 @@ def main() -> None:
     model_specs = {
         "LogisticRegression": LogisticRegression(
             max_iter=2000, class_weight="balanced", solver="lbfgs",
-            multi_class="auto", random_state=RANDOM_STATE,
         ),
         "GradientBoosting": GradientBoostingClassifier(
             n_estimators=250, learning_rate=0.05, max_depth=3, random_state=RANDOM_STATE,
