@@ -227,51 +227,88 @@ STAGES = [
 
 ---
 
-### 4.2 `src/data_cleaning/data_cleaning.py` (277 บรรทัด)
+### 4.2 `src/data_cleaning/data_cleaning.py` (342 บรรทัด)
 **หน้าที่:** แปลงข้อมูล Google Form ดิบ → ข้อมูลที่นำไปวิเคราะห์ได้
 
 ขั้นตอนภายในฟังก์ชัน `clean_data(df)`:
 
-1. **Drop respondents ที่ไม่ระบุเพศ/อายุ** (ลด noise)
-2. **Rename ~80 คอลัมน์ภาษาไทย** → ชื่ออังกฤษมาตรฐาน เก็บ dictionary ที่ `column_mapping.json`
-3. **Timestamp parsing** → แตก `hour`, `day_of_week`, `month` (สำหรับวิเคราะห์เวลา)
-4. **Age cleaning** → cast เป็น numeric, ตั้ง [10, 100] เป็น valid range, อื่นๆ → NaN
-5. **Province normalization** — รวมตัวสะกดผิด (`กทม`, `bkk`, `Bkk`, `กรุงเทพ` → `กรุงเทพมหานคร`), จัด `แอลเอ`/`Bonn` เป็น `ต่างประเทศ`
-6. **Multi-answer columns** (เช่น `interests`, `ad_channels_seen`) → standardize delimiter
-7. **Conditional masking** — ถ้า `drink_coffee == "ไม่ดื่ม"` ให้ตัด field ที่เกี่ยวกับ coffee ทั้งหมดเป็น NaN (ป้องกัน leakage)
-8. **Likert text → numeric** (1-5):
-   - `"5 สำคัญมากที่สุด"` → `5.0` (สำหรับ factor cols เช่น `coffee_aroma`)
-   - `"5 มีอิทธิพลมากที่สุด"` → `5.0` (สำหรับ influencer cols)
-9. **Reason categorization** — `reason_like` → 5 บัคเก็ต (รสชาติ / ราคา / ความสะดวก / โปร / อื่นๆ) ด้วย regex keyword
-10. **Derive `customer_segment`** — Rule-based 4 บัคเก็ต:
-    - Brand Loyalists (High Potential) — ชอบ Café Amazon **และ** จะลอง RTD ใหม่
-    - New Potential Customers — ไม่ชอบ Amazon แต่จะลอง RTD ใหม่
-    - Store-Only Loyalists — ชอบ Amazon แต่ไม่ลอง RTD ใหม่
-    - General / Unlikely to buy
+1. **Drop respondents ที่ไม่ระบุเพศ/อายุ** (ลด noise) — ใช้ `dropna(subset=['เพศ', 'อายุ'])` ก่อน rename เพื่อกรองข้อมูลไม่สมบูรณ์
+2. **Rename ~80 คอลัมน์ภาษาไทย** → ชื่ออังกฤษมาตรฐาน (135 mappings) เก็บ dictionary ที่ `column_mapping.json`
+3. **Timestamp parsing** → แตก `hour`, `day_of_week`, `month` (สำหรับวิเคราะห์เวลา) ด้วย `pd.to_datetime` + `errors='coerce'`
+4. **Age cleaning** → cast เป็น numeric, ตั้ง [10, 100] เป็น valid range, นอกช่วงนี้ → NaN (ป้องกัน typo เช่น 250)
+5. **Province normalization** — รวมตัวสะกดผิด (`กทม`, `bkk`, `Bkk`, `กรุงเทพ`, `dกทม`, `กมม`, `bangkok` → `กรุงเทพมหานคร`), จัด `พัทยา` → `ชลบุรี`, `แอลเอ`/`Bonn` → `ต่างประเทศ` ด้วยฟังก์ชัน `clean_province()`
+6. **Multi-answer columns** (เช่น `interests`, `ad_channels_seen`, `rtd_coffee_brands`) → standardize delimiter จาก `', '` เป็น `','` (20 columns)
+7. **Conditional masking** — ป้องกัน logical inconsistency และ target leakage:
+   - ถ้า `drink_coffee == "ไม่ดื"` → ตัด coffee-related fields (9 columns) เป็น None
+   - ถ้า `drink_tea == "ไม่ดื่ม"` → ตัด tea-related fields (7 columns) เป็น None
+   - Fill None → `'ไม่ระบุ'` สำหรับ choice columns
+8. **Likert text → numeric** (1-5) ด้วย 3 mapping dictionaries:
+   - `rating_mapping` สำหรับ factor importance (24 columns): `"5 สำคัญมากที่สุด"` → `5.0`
+   - `rating_mapping_coffee_inf` สำหรับ coffee influencer (5 columns): `"5 มีอิทธิพลมากที่สุด"` → `5.0`
+   - `rating_mapping_tea_inf` สำหรับ tea influencer (5 columns): `"5 มีอิทธิพลมาก"` → `5.0`
+9. **Reason categorization** — `reason_like` → 4 categories (รสชาติ / ราคา-ความคุ้มค่า / ความสะดวก-สาขาเยอะ / โปรโมชั่น / อื่นๆ-ไม่ระบุ) ด้วย regex keyword matching
+10. **Derive `customer_segment`** — Rule-based 4 segments ด้วยฟังก์ชัน `segment_customer()`:
+    - **Brand Loyalists (High Potential)** — ชอบ Café Amazon **และ** จะลอง RTD ใหม่
+    - **New Potential Customers** — ไม่ชอบ Amazon แต่จะลอง RTD ใหม่
+    - **Store-Only Loyalists** — ชอบ Amazon แต่ไม่ลอง RTD ใหม่
+    - **General / Unlikely to buy** — อื่นๆ
+
+**ฟังก์ชันเสริม:**
+- `split_answers(value)` — แยก multi-tick answers และกรอง NaN
+- `derive_binary_target(value)` — สร้าง legacy binary target (0/1)
+- `derive_target(value)` — สร้าง 3-class target (0/1/2) ด้วย priority: "ลองเลย" > "ลอง" > "ไม่ลอง"
+- `build_clean_data(age_group_mapping)` — orchestrator หลักที่เรียก `clean_data()` + derive targets + save CSV
 
 **Output:** `data/processed/media_behavior_cleaned.csv` + `column_mapping.json`
 
 ---
 
-### 4.3 `src/feature_engineering/feature_selection_visualization.py` (751 บรรทัด)
+### 4.3 `src/feature_engineering/feature_selection_visualization.py` (686 บรรทัด)
 **หน้าที่:** ทำ EDA + Feature Selection แบบ target-aware เพื่อเลือก feature ที่จะใช้ในขั้น supervised
 
-ฟังก์ชันหลัก:
+**Configuration:**
+- `age_group_mapping` — แปลงช่วงอายุเป็นตัวเลขตัวแทน (6 groups: <18→17, 18-22→20, ..., 50+→55)
+- `likert_cols` — 24 คอลัมน์ Likert (coffee factors 13 + tea factors 11)
+- `numeric_feature_labels` — display labels สำหรับ numeric features (9 mappings)
+- `categorical_feature_labels` — display labels สำหรับ categorical features (7 mappings)
+- `categorical_value_labels` — specific value labels (5 mappings)
+
+**ฟังก์ชันหลัก:**
 
 | ฟังก์ชัน | หน้าที่ |
 |---|---|
-| `derive_target(value)` | แปลง multi-label `will_try_new_rtd_coffee` (ที่ผู้ตอบ tick "ลองแน่นอน"/"อาจจะลอง"/"ไม่ลอง") เป็น integer 0/1/2 — จัด priority "ลองแน่นอน > อาจจะ > ไม่ลอง" |
-| `derive_binary_target(value)` | เวอร์ชัน binary (legacy) |
-| `build_clean_data()` | รัน cleaning ใหม่ + เพิ่ม target columns + age_group encoding |
-| `prepare_feature_data(df)` | แยก numeric (Likert) จาก categorical, drop NaN target, one-hot encode สำหรับ ANOVA |
-| `summarize_feature_effect(...)` | คำนวณ direction + effect size ของแต่ละ feature เทียบกับ target |
-| `build_feature_summary_table(...)` | ใช้ `sklearn.feature_selection.f_classif` ทำ ANOVA F-test → จัดอันดับ top-10 features ลง CSV |
-| `make_target_distribution`, `make_tryrate_by_segment`, `make_likert_by_target`, `make_cohens_d_chart`, `make_imbalance_summary`, `make_minority_profile`, `make_high_value_segments`, `make_correlation_table`, `make_distribution_table` | สร้าง chart EDA ~15 ไฟล์ |
-| `make_images(df)` | orchestrator เรียก chart ทุกตัว |
+| `nice_label_format(text)` | แปลง feature name เป็น readable label (replace `__` → ` = `, `_` → space) |
+| `format_p_value(p_value)` | Format p-value (p < 0.001 หรือ p = X.XXX) |
+| `get_feature_metadata(feature, analysis_df)` | ระบุว่า feature เป็น numeric/categorical และ source variable |
+| `get_feature_display_label(...)` | สร้าง human-readable label จาก metadata + mapping dictionaries |
+| `summarize_feature_effect(...)` | คำนวณ effect size และ direction:<br>- **Numeric**: delta mean (try vs no) + maybe mean<br>- **Categorical**: lift in definite-try rate + maybe-try rate (percentage points) |
+| `prepare_feature_data(df)` | เตรียมข้อมูลสำหรับ ANOVA:<br>1. Drop NaN target → analysis_df<br>2. เลือก numeric columns (exclude IDs/targets) → StandardScaler<br>3. เลือก categorical (exclude free-text, multi-answer, IDs) → OneHotEncoder<br>4. รัน `f_classif` (ANOVA F-test) → feature_scores DataFrame |
+| `build_feature_summary_table(...)` | สร้างตาราง top-N features:<br>1. กรอง p ≤ 0.05<br>2. Deduplicate by source_var (categorical ที่ OHE แล้วจะมีหลาย column)<br>3. เรียก `summarize_feature_effect` ต่อ feature<br>4. Return DataFrame พร้อม f_score, p_value, effect_value, direction, effect_label |
 
-**Output:** `outputs/feature_selection_summary.csv` (ใช้ในขั้น supervised), `feature_selection.png`, `cohens_d_features.png`, `likert_by_target.png`, `high_value_segments.png`, `imbalance_summary.png`, `minority_profile.png`, `correlation_heatmap.png`, `tryrate_by_demographic.png`, `tryrate_by_behavior.png`, `eda_*.png` ฯลฯ
+**Visualization Functions (13 charts):**
 
-**ข้อสังเกตเชิงสถิติ:** F-score ใช้คัดความสัมพันธ์ทางสถิติ (ไม่ใช่ causality), Cohen's d บอก **ขนาดของผล** ระหว่างกลุ่ม "definite-try" vs "never-try"
+| ฟังก์ชัน | Output | คำอธิบาย |
+|---|---|---|
+| `make_target_distribution(df)` | `target_distribution.png` | Pie chart + horizontal bar แสดง class distribution (0/1/2) |
+| `make_tryrate_by_segment(df, seg_cols, ...)` | `tryrate_by_demographic.png`<br>`tryrate_by_behavior.png` | Horizontal bar charts แสดง dt distribution ต่อ target group พร้อม Δ mean |
+| `make_imbalance_summary(df)` | `imbalance_summary.png` | Bar chart + text panel แสดง imbalance ratio, class weights, baseline accuracy |
+| `make_minority_profile(df)` | `minority_profile.png` | Horizontal bars (6 panels) แสดง demographic profile ของ definite-triers (class=2) |
+| `make_cohens_d_chart(df)` | `cohens_d_features.png` | Horizontal bar chart แสดง Cohen's d ของ Likert features (pooled SD, try vs no) พร้อม reference lines (d=0.5, 0.8) |
+| `make_high_value_segments(df, ...)` | `high_value_segments.png` | Top-12 segments ที่มี definite-try rate สูงสุด (min n=10) เทียบกับ overall |
+| `make_distribution_table(df)` | (ใช้ใน heatmap) | Distribution table ของ Likert scores (1-5) ต่อ feature |
+| `make_correlation_table(df)` | (ใช้ใน heatmap) | Correlation matrix ของ top-8 features ที่ correlate กับ target |
+| `make_images(df)` | orchestrator | เรียก visualization ทั้งหมด + สร้าง demographic charts (gencupation) + feature selection chart + distribution/correlation heatmaps |
+
+**Feature Selection Chart (main output):**
+- Horizontal bar chart แสดง top-10 features เรียงตาม F-score
+- สี: positive driver (blue #2C7FB8) vs negative driver (orange #D95F02)
+- Annotation: p-value + effect label ต่อ bar
+-arget.png`, `high_value_segments.png`, `imbalance_summary.png`, `minority_profile.png`, `correlation_heatmap.png`, `distribution_analysis.png`
+- `outputs/tryrate_by_demographic.png`,ชิงสถิติ:** 
+- F-score ใช้คัดความสัมพันธ์ทางสถิติ (ไม่ใช่ causality)
+- Cohen's d บอก **ขนาดของผล** ระหว่างกลุ่ม "definite-try" vs "never-try" (effect size ไม่ขึ้นกับ sample size)
+- ANOVA assumption (normality + equal variance) ละเมิดเล็กน้อยกับ Likert แต่ F-test robust พอใช้สำหรับ ranking
+- Categorical features ถูก deduplicate by source_var เพื่อเปรียบเทียบกับ numeric แบบ fair
 
 ---
 
