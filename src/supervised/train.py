@@ -430,5 +430,5 @@ def main() -> None:
     print(f"Saved coefficients:   {OUTPUTS_DIR / 'supervised_coefficients.csv'}")
     print(f"Saved feature schema: {schema_path}")
     print(f"Saved model (LogReg): {MODELS_DIR / 'supervised_logreg.joblib'}")
-    if __name__ == "__main__":
+if __name__ == "__main__":
     main()

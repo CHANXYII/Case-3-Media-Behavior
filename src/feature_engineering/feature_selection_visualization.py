@@ -17,14 +17,11 @@ from src.config import (
     CLEAN_CSV,
     LEGACY_BINARY_TARGET_COLUMN,
     OUTPUTS_DIR,
-    RAW_CSV,
     TARGET_COLUMN,
-    ensure_dirs,
     setup_thai_font,
 )
-from src.data_cleaning.data_cleaning import clean_data
+from src.data_cleaning.data_cleaning import build_clean_data
 
-raw_data_path = RAW_CSV
 clean_data_path = CLEAN_CSV
 output_dir = OUTPUTS_DIR
 target_column = TARGET_COLUMN
@@ -81,50 +78,6 @@ categorical_value_labels = {
 
 positive_driver_color = "#2C7FB8"
 negative_driver_color = "#D95F02"
-
-
-def split_answers(value):
-    text = str(value).strip()
-    if pd.isna(value) or not text or text.lower() == "nan":
-        return []
-    return [item.strip() for item in text.split(",") if item.strip() and item.strip().lower() != "nan"]
-
-
-def first_value(series):
-    series = series.dropna()
-    series = series[series.astype(str).str.strip() != ""]
-    return series.iloc[0] if len(series) else np.nan
-
-
-def merge_province(series):
-    values = []
-    for value in series.dropna():
-        for item in split_answers(value):
-            if item not in values:
-                values.append(item)
-    return ",".join(values) if values else np.nan
-
-
-def derive_binary_target(value):
-    answers = split_answers(value)
-    if any("ลอง" in answer and answer != "ไม่ลอง" for answer in answers):
-        return 1.0
-    if answers and all(answer == "ไม่ลอง" for answer in answers):
-        return 0.0
-    return np.nan
-
-
-def derive_target(value):
-    answers = split_answers(value)
-    if not answers:
-        return np.nan
-    if any(answer == "ลองเลย ชอบลองของออกใหม่อยู่แล้ว" for answer in answers):
-        return 2.0
-    if any("ลอง" in answer and answer != "ไม่ลอง" for answer in answers):
-        return 1.0
-    if all(answer == "ไม่ลอง" for answer in answers):
-        return 0.0
-    return np.nan
 
 
 def nice_label_format(text):
@@ -228,25 +181,6 @@ def build_feature_summary_table(analysis_df, feature_scores, top_n=10):
             break
 
     return pd.DataFrame(rows)
-
-
-def build_clean_data():
-    raw_df = pd.read_csv(raw_data_path)
-    raw_df["respondent_id"] = np.arange(1, len(raw_df) + 1)
-    raw_df["age_group_raw"] = raw_df["อายุ"]
-
-    df = clean_data(raw_df)
-    agg = {col: (merge_province if col == "province" else first_value) for col in df.columns if col != "respondent_id"}
-    df = df.groupby("respondent_id", as_index=False).agg(agg)
-
-    df["age_group"] = df["age_group_raw"].astype(str).replace("nan", np.nan)
-    df["age"] = df["age_group"].map(age_group_mapping)
-    df[LEGACY_BINARY_TARGET_COLUMN] = df["will_try_new_rtd_coffee"].apply(derive_binary_target)
-    df[target_column] = df["will_try_new_rtd_coffee"].apply(derive_target)
-
-    ensure_dirs()
-    df.to_csv(clean_data_path, index=False, encoding="utf-8-sig")
-    return df
 
 
 def prepare_feature_data(df):
@@ -745,7 +679,7 @@ def make_images(df):
 
 
 if __name__ == "__main__":
-    df = build_clean_data()
+    df = build_clean_data(age_group_mapping)
     make_images(df)
     print(f"Clean data file: {clean_data_path}")
     print(f"Output dir: {output_dir}")

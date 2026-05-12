@@ -9,7 +9,14 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.config import CLEAN_CSV, COLUMN_MAPPING_JSON, RAW_CSV, ensure_dirs
+from src.config import (
+    CLEAN_CSV,
+    COLUMN_MAPPING_JSON,
+    LEGACY_BINARY_TARGET_COLUMN,
+    RAW_CSV,
+    TARGET_COLUMN,
+    ensure_dirs,
+)
 
 
 def clean_data(df):
@@ -143,17 +150,23 @@ def clean_data(df):
         df.loc[(df['age'] < 10) | (df['age'] > 100), 'age'] = np.nan
 
     if 'province' in df.columns:
-        df['province'] = df['province'].fillna('').astype(str).str.split(',')
-        df = df.explode('province')
-        df['province'] = df['province'].str.strip()
-        df['province'] = df['province'].replace(
-            ['กทม', 'กทม.', 'กรุงเทพ', 'dกทม', 'กมม', 'bangkok', 'bkk', 'Bkk'],
-            'กรุงเทพมหานคร',
-        )
-        df['province'] = df['province'].replace(
-            ['พัทยา', 'แอลเอ', 'Bonn'],
-            ['ชลบุรี', 'ต่างประเทศ', 'ต่างประเทศ'],
-        )
+        def clean_province(value):
+            if pd.isna(value) or not str(value).strip():
+                return ''
+            provinces = [p.strip() for p in str(value).split(',')]
+            cleaned = []
+            for p in provinces:
+                if p in ['กทม', 'กทม.', 'กรุงเทพ', 'dกทม', 'กมม', 'bangkok', 'bkk', 'Bkk']:
+                    p = 'กรุงเทพมหานคร'
+                elif p == 'พัทยา':
+                    p = 'ชลบุรี'
+                elif p in ['แอลเอ', 'Bonn']:
+                    p = 'ต่างประเทศ'
+                if p and p not in cleaned:
+                    cleaned.append(p)
+            return ','.join(cleaned) if cleaned else ''
+
+        df['province'] = df['province'].apply(clean_province)
 
     multi_answer_cols = [
         'interests', 'ad_channels_seen', 'influence_ad', 'trusted_ad',
@@ -265,13 +278,73 @@ def clean_data(df):
     return df
 
 
-if __name__ == '__main__':
-    ensure_dirs()
+def split_answers(value):
+    text = str(value).strip()
+    if pd.isna(value) or not text or text.lower() == "nan":
+        return []
+    return [item.strip() for item in text.split(",") if item.strip() and item.strip().lower() != "nan"]
+
+
+def derive_binary_target(value):
+    answers = split_answers(value)
+    if any("ลอง" in answer and answer != "ไม่ลอง" for answer in answers):
+        return 1.0
+    if answers and all(answer == "ไม่ลอง" for answer in answers):
+        return 0.0
+    return np.nan
+
+
+def derive_target(value):
+    answers = split_answers(value)
+    if not answers:
+        return np.nan
+    if any(answer == "ลองเลย ชอบลองของออกใหม่อยู่แล้ว" for answer in answers):
+        return 2.0
+    if any("ลอง" in answer and answer != "ไม่ลอง" for answer in answers):
+        return 1.0
+    if all(answer == "ไม่ลอง" for answer in answers):
+        return 0.0
+    return np.nan
+
+
+def build_clean_data(age_group_mapping):
+    """
+    Build complete cleaned dataset with derived features and target variables.
+
+    Args:
+        age_group_mapping: Dictionary mapping age group strings to numeric values
+
+    Returns:
+        DataFrame with cleaned data and derived target columns
+    """
     raw_df = pd.read_csv(RAW_CSV)
-    print(raw_df.shape)
-    cleaned_df = clean_data(raw_df)
-    print(f"Clean the data successfully!: {cleaned_df.shape}")
-    cleaned_df.to_csv(CLEAN_CSV, index=False, encoding="utf-8-sig")
+    raw_df["age_group_raw"] = raw_df["อายุ"]
+
+    df = clean_data(raw_df)
+
+    df["age_group"] = df["age_group_raw"].astype(str).replace("nan", np.nan)
+    df["age"] = df["age_group"].map(age_group_mapping)
+    df[LEGACY_BINARY_TARGET_COLUMN] = df["will_try_new_rtd_coffee"].apply(derive_binary_target)
+    df[TARGET_COLUMN] = df["will_try_new_rtd_coffee"].apply(derive_target)
+
+    ensure_dirs()
+    df.to_csv(CLEAN_CSV, index=False, encoding="utf-8-sig")
+    return df
+
+
+if __name__ == '__main__':
+    age_group_mapping = {
+        "ต่ำกว่า 18ปี": 17.0,
+        "18-22ปี": 20.0,
+        "23-29ปี": 26.0,
+        "30-39ปี": 35.0,
+        "40-49ปี": 45.0,
+        "50ปี ขึ้นไป": 55.0,
+    }
+
+    ensure_dirs()
+    df = build_clean_data(age_group_mapping)
+    print(f"Clean the data successfully!: {df.shape}")
     print(f"Cleaned dataset saved to: {CLEAN_CSV}")
-    print("\nExample of column name after clean: ")
-    print(cleaned_df.columns.tolist()[:10])
+    print("\nExample of column names after clean: ")
+    print(df.columns.tolist()[:10])
